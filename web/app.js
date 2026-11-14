@@ -77,6 +77,35 @@
   }
   const franchise = N.map((g) => new Set(g.f.filter((t) => D.dict.fam[t].startsWith("Game:"))));
 
+  // --- Émojis (web/emoji.js) : un par thème, un par famille de mécaniques --------------------------
+  const EMO = window.BGG_EMOJI || { themes: {}, families: {} };
+  const famOfMech = {};
+  for (const [k, f] of Object.entries(EMO.families)) for (const m of f.mechanics) famOfMech[m] = k;
+  const MECH_FAM = D.dict.mech.map((m) => famOfMech[m] || null);
+  {
+    const missM = D.dict.mech.filter((m) => !famOfMech[m]), missC = D.dict.cat.filter((c) => !EMO.themes[c]);
+    if (missM.length || missC.length) console.warn("emoji.js : sans émoji", { mecaniques: missM, themes: missC });
+  }
+  // Émoji d'une étiquette (mécaniques et thèmes seulement) ; « · » si absente du dictionnaire.
+  function emo(key, t) {
+    if (key === "m") return (EMO.families[MECH_FAM[t]] || {}).emoji || "·";
+    if (key === "c") return EMO.themes[D.dict.cat[t]] || "·";
+    return "";
+  }
+  const emoTag = (key, t) => { const e = emo(key, t); return e ? `<span class="emo">${e}</span>` : ""; };
+  // Thème dominant d'un jeu : sa catégorie thématique la plus spécifique (IDF maximal, hors catégories de format
+  // ou de licence listées dans emoji.js) ; sans catégorie, la famille
+  // de sa mécanique la plus spécifique.
+  const NON_THEMATIC = new Set((EMO.nonThematic || []).map((n) => D.dict.cat.indexOf(n)).filter((t) => t >= 0));
+  const DOM_EMO = N.map((g) => {
+    const best = (ts, idf) => ts.reduce((b, t) => (b === null || idf[t] > idf[b] ? t : b), null);
+    const thematic = g.c.filter((t) => !NON_THEMATIC.has(t));
+    const c = best(thematic.length ? thematic : g.c, D.idf.cat);
+    if (c !== null) return emo("c", c);
+    const m = best(g.m, D.idf.mech);
+    return m !== null ? emo("m", m) : "";
+  });
+
   // --- Métriques (appliquées à chaque attribut) ---------------------------------------------------
   const METRICS = {
     cos: { label: "Cosinus IDF", short: "Cos IDF",
@@ -143,8 +172,8 @@
     // Pondération : deux groupes activables. A = mécaniques ↔ thème (part méca. = alpha) ; B = familles ↔ description
     // (part familles = beta). Deux groupes actifs : 50 % chacun.
     alpha: 1, beta: 0.5, onA: true, onB: false,
-    metric: "cos", signals: true, sigFilter: false,
-    gems: false, gemBeta: 1, view: "graph", mapAlpha: "auto",
+    metric: "cos", signals: true, emoji: false, sigFilter: false,
+    gems: false, gemBeta: 1, view: "graph", mapAlpha: "auto", famView: false, famOpen: null, famCenter: "mean",
     noFranchise: false, noReimpl: false, tags: { f: new Set(), d: new Set(), ar: new Set(), pu: new Set() },
     req: { m: new Set(), c: new Set(), f: new Set(), d: new Set() }, // étiquettes indispensables (ET logique)
     ban: { m: new Set(), c: new Set(), f: new Set(), d: new Set() }, // étiquettes interdites
@@ -312,7 +341,7 @@
           : st === "ban" ? "Interdite : aucun voisin ne doit l'avoir. Clic : revenir à neutre."
             : "Neutre. Clic : la rendre indispensable ; deuxième clic : l'interdire.";
         return `<span class="chip toggle${st ? ` ${st}` : ""}${extra ? " extra" : ""}" data-t="${t}" role="button" ` +
-          `tabindex="0" data-help="${escapeHtml(help + (extra ? " (absente du jeu central)" : ""))}">${escapeHtml(name)}</span>`;
+          `tabindex="0" data-help="${escapeHtml(help + (extra ? " (absente du jeu central)" : ""))}">${emoTag(key, t)}${escapeHtml(name)}</span>`;
       }).join("") || `<span class="hint">aucune</span>`;
       box.querySelectorAll(".chip").forEach((ch) => {
         const cycle = () => {
@@ -446,6 +475,8 @@
   const zoom = d3.zoom().scaleExtent([0.2, 5]).on("zoom", (e) => root.attr("transform", e.transform));
   svg.call(zoom).on("dblclick.zoom", null);
   const tip = $("#tooltip");
+  // Nom affiché sur le graphe et la carte : précédé de l'émoji du thème dominant si la case « Émojis » est cochée.
+  const gameName = (i) => (state.emoji && DOM_EMO[i] ? `${DOM_EMO[i]} ${N[i].n}` : N[i].n);
   let sim = null;
   let current = { parent: new Map() };
 
@@ -614,7 +645,7 @@
       .style("fill", (n) => textOn(fill(n)));
     node.select("text.label")
       .attr("x", (n) => R(n) + 5)
-      .text((n) => (n.d <= 1 || nodes.length <= 40 ? N[n.i].n : ""));
+      .text((n) => (n.d <= 1 || nodes.length <= 40 ? gameName(n.i) : ""));
 
     node
       .on("click", (e, n) => { e.stopPropagation(); select(n.i); })
@@ -657,9 +688,11 @@
   const msvg = d3.select("#map");
   const mroot = msvg.append("g");
   const mPts = mroot.append("g");
+  const mFamLinks = mroot.append("g").attr("class", "fam-links");
   const mEdges = mroot.append("g");
   const mSel = mroot.append("g");
   const mLabels = mroot.append("g");
+  const mFam = mroot.append("g").attr("class", "fam-centroids");
   let mk = 1; // facteur de zoom courant, pour garder des points de taille constante à l'écran
   const mzoom = d3.zoom().scaleExtent([0.5, 40]).on("zoom", (e) => {
     if (!Number.isFinite(e.transform.k)) return;
@@ -669,6 +702,9 @@
     mSel.selectAll("circle").attr("r", (n) => (n.d === 0 ? 8 : 5.5) / mk).attr("stroke-width", 1.5 / mk);
     mEdges.selectAll("line").attr("stroke-width", 1.2 / mk);
     mLabels.selectAll("text").style("font-size", `${11 / mk}px`).style("stroke-width", `${3 / mk}px`).attr("dx", 7 / mk);
+    mFamLinks.selectAll("line").attr("stroke-width", (l) => (l.all ? 0.6 : 1.4) / mk);
+    mFam.selectAll("circle").attr("r", 14 / mk).attr("stroke-width", 2 / mk);
+    mFam.selectAll("text").style("font-size", `${17 / mk}px`);
   });
   msvg.call(mzoom).on("dblclick.zoom", null);
   const onMap = N.map((g, i) => i).filter((i) => N[i].xy);
@@ -679,6 +715,113 @@
     ? d3.minIndex(MAP_ALPHAS, (a) => Math.abs(a - state.alpha))
     : state.mapAlpha);
   const P = (i) => N[i].xy[mapIdx()];
+
+  // --- Centres des thèmes, sur chaque carte ----------------------------------------------------------
+  // Groupes = thèmes (catégories BGG) réunis par émoji (ex. 🪖 = toutes les guerres modernes), hors catégories
+  // de format ou de licence (emoji.js, nonThematic). Un jeu appartient à un groupe s'il en a au moins une
+  // catégorie, avec un poids w = (nb de ses catégories thématiques dans le groupe) / (nb total de ses catégories
+  // thématiques) : un jeu mono-thème pèse plus qu'un jeu à cinq thèmes. Centre = moyenne pondérée ou pic
+  // d'enrichissement, calculé une fois par carte (une par α) et mis en cache.
+  const GROUPS = {};
+  const GROUP_OF_CAT = D.dict.cat.map((name, t) => {
+    if (NON_THEMATIC.has(t)) return null;
+    const e = EMO.themes[name];
+    if (!e) return null;
+    (GROUPS[e] = GROUPS[e] || { emoji: e, cats: [] }).cats.push(name);
+    return e;
+  });
+  for (const G of Object.values(GROUPS)) G.label = G.cats.length > 2 ? `${G.cats[0]}, ${G.cats[1]}… (${G.cats.length})` : G.cats.join(", ");
+  const FAM_KEYS = Object.keys(GROUPS);
+  const GAME_FAMS = N.map((g) => {
+    const c = new Map();
+    const th = g.c.filter((t) => GROUP_OF_CAT[t]);
+    for (const t of th) c.set(GROUP_OF_CAT[t], (c.get(GROUP_OF_CAT[t]) || 0) + 1);
+    for (const [f, n] of c) c.set(f, n / th.length);
+    return c;
+  });
+  const FAM_MEMBERS = Object.fromEntries(FAM_KEYS.map((f) => [f, onMap.filter((i) => GAME_FAMS[i].has(f))]));
+  const centCache = new Map();
+  // Deux définitions du centre d'une famille (bouton « Centre ») :
+  //   moyenne : centroïde pondéré (demandé) ; les grandes familles, présentes partout, retombent au milieu ;
+  //   pic     : cellule où la famille est la plus sur-représentée. Grille G×G, densités lissées (gaussienne
+  //             σ = 1,5 cellule) de la famille (F, pondérée par w) et de tous les jeux (A) ; enrichissement
+  //             E = (F/ΣF) / (A/ΣA), maximisé parmi les cellules où F ≥ 20 % de son maximum.
+  function centers(mi) {
+    return state.famCenter === "peak" ? peaks(mi) : centroids(mi);
+  }
+  const peakCache = new Map();
+  function peaks(mi) {
+    if (peakCache.has(mi)) return peakCache.get(mi);
+    const G = 64;
+    const xs = onMap.map((i) => N[i].xy[mi][0]).sort((a, b) => a - b);
+    const ys = onMap.map((i) => N[i].xy[mi][1]).sort((a, b) => a - b);
+    const q = (a, p) => a[Math.floor(p * (a.length - 1))];
+    const x0 = q(xs, 0.01), x1 = q(xs, 0.99), y0 = q(ys, 0.01), y1 = q(ys, 0.99);
+    const cell = (i) => {
+      const [x, y] = N[i].xy[mi];
+      const cx = Math.min(G - 1, Math.max(0, Math.floor(((x - x0) / (x1 - x0)) * G)));
+      const cy = Math.min(G - 1, Math.max(0, Math.floor(((y - y0) / (y1 - y0)) * G)));
+      return cy * G + cx;
+    };
+    const cellOf = onMap.map(cell);
+    const kern = [-3, -2, -1, 0, 1, 2, 3].map((d) => Math.exp(-(d * d) / (2 * 1.5 * 1.5)));
+    const blur = (h) => { // flou gaussien séparable
+      const tmp = new Float64Array(G * G), out = new Float64Array(G * G);
+      for (let y = 0; y < G; y++) for (let x = 0; x < G; x++) {
+        let v = 0;
+        for (let k = -3; k <= 3; k++) { const xx = x + k; if (xx >= 0 && xx < G) v += kern[k + 3] * h[y * G + xx]; }
+        tmp[y * G + x] = v;
+      }
+      for (let y = 0; y < G; y++) for (let x = 0; x < G; x++) {
+        let v = 0;
+        for (let k = -3; k <= 3; k++) { const yy = y + k; if (yy >= 0 && yy < G) v += kern[k + 3] * tmp[yy * G + x]; }
+        out[y * G + x] = v;
+      }
+      return out;
+    };
+    const A = new Float64Array(G * G);
+    onMap.forEach((i, k) => { A[cellOf[k]]++; });
+    const Ab = blur(A), sA = Ab.reduce((a, b) => a + b, 0);
+    const pos = new Map(onMap.map((i, k) => [i, cellOf[k]]));
+    const out = {}, base = centroids(mi);
+    for (const f of FAM_KEYS) {
+      if (!base[f]) continue;
+      const F = new Float64Array(G * G);
+      for (const i of FAM_MEMBERS[f]) F[pos.get(i)] += GAME_FAMS[i].get(f);
+      const Fb = blur(F), sF = Fb.reduce((a, b) => a + b, 0), fMax = Math.max(...Fb);
+      let best = -1, bestE = -1;
+      for (let c = 0; c < G * G; c++) {
+        if (Fb[c] < 0.2 * fMax || Ab[c] <= 0) continue;
+        const E = (Fb[c] / sF) / (Ab[c] / sA);
+        if (E > bestE) { bestE = E; best = c; }
+      }
+      const cx = best % G, cy = Math.floor(best / G);
+      out[f] = { ...base[f], x: x0 + ((cx + 0.5) / G) * (x1 - x0), y: y0 + ((cy + 0.5) / G) * (y1 - y0), lift: bestE };
+    }
+    peakCache.set(mi, out);
+    return out;
+  }
+  function centroids(mi) {
+    if (centCache.has(mi)) return centCache.get(mi);
+    const out = {};
+    for (const f of FAM_KEYS) {
+      let sw = 0, sx = 0, sy = 0;
+      for (const i of FAM_MEMBERS[f]) {
+        const w = GAME_FAMS[i].get(f), [x, y] = N[i].xy[mi];
+        sw += w; sx += w * x; sy += w * y;
+      }
+      if (!sw) continue;
+      const cx = sx / sw, cy = sy / sw;
+      let v = 0; // dispersion : écart quadratique moyen pondéré au centroïde
+      for (const i of FAM_MEMBERS[f]) {
+        const w = GAME_FAMS[i].get(f), [x, y] = N[i].xy[mi];
+        v += w * ((x - cx) ** 2 + (y - cy) ** 2);
+      }
+      out[f] = { f, x: cx, y: cy, n: FAM_MEMBERS[f].length, spread: Math.sqrt(v / sw) };
+    }
+    centCache.set(mi, out);
+    return out;
+  }
 
   function mapScales() {
     const { width, height } = msvg.node().getBoundingClientRect();
@@ -738,7 +881,66 @@
       .call((sel) => T(sel).attr("x", (n) => mx(P(n.i)[0])).attr("y", (n) => my(P(n.i)[1])))
       .attr("dx", 7 / mk).attr("dy", "0.32em")
       .style("font-size", `${11 / mk}px`).style("stroke-width", `${3 / mk}px`)
-      .text((n) => N[n.i].n);
+      .text((n) => gameName(n.i));
+    drawFamilies(level, T);
+  }
+
+  // Centres des thèmes (émoji au centre) et liens vers les jeux : jeux du graphe courant toujours ; tous les
+  // membres du thème ouvert (clic sur son émoji).
+  function drawFamilies(level, T) {
+    $("#fam-btn").setAttribute("aria-pressed", state.famView);
+    if (!state.famView) {
+      $("#fam-center").hidden = true;
+      mFam.selectAll("*").remove();
+      mFamLinks.selectAll("*").remove();
+      return;
+    }
+    const C = centers(mapIdx());
+    $("#fam-center").hidden = false;
+    $("#fam-center").textContent = state.famCenter === "peak" ? "Centre : pic" : "Centre : moyenne";
+    const cents = Object.values(C);
+    const links = [];
+    for (const i of level.keys()) {
+      if (!N[i].xy) continue;
+      for (const f of GAME_FAMS[i].keys()) if (C[f]) links.push({ f, i, all: false });
+    }
+    if (state.famOpen && C[state.famOpen]) {
+      const inGraph = new Set(level.keys());
+      for (const i of FAM_MEMBERS[state.famOpen]) if (!inGraph.has(i)) links.push({ f: state.famOpen, i, all: true });
+    }
+    mFamLinks.selectAll("line").data(links, (l) => `${l.f}|${l.i}|${l.all}`)
+      .join("line")
+      .attr("class", (l) => `fam-link${l.all ? " all" : ""}${state.famOpen === l.f ? " open" : ""}`)
+      .attr("stroke-width", (l) => (l.all ? 0.6 : 1.4) / mk)
+      .call((sel) => T(sel).attr("x1", (l) => mx(C[l.f].x)).attr("y1", (l) => my(C[l.f].y))
+        .attr("x2", (l) => mx(P(l.i)[0])).attr("y2", (l) => my(P(l.i)[1])));
+    const g = mFam.selectAll("g.fam").data(cents, (c) => c.f)
+      .join((enter) => {
+        const e = enter.append("g").attr("class", "fam");
+        e.append("circle");
+        e.append("text").attr("text-anchor", "middle").attr("dy", "0.35em");
+        return e;
+      })
+      .classed("open", (c) => state.famOpen === c.f)
+      .classed("dim", (c) => state.famOpen && state.famOpen !== c.f);
+    g.call((sel) => T(sel).attr("transform", (c) => `translate(${mx(c.x)},${my(c.y)})`));
+    g.select("circle").attr("r", 14 / mk).attr("stroke-width", 2 / mk);
+    g.select("text").style("font-size", `${17 / mk}px`).text((c) => GROUPS[c.f].emoji);
+    g.on("mouseenter", (e, c) => {
+      const F = GROUPS[c.f];
+      const inG = [...level.keys()].filter((i) => GAME_FAMS[i].has(c.f)).length;
+      tipShow(`<b>${F.emoji} ${escapeHtml(F.label)}</b><span class="tl">${c.n} jeux de la carte · ${inG} dans le graphe · ` +
+        `dispersion ${c.spread.toFixed(2)}${c.lift ? ` · sur-représentation ×${c.lift.toFixed(1)} au pic` : ""}</span><span class="ds">${escapeHtml(F.cats.join(", "))}</span>` +
+        `<span class="tl">Clic : ${state.famOpen === c.f ? "masquer" : "afficher"} les liens vers tous ses jeux.</span>`, e);
+    })
+      .on("mousemove", tipMove)
+      .on("mouseleave", tipHide)
+      .on("click", (e, c) => {
+        e.stopPropagation();
+        state.famOpen = state.famOpen === c.f ? null : c.f;
+        tipHide();
+        render();
+      });
   }
 
   function setView(v) {
@@ -755,6 +957,7 @@
     $("#graph").toggleAttribute("hidden", v !== "graph");
     $("#map").toggleAttribute("hidden", v !== "map");
     $("#map-alpha-row").hidden = v !== "map";
+    $("#fam-btn").hidden = v !== "map";
     mapFor = null; // tailles à recalculer une fois la vue affichée
     tipHide();
     if (state.center >= 0) render();
@@ -816,7 +1019,7 @@
     const sharedChips = (key, dname) => {
       const ref = new Set(c[key]);
       return g[key].map((t) => [t, D.dict[dname][t]]).sort((a, b) => a[1].localeCompare(b[1]))
-        .map(([t, name]) => `<span class="chip${!isCenter && ref.has(t) ? " shared" : ""}">${escapeHtml(name)}</span>`)
+        .map(([t, name]) => `<span class="chip${!isCenter && ref.has(t) ? " shared" : ""}">${emoTag(key, t)}${escapeHtml(name)}</span>`)
         .join("") || `<span class="hint">aucune</span>`;
     };
     const addableChips = (key, max = 8) => {
@@ -908,6 +1111,19 @@
   }
   $("#cross").addEventListener("change", (e) => { state.cross = e.target.checked; if (state.center >= 0) render(); });
   $("#no-reimpl").addEventListener("change", (e) => { state.noReimpl = e.target.checked; applyFilters(); });
+  $("#emoji").addEventListener("change", (e) => { state.emoji = e.target.checked; if (state.center >= 0) render(); });
+
+  // Légende des émojis (repliable) : familles de mécaniques puis thèmes.
+  {
+    const fams = Object.values(EMO.families).map((f) =>
+      `<li data-help="${escapeHtml(f.label + " : " + f.mechanics.join(", "))}"><span class="emo">${f.emoji}</span>${escapeHtml(f.label)}</li>`).join("");
+    const byEmoji = new Map();
+    for (const [name, e] of Object.entries(EMO.themes)) byEmoji.set(e, [...(byEmoji.get(e) || []), name]);
+    const themes = [...byEmoji].map(([e, names]) =>
+      `<li data-help="${escapeHtml(names.join(", "))}"><span class="emo">${e}</span>${escapeHtml(names.length > 1 ? names[0] + " (+" + (names.length - 1) + ")" : names[0])}</li>`).join("");
+    $("#emoji-legend").innerHTML = `<h3>Familles de mécaniques</h3><ul class="emo-grid">${fams}</ul>` +
+      `<h3>Thèmes</h3><ul class="emo-grid">${themes}</ul>`;
+  }
   $("#signals").addEventListener("change", (e) => {
     state.signals = e.target.checked;
     $("#legend-signals").hidden = !state.signals;
@@ -987,7 +1203,18 @@
     }
     drawRate(k);
   }
-  document.querySelectorAll(".view-btn").forEach((b) => b.addEventListener("click", () => setView(b.dataset.view)));
+  document.querySelectorAll(".view-btn[data-view]").forEach((b) => b.addEventListener("click", () => setView(b.dataset.view)));
+  $("#fam-center").addEventListener("click", () => {
+    state.famCenter = state.famCenter === "peak" ? "mean" : "peak";
+    hideHelp();
+    if (state.center >= 0) render();
+  });
+  $("#fam-btn").addEventListener("click", () => {
+    state.famView = !state.famView;
+    if (!state.famView) state.famOpen = null;
+    hideHelp();
+    if (state.center >= 0) render();
+  });
   msvg.on("click", () => { if (state.center >= 0) select(state.center); });
   $("#gems-btn").addEventListener("click", () => {
     state.gems = !state.gems;

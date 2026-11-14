@@ -524,3 +524,25 @@ button:disabled { opacity: 0.5; cursor: default; }
 #tooltip .tl { display: block; font-size: 0.76rem; line-height: 1.35; white-space: normal; }
 #tooltip .tl .w { color: var(--tip-wish); font-weight: 600; }
 #tooltip .tl .t { color: var(--tip-trade); font-weight: 600; }
+
+/* --- Émojis --- */
+.emo { margin-right: 4px; font-family: "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", sans-serif; font-style: normal; }
+.emo-legend { margin: 6px 0 8px; }
+.emo-legend summary { cursor: pointer; font-weight: 600; font-size: 0.85rem; }
+.emo-legend h3 { margin: 8px 0 2px; font-size: 0.8rem; color: var(--muted); }
+.emo-grid { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px 8px; font-size: 0.78rem; }
+.emo-grid li { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* --- Centroïdes des familles de mécaniques (vue carte) --- */
+.fam-toggle {
+  padding: 3px 10px; font-size: 0.8rem; font-weight: 600;
+  background: var(--surface); color: var(--text); border: 1px solid var(--border);
+}
+.fam-toggle[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+#map .fam circle { fill: var(--surface); stroke: var(--accent); opacity: 0.92; cursor: pointer; }
+#map .fam text { pointer-events: none; font-family: "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", sans-serif; }
+#map .fam.open circle { stroke: var(--text); fill: var(--shared); }
+#map .fam.dim { opacity: 0.35; }
+#map .fam-link { stroke: var(--accent); stroke-opacity: 0.55; pointer-events: none; }
+#map .fam-link.all { stroke-opacity: 0.18; }
+#map .fam-link.open:not(.all) { stroke-opacity: 0.9; }

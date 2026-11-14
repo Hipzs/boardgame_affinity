@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Boardgame Affinity</title>
-  <link rel="stylesheet" href="style.css?v=39">
+  <link rel="stylesheet" href="style.css?v=44">
 </head>
 <body>
   <!-- Aide au survol : tout élément portant data-help affiche son texte dans #help (voir app.js, « Aide au survol »). -->
@@ -39,6 +39,7 @@
           <label class="check" data-help="Remplit les bulles selon la note BGG (viridis, de 5,5 à 8,5) à la place de la couleur de niveau. S'applique aussi à la carte."><input id="color-rating" type="checkbox"> Couleur = note</label>
           <label class="check" data-help="Signaux par jeu, calculés sur les collections BGG : point vert si la convoitise (souhaits / possédés) est dans l'intervalle choisi, contour rouge si la revente (à échanger / possédés) l'est. Chaque signal a son intervalle de centiles, indépendant de l'autre."><input id="signals" type="checkbox" checked> Convoit./revente</label>
           <label class="check" data-help="Écarte les réimplémentations (nouvelles versions des mêmes règles selon BGG, ex. Pandemic → Iberia, Reign of Cthulhu, WoW: Wrath of the Lich King) du jeu dont on part. Groupes : composantes connexes des liens BGG."><input id="no-reimpl" type="checkbox"> Sans réimpl.</label>
+          <label class="check" data-help="Ajoute devant le nom de chaque jeu, sur le graphe et la carte, l'émoji de son thème dominant (sa catégorie BGG la plus spécifique). Les émojis des étiquettes restent toujours affichés dans les pastilles."><input id="emoji" type="checkbox"> Émojis</label>
         </div>
         <div id="sig-row" class="sig-row">
           <div class="sig-head">
@@ -168,6 +169,10 @@
           <li><span class="dot sig-ring"></span>revente dans l'intervalle</li>
           <li><span class="dot sig-dot"></span>convoitise dans l'intervalle</li>
         </ul>
+        <details class="emo-legend">
+          <summary data-help="Code émoji utilisé devant les mécaniques (par famille) et les thèmes. Survole une entrée pour voir ce qu'elle regroupe. Dictionnaire éditable : web/emoji.js.">Émojis</summary>
+          <div id="emoji-legend"></div>
+        </details>
         <p>Taille ∝ log(avis) · épaisseur du lien ∝ similarité.<br>
           Clic : détails · double-clic : recentrer · molette : zoom · survol : description, mécaniques communes.</p>
       </section>
@@ -228,6 +233,8 @@
             <button type="button" class="view-btn" data-view="map" aria-pressed="false" id="map-btn" data-help="Carte 2D (t-SNE) : chaque point est un jeu ; deux jeux proches se ressemblent (mécaniques/thème). Le graphe courant est superposé.">Carte</button>
           </div>
           <div class="presets seg map-alpha" id="map-alpha-row" hidden></div>
+          <button type="button" class="fam-toggle" id="fam-btn" aria-pressed="false" hidden data-help="Affiche le centre de chaque thème (catégories BGG regroupées par émoji, hors format et licence) sur la carte, relié aux jeux du graphe de ce thème. Clic sur un émoji : liens vers tous les jeux du thème. Conseil : les thèmes forment des grappes nettes sur la carte α = 0 (thème seul).">🗺️ Thèmes</button>
+          <button type="button" class="fam-toggle" id="fam-center" hidden data-help="Bascule la définition du centre d'un thème. Moyenne : centroïde pondéré de ses jeux (les grands thèmes, présents partout, retombent au milieu de la carte). Pic : endroit où le thème est le plus sur-représenté par rapport à l'ensemble des jeux (densités lissées sur une grille).">Centre : moyenne</button>
           <p id="map-msg" class="msg"></p>
         </div>
       </div>
@@ -239,7 +246,8 @@
   <footer id="meta"></footer>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
-  <script src="data/games.js?v=39"></script>
-  <script src="app.js?v=39"></script>
+  <script src="emoji.js?v=44"></script>
+  <script src="data/games.js?v=44"></script>
+  <script src="app.js?v=44"></script>
 </body>
 </html>
