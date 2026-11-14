@@ -2,7 +2,7 @@
  * Fichier éditable à la main. Une étiquette absente reçoit « · » et est signalée dans la console.
  * Éviter les émojis composés (séquences ZWJ, ex. 🏴‍☠️) : certaines polices les affichent en morceaux.
  */
-window.BGG_EMOJI = {
+export const EMOJI = {
   themes: {
     "Card Game": "🃏", "Fantasy": "🧙", "Economic": "💰", "Fighting": "🥊",
     "Science Fiction": "🚀", "Wargame": "⚔️", "Dice": "🎲", "Party Game": "🎉",
