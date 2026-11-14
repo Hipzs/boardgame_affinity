@@ -163,7 +163,8 @@
   // Seuils réglables (centiles, curseur double) : un jeu est « élevé » si sa valeur atteint le centile choisi.
   // Intervalle de centiles [bas, haut] par signal ; [0, 100] = signal inactif (ni marquage ni filtre).
   for (const key of ["wish", "trade"]) BEH[key].pct = Float64Array.from(BEH[key].x, (v) => 100 * BEH[key].rank(v));
-  const sigInt = { wish: [0, 100], trade: [0, 100] };
+  // Par défaut : préréglage « Convoité, gardé » (convoitise c80 → c100, revente c0 → c30), case « Filtrer » cochée.
+  const sigInt = { wish: [80, 100], trade: [0, 30] };
   const sigActive = (k) => sigInt[k][0] > 0 || sigInt[k][1] < 100;
   const inInt = (k, i) => BEH[k].pct[i] >= sigInt[k][0] && BEH[k].pct[i] <= sigInt[k][1];
   // Marquage : point vert (convoitise) / contour rouge (revente) pour les jeux dans l'intervalle actif.
@@ -176,8 +177,8 @@
     center: -1, selected: -1, k: 5, depth: 2, cross: false, tau: 0, showRating: false, colorRating: false,
     // Pondération : un curseur v_k ∈ [0, 100] par attribut, normalisé w_k = v_k / Σ v (au moins un v_k > 0).
     wRaw: { m: 100, c: 0, f: 0, d: 0 },
-    metric: "cos", signals: true, emoji: false, sigFilter: false,
-    gems: false, gemBeta: 1, view: "graph", mapSel: "auto", famView: false, famOpen: null, famCenter: "mean",
+    metric: "cos", signals: true, emoji: false, sigFilter: true, // signaux filtrés par défaut (« Convoité, gardé »)
+    gems: true, gemBeta: 2, // « Pépites cachées » actif par défaut, intensité β = 2,0 view: "graph", mapSel: "auto", famView: false, famOpen: null, famCenter: "mean",
     noFranchise: false, noReimpl: false, noExpLine: false, tags: { f: new Set(), d: new Set(), ar: new Set(), pu: new Set() },
     req: { m: new Set(), c: new Set(), f: new Set(), d: new Set() }, // étiquettes indispensables (ET logique)
     ban: { m: new Set(), c: new Set(), f: new Set(), d: new Set() }, // étiquettes interdites
@@ -267,8 +268,25 @@
     const v = parseFloat($(id).value);
     return Number.isFinite(v) ? v : null;
   };
+  // Recherche par mots-clés (comme dans « Mes collections ») : texte normalisé (minuscules, sans accents) de
+  // chaque jeu, construit à la demande et mis en cache. Champs : nom, début de description, 40 mots-clés TF-IDF,
+  // mécaniques, catégories, familles, auteurs, illustrateurs, éditeurs, extensions, année.
+  // Tous les mots doivent y être (sous-chaînes) ; « -mot » exclut.
+  const kwNorm = (x) => String(x).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  const kwCache = new Array(N.length);
+  function kwText(i) {
+    if (kwCache[i] === undefined) {
+      const g = N[i];
+      kwCache[i] = kwNorm([g.n, g.ds || "", g.y || "", ...(g.dv || []).map((x) => D.words[x[0]]),
+        ...g.m.map((t) => D.dict.mech[t]), ...g.c.map((t) => D.dict.cat[t]), ...g.f.map((t) => D.dict.fam[t]),
+        ...g.d.map((t) => D.dict.des[t]), ...g.ar.map((t) => D.dict.art[t]), ...g.pu.map((t) => D.dict.pub[t]),
+        ...(g.x || []).map((t) => D.dict.exp[t])].join(" | "));
+    }
+    return kwCache[i];
+  }
   function readFilters() {
     return {
+      kw: kwNorm($("#f-kw").value).split(/\s+/).filter((w) => w && w !== "-"),
       plMin: num("#pl-min"), plMax: num("#pl-max"), tMin: num("#t-min"), tMax: num("#t-max"),
       ageMax: num("#age-max"), wMin: num("#w-min"), wMax: num("#w-max"),
     };
@@ -280,6 +298,10 @@
   };
   const rateActive = (k) => RATE[k].lo > RATE[k].min || RATE[k].hi < RATE[k].max;
   function passes(g, i, F) {
+    if (F.kw.length) {
+      const txt = kwText(i);
+      for (const w of F.kw) if (w.startsWith("-") ? txt.includes(w.slice(1)) : !txt.includes(w)) return false;
+    }
     for (const k of ["av", "b"]) if (rateActive(k) && (g[k] < RATE[k].lo || g[k] > RATE[k].hi)) return false;
     // Filtre par signaux : convoitise ET revente au moins au centile choisi (un curseur à 0 neutralise son critère).
     // Filtre par signaux : chaque intervalle actif doit contenir le centile du jeu (signaux indépendants).
@@ -310,7 +332,7 @@
   function applyFilters() {
     const F = readFilters();
     pass = Uint8Array.from(N, (g, i) => (passes(g, i, F) ? 1 : 0));
-    const active = Object.values(state.tags).filter((s) => s.size).length
+    const active = (F.kw.length ? 1 : 0) + Object.values(state.tags).filter((s) => s.size).length
       + [F.plMin ?? F.plMax, F.tMin ?? F.tMax, F.ageMax, F.wMin ?? F.wMax].filter((x) => x !== null).length
       + (state.noFranchise ? 1 : 0) + (state.noReimpl ? 1 : 0) + (state.noExpLine ? 1 : 0) + (state.signals && state.sigFilter && (sigActive("wish") || sigActive("trade")) ? 1 : 0)
       + (rateActive("av") ? 1 : 0) + (rateActive("b") ? 1 : 0);
@@ -1563,11 +1585,11 @@
   });
 
   let ft;
-  for (const id of ["pl-min", "pl-max", "t-min", "t-max", "age-max", "w-min", "w-max"]) {
+  for (const id of ["f-kw", "pl-min", "pl-max", "t-min", "t-max", "age-max", "w-min", "w-max"]) {
     $(`#${id}`).addEventListener("input", () => { clearTimeout(ft); ft = setTimeout(applyFilters, 250); });
   }
   $("#reset").addEventListener("click", () => {
-    for (const id of ["pl-min", "pl-max", "t-min", "t-max", "age-max", "w-min", "w-max"]) $(`#${id}`).value = "";
+    for (const id of ["f-kw", "pl-min", "pl-max", "t-min", "t-max", "age-max", "w-min", "w-max"]) $(`#${id}`).value = "";
     for (const k of Object.keys(TAG_KEYS)) { state.tags[k].clear(); drawTagChips(k); }
     setOpt("noFranchise", "no-franchise", false);
     setOpt("noReimpl", "no-reimpl", false);
@@ -1605,6 +1627,7 @@
       add("Filtres", `${TAG_NAMES[key]} : ${D.dict[TAG_KEYS[key]][t]}`, () => { state.tags[key].delete(t); drawTagChips(key); });
     }
     const F = readFilters();
+    if (F.kw.length) add("Filtres", `Mots-clés : « ${$("#f-kw").value.trim()} »`, () => { $("#f-kw").value = ""; });
     const span = (lo, hi, unit = "") => (lo !== null && hi !== null ? `${fr(lo)} à ${fr(hi)}${unit}`
       : lo !== null ? `≥ ${fr(lo)}${unit}` : `≤ ${fr(hi)}${unit}`);
     const clearIds = (...ids) => () => ids.forEach((id) => { $(`#${id}`).value = ""; });
@@ -1782,10 +1805,11 @@
     return String(s).replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
   }
 
-  // Jeu initial : id BGG dans l'URL (#30549), sinon Pandemic, sinon le plus noté.
+  // Jeu initial : id BGG dans l'URL (#30549), sinon Terraforming Mars, sinon le plus noté.
   const fromHash = N.findIndex((g) => String(g.id) === location.hash.slice(1));
-  const pandemic = resolve("Pandemic");
-  setCenter(fromHash >= 0 ? fromHash : pandemic >= 0 ? pandemic : 0);
+  applyFilters(); // filtres actifs dès le départ (signaux « Convoité, gardé » filtrés par défaut)
+  const byDefault = resolve("Terraforming Mars"); // jeu affiché par défaut
+  setCenter(fromHash >= 0 ? fromHash : byDefault >= 0 ? byDefault : 0);
   // Onglet nommé : les liens « Explorer » de la page « Mes collections » (target="bga-explorer") rouvrent cet onglet,
   // avec #id BGG dans l'adresse : on recentre sur ce jeu.
   window.name = "bga-explorer";

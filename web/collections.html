@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Mes collections</title>
-  <link rel="stylesheet" href="style.css?v=83">
+  <link rel="stylesheet" href="style.css?v=87">
 </head>
 <body class="coll-page">
   <header class="top">
@@ -20,6 +20,7 @@
 
   <main class="colls-main">
     <aside class="panel filt-panel">
+      <button id="reset" type="button" class="secondary" data-help="Vide tous les filtres, sauf « Garder / exclure » (bouton « Effacer » dédié).">Réinitialiser</button>
       <div class="kw-search" data-help="Recherche par mots-clés dans tous tes jeux : nom, description (début et mots-clés), mécaniques, thèmes, familles, auteurs, illustrateurs, éditeurs, extensions, année. Plusieurs mots : le jeu doit tous les contenir (accents et majuscules ignorés). Préfixe « - » pour exclure un mot (ex. -dice).">
         <input id="f-kw" type="search" placeholder="Mots-clés : nom, description, mécanique, auteur…" autocomplete="off" aria-label="Recherche par mots-clés dans mes jeux">
       </div>
@@ -33,7 +34,7 @@
         <div class="filters">
           <h2 id="filters-sum" class="filters-title">Filtres <span id="filter-count" class="badge"></span></h2>
           <div class="required in-filters">
-            <h2 data-help="Étiquettes de tes jeux (mécaniques, thème, familles fines), des plus fréquentes aux plus rares ; « + » : les afficher toutes. Clic sur une étiquette : indispensable (✓, le jeu doit l'avoir), nouveau clic : neutre. Croix à droite (au survol) : interdite (✕, le jeu ne doit pas l'avoir). Non vidé par « Réinitialiser » (bouton « Effacer »).">Garder / exclure <span id="req-count" class="badge"></span></h2>
+            <h2 data-help="Étiquettes de tes jeux (mécaniques, thème, familles fines), des plus fréquentes aux plus rares ; « + » : les afficher toutes. Clic sur une étiquette : indispensable (✓, le jeu doit l'avoir), nouveau clic : neutre. Croix à droite (au survol) : interdite (✕, le jeu ne doit pas l'avoir). Non vidé par « Réinitialiser » (bouton « Effacer »)." class="req-title"><span id="req-count" class="badge"></span></h2>
             <details class="req-sec" data-sec="m" open><summary><h3>Mécaniques <span class="sec-n" id="sec-n-m"></span></h3></summary>
               <div id="req-m" class="chips"></div></details>
             <details class="req-sec" data-sec="c" open><summary><h3>Thème <span class="sec-n" id="sec-n-c"></span></h3></summary>
@@ -99,8 +100,6 @@
             <datalist id="dl-pu"></datalist>
             <div class="chips"></div>
           </div>
-
-          <button id="reset" type="button" class="secondary" data-help="Vide tous les filtres, sauf « Garder / exclure » (bouton « Effacer » dédié).">Réinitialiser</button>
         </div>
       <p id="f-stats" class="msg"></p>
     </aside>
@@ -153,9 +152,10 @@
   <div id="help" role="tooltip" hidden></div>
   <footer>Enregistré dans ce navigateur (localStorage, adresse http://localhost:8765) : exporter pour sauvegarder. Données BoardGameGeek, usage non commercial.</footer>
 
-  <script src="emoji.js?v=83"></script>
-  <script src="data/games.js?v=83"></script>
-  <script src="collection-store.js?v=83"></script>
-  <script src="collections.js?v=83"></script>
+  <script src="emoji.js?v=87"></script>
+  <script src="data/games.js?v=87"></script>
+  <script src="default-collections.js?v=87"></script>
+  <script src="collection-store.js?v=87"></script>
+  <script src="collections.js?v=87"></script>
 </body>
 </html>

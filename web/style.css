@@ -879,3 +879,12 @@ body.is-dragging-coll .coll-box { transition: box-shadow 0.1s; }
 .chip.toggle.on .ban-x { display: none !important; }
 .chip.toggle.on { padding-right: 8px; }
 .chip.toggle.on > .emo { margin-left: 2px; }
+/* Explorateur : recherche par mots-clés en tête du panneau Filtres */
+.filters > .kw-search { margin: 8px 0 4px; }
+
+/* Titre « Garder / exclure » retiré (mots seulement) : il ne reste que le compteur, masqué s'il est vide */
+.req-title { margin: 0 0 2px; }
+.req-title:has(.badge:empty) { display: none; }
+/* Réinitialiser tout en haut des filtres (deux pages) */
+.filters > #reset { margin: 8px 0 2px; }
+.filt-panel > #reset { margin: 0 0 8px; align-self: flex-start; padding: 4px 10px; font-size: 0.82rem; }

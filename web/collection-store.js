@@ -33,6 +33,20 @@
         localStorage.removeItem(OLD);
         return d;
       }
+      // Tout premier chargement : collections par défaut (web/default-collections.js), enregistrées aussitôt
+      // pour qu'une suppression par l'utilisateur soit définitive.
+      const def = window.BGA_DEFAULT_COLLECTIONS;
+      if (def && ((def.games || []).length || (def.collections || []).length)) {
+        const now0 = new Date().toISOString();
+        const d = clean({
+          games: (def.games || []).map((x) => (typeof x === "number" ? { id: x, added: now0 } : x)),
+          collections: (def.collections || []).map((c, j) => ({ cid: c.cid || `cdef${j}`, name: c.name, color: c.color || "",
+            created: c.created || now0, games: c.games || [] })),
+        });
+        for (const c of d.collections) for (const id of c.games) if (!d.games.some((x) => x.id === id)) d.games.push({ id, added: now0 });
+        localStorage.setItem(KEY, JSON.stringify(d));
+        return d;
+      }
       return clean(null);
     } catch (_) { return clean(JSON.parse(JSON.stringify(mem))); }
   }
