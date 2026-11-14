@@ -1,3 +1,4 @@
+// @ts-check
 /* « Mes collections » : jeux ajoutés depuis l'explorateur et collections nommées, partagés entre l'explorateur
  * (index.html) et la page collections.html.
  *
@@ -32,14 +33,14 @@ export const clean = (d) => ({
 
 /**
  * @param {object} [opts]
- * @param {Storage | null} [opts.storage]  localStorage ou équivalent (null/indisponible : repli mémoire)
+ * @param {any} [opts.storage]  localStorage ou équivalent (null/indisponible : repli mémoire)
  * @param {{games?: any[], collections?: any[]} | null} [opts.defaults]  collections proposées au tout premier chargement
  * @param {() => string} [opts.now]  horodatage ISO
  * @param {() => string} [opts.newCid]  identifiant de collection
  * @param {(onKeyChange: (key: string) => void) => void} [opts.addStorageListener]  appelle le callback à chaque modification venant d'un autre onglet
  */
 export function createCollectionStore({
-  storage = null,
+  storage = /** @type {any} */ (null),
   defaults = null,
   now = () => new Date().toISOString(),
   newCid = () => `c${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`,

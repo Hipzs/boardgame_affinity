@@ -30,3 +30,27 @@ export function fakeStorage(initial = {}) {
     dump: () => Object.fromEntries(m),
   };
 }
+
+/** Tout le contexte de calcul construit sur la fixture (comme le font les pages). */
+export async function loadWorld() {
+  const { loadDataset } = await import("../../web/lib/dataset.js");
+  const { buildAttrs } = await import("../../web/lib/attrs.js");
+  const { buildGemQ } = await import("../../web/lib/gems.js");
+  const { createNeighborIndex } = await import("../../web/lib/neighbors.js");
+  const { createKeywordText } = await import("../../web/lib/keywords.js");
+  const raw = loadFixture();
+  const ds = loadDataset(raw);
+  const at = buildAttrs(raw);
+  const gemQ = buildGemQ(raw.nodes);
+  const nb = createNeighborIndex({
+    N: raw.nodes,
+    ATTRS: at.ATTRS,
+    ATTR_KEYS: at.ATTR_KEYS,
+    franchise: at.franchise,
+    gemQ,
+  });
+  const kwText = createKeywordText(raw);
+  const ctx = { kwText: (g) => kwText(g), terms: (g, i, key) => at.ATTRS[key].set[i] };
+  return { raw, ds, ...at, gemQ, nb, kwText, ctx };
+}
+export const OPTS = { gems: false, gemBeta: 2, noFranchise: false, noReimpl: false, noExpLine: false };

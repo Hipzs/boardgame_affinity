@@ -1813,6 +1813,8 @@
   // Onglet nommé : les liens « Explorer » de la page « Mes collections » (target="bga-explorer") rouvrent cet onglet,
   // avec #id BGG dans l'adresse : on recentre sur ce jeu.
   window.name = "bga-explorer";
+  // Temporaire (refactoring, étapes 2-3) : exposé pour comparer ce calcul à web/lib/ ; retiré à l'étape 10.
+  window.__dbg = { neighbors: (u, cfg) => neighbors(u, cfg, false), getPass: () => pass, state };
   window.addEventListener("hashchange", () => {
     const j = N.findIndex((g) => String(g.id) === location.hash.slice(1));
     if (j >= 0 && j !== state.center) setCenter(j);
