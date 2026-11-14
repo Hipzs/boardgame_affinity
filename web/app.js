@@ -1,6 +1,7 @@
 /* Graphe des plus proches voisins, calculé dans le navigateur à partir des attributs (src/export_web.py).
  *
- * Similarité : s(u,v) = α·cos_IDF(méca) + (1−α)·cos_IDF(catég), via des listes inversées.
+ * Similarité : s(u,v) = Σ_k w_k · métrique_k(u,v) sur les 4 attributs (méca., thème, familles, description),
+ * w_k = v_k / Σ v (4 curseurs), via des listes inversées.
  * Les voisins sont cherchés parmi les jeux qui passent les filtres ; le graphe est un parcours en largeur (BFS).
  */
 (() => {
@@ -15,8 +16,12 @@
     return;
   }
 
-  const MAX_NODES = 300;
-  const K_MAX = 12;
+  // Budget du graphe : au plus 300 jeux autour du jeu choisi. Voisins k ∈ KS = {1, …, 15}.
+  const BUDGET = 300;
+  const MAX_NODES = BUDGET + 1;
+  const KS = Array.from({ length: 15 }, (_, j) => j + 1);
+  const K_MAX = KS[KS.length - 1];
+  const D_MAX = 6;
   const N = D.nodes;
   const css = getComputedStyle(document.documentElement);
   const depthColor = (d) => css.getPropertyValue(`--d${Math.min(d, 4)}`).trim();
@@ -169,18 +174,17 @@
   // --- État ---------------------------------------------------------------------------------
   const state = {
     center: -1, selected: -1, k: 5, depth: 2, cross: false, tau: 0, showRating: false, colorRating: false,
-    // Pondération : deux groupes activables. A = mécaniques ↔ thème (part méca. = alpha) ; B = familles ↔ description
-    // (part familles = beta). Deux groupes actifs : 50 % chacun.
-    alpha: 1, beta: 0.5, onA: true, onB: false,
+    // Pondération : un curseur v_k ∈ [0, 100] par attribut, normalisé w_k = v_k / Σ v (au moins un v_k > 0).
+    wRaw: { m: 100, c: 0, f: 0, d: 0 },
     metric: "cos", signals: true, emoji: false, sigFilter: false,
-    gems: false, gemBeta: 1, view: "graph", mapAlpha: "auto", famView: false, famOpen: null, famCenter: "mean",
-    noFranchise: false, noReimpl: false, tags: { f: new Set(), d: new Set(), ar: new Set(), pu: new Set() },
+    gems: false, gemBeta: 1, view: "graph", mapSel: "auto", famView: false, famOpen: null, famCenter: "mean",
+    noFranchise: false, noReimpl: false, noExpLine: false, tags: { f: new Set(), d: new Set(), ar: new Set(), pu: new Set() },
     req: { m: new Set(), c: new Set(), f: new Set(), d: new Set() }, // étiquettes indispensables (ET logique)
     ban: { m: new Set(), c: new Set(), f: new Set(), d: new Set() }, // étiquettes interdites
   };
   function attrWeights() {
-    const gA = state.onA ? (state.onB ? 0.5 : 1) : 0, gB = state.onB ? (state.onA ? 0.5 : 1) : 0;
-    return { m: gA * state.alpha, c: gA * (1 - state.alpha), f: gB * state.beta, d: gB * (1 - state.beta) };
+    const tot = ATTR_KEYS.reduce((a, k) => a + state.wRaw[k], 0) || 1;
+    return Object.fromEntries(ATTR_KEYS.map((k) => [k, state.wRaw[k] / tot]));
   }
   // Configuration du calcul : métrique, poids par attribut, modulateurs.
   const currentCfg = () => ({ metric: state.metric, w: attrWeights() });
@@ -226,6 +230,7 @@
       if (v === u || !pass[v]) continue;
       if (state.noFranchise && fu.size && [...franchise[v]].some((t) => fu.has(t))) continue;
       if (state.noReimpl && ru >= 0 && N[v].ri === ru) continue;
+      if (state.noExpLine && N[u].xl >= 0 && N[v].xl === N[u].xl) continue;
       let s = 0;
       for (const key of active) s += cfg.w[key] * attrPair(key, cfg.metric, u, v, ctx);
       if (s > 0) out.push([v, Math.min(s, 1)]);
@@ -307,16 +312,18 @@
     pass = Uint8Array.from(N, (g, i) => (passes(g, i, F) ? 1 : 0));
     const active = Object.values(state.tags).filter((s) => s.size).length
       + [F.plMin ?? F.plMax, F.tMin ?? F.tMax, F.ageMax, F.wMin ?? F.wMax].filter((x) => x !== null).length
-      + (state.noFranchise ? 1 : 0) + (state.noReimpl ? 1 : 0) + (state.signals && state.sigFilter && (sigActive("wish") || sigActive("trade")) ? 1 : 0)
+      + (state.noFranchise ? 1 : 0) + (state.noReimpl ? 1 : 0) + (state.noExpLine ? 1 : 0) + (state.signals && state.sigFilter && (sigActive("wish") || sigActive("trade")) ? 1 : 0)
       + (rateActive("av") ? 1 : 0) + (rateActive("b") ? 1 : 0);
     $("#filter-count").textContent = active || "";
     const nReq = ATTR_KEYS.reduce((n, k) => n + state.req[k].size + state.ban[k].size, 0);
     $("#req-count").textContent = nReq || "";
+    if (!$("#filter-pop").hidden) drawFilterPop();
     invalidate();
   }
 
   // Indispensables / interdites : pastilles à trois états, construites depuis le jeu central.
-  //   neutre --clic--> indispensable (✓, le voisin doit l'avoir) --clic--> interdite (✕, il ne doit pas l'avoir) --clic--> neutre
+  //   clic sur la pastille : neutre <-> indispensable (✓, le voisin doit l'avoir) ; une interdite redevient neutre
+  //   clic sur la croix (visible au survol, à droite) : interdite (✕, le voisin ne doit pas l'avoir) <-> neutre
   // Une étiquette active absente du nouveau jeu central reste affichée (« extra ») pour pouvoir la retirer.
   const clearReqBan = () => { for (const k of ATTR_KEYS) { state.req[k].clear(); state.ban[k].clear(); } };
   const REQ_SHOW = { m: Infinity, c: Infinity, f: 16, d: 14 }; // nombre de pastilles proposées (familles et mots : les plus informatives)
@@ -337,24 +344,33 @@
       box.innerHTML = items.map(([t, name]) => {
         const st = state.req[key].has(t) ? "on" : state.ban[key].has(t) ? "ban" : "";
         const extra = st && !own.has(t);
-        const help = st === "on" ? "Indispensable : chaque voisin doit l'avoir. Clic : l'interdire."
-          : st === "ban" ? "Interdite : aucun voisin ne doit l'avoir. Clic : revenir à neutre."
-            : "Neutre. Clic : la rendre indispensable ; deuxième clic : l'interdire.";
+        const help = st === "on" ? "Indispensable : chaque voisin doit l'avoir. Clic : revenir à neutre ; croix : l'interdire."
+          : st === "ban" ? "Interdite : aucun voisin ne doit l'avoir. Clic ou croix : revenir à neutre."
+            : "Neutre. Clic : la rendre indispensable ; croix à droite : l'interdire.";
+        const xHelp = st === "ban" ? "Retirer l'interdiction." : "Interdire : aucun voisin ne doit l'avoir.";
         return `<span class="chip toggle${st ? ` ${st}` : ""}${extra ? " extra" : ""}" data-t="${t}" role="button" ` +
-          `tabindex="0" data-help="${escapeHtml(help + (extra ? " (absente du jeu central)" : ""))}">${emoTag(key, t)}${escapeHtml(name)}</span>`;
+          `tabindex="0" data-help="${escapeHtml(help + (extra ? " (absente du jeu central)" : ""))}">${emoTag(key, t)}${escapeHtml(name)}` +
+          `<span class="ban-x" aria-label="Interdire" data-help="${escapeHtml(xHelp)}">✕</span></span>`;
       }).join("") || `<span class="hint">aucune</span>`;
       box.querySelectorAll(".chip").forEach((ch) => {
-        const cycle = () => {
-          const t = +ch.dataset.t;
-          if (state.req[key].has(t)) { state.req[key].delete(t); state.ban[key].add(t); }
-          else if (state.ban[key].has(t)) state.ban[key].delete(t);
-          else state.req[key].add(t);
-          hideHelp();
-          drawRequired();
-          applyFilters();
+        const t = +ch.dataset.t;
+        const done = () => { hideHelp(); drawRequired(); applyFilters(); };
+        // Pastille : neutre <-> indispensable ; une interdite redevient neutre.
+        const toggleReq = () => {
+          if (state.ban[key].delete(t)) return done();
+          if (!state.req[key].delete(t)) state.req[key].add(t);
+          done();
         };
-        ch.addEventListener("click", cycle);
-        ch.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); cycle(); } });
+        // Croix : interdite <-> neutre (une indispensable devient directement interdite).
+        const toggleBan = () => {
+          if (!state.ban[key].delete(t)) { state.req[key].delete(t); state.ban[key].add(t); }
+          done();
+        };
+        ch.addEventListener("click", (e) => (e.target.closest(".ban-x") ? toggleBan() : toggleReq()));
+        ch.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleReq(); }
+          else if (e.key === "Delete" || e.key === "Backspace" || e.key === "x") { e.preventDefault(); toggleBan(); }
+        });
       });
     }
   }
@@ -454,9 +470,11 @@
       frontier = next;
     }
     if (cross) {
+      // 12 voisins au plus par jeu : à k grand, presque toutes les paires seraient reliées (et le calcul long).
+      const kc = Math.min(k, 12);
       const seen = new Set(links.map((l) => key(l.source, l.target)));
       for (const u of level.keys()) {
-        for (const [v, s] of nbk(u)[0]) {
+        for (const [v, s] of neighbors(u).slice(0, kc).filter(([, x]) => x >= tau)) {
           if (!level.has(v) || seen.has(key(u, v))) continue;
           seen.add(key(u, v));
           links.push({ source: u, target: v, s, cross: true });
@@ -495,14 +513,16 @@
 
   // --- Infobulles -------------------------------------------------------------------------------
   function tipShow(html, e) { tip.innerHTML = html; tip.hidden = false; tipMove(e); }
-  function tipMove(e) {
+  // Place une infobulle près du pointeur, dans la zone du graphe (bascule à gauche / au-dessus près des bords).
+  function placeTip(el, e) {
     const r = $("#graph-wrap").getBoundingClientRect();
     const x = e.clientX - r.left + 12, y = e.clientY - r.top + 12;
-    // Reste dans la zone du graphe (bascule à gauche / au-dessus près des bords).
-    tip.style.left = `${x + tip.offsetWidth > r.width ? x - tip.offsetWidth - 24 : x}px`;
-    tip.style.top = `${y + tip.offsetHeight > r.height ? y - tip.offsetHeight - 24 : y}px`;
+    el.style.left = `${Math.max(4, x + el.offsetWidth > r.width ? x - el.offsetWidth - 24 : x)}px`;
+    el.style.top = `${Math.max(4, y + el.offsetHeight > r.height ? y - el.offsetHeight - 24 : y)}px`;
   }
+  const tipMove = (e) => placeTip(tip, e);
   function tipHide() { tip.hidden = true; }
+
   const sharedNames = (key, u, v) => {
     const A = ATTRS[key], a = A.set[u];
     return [...A.set[v]].filter((t) => a.has(t)).map((t) => A.dict[t]).sort();
@@ -548,8 +568,9 @@
     current = { parent };
     $("#tau-msg").textContent = state.tau > 0 ? `${pruned} lien${pruned > 1 ? "s" : ""} coupé${pruned > 1 ? "s" : ""}` : "";
     const nPass = pass.reduce((a, b) => a + b, 0);
-    $("#stats").textContent =
-      `${level.size} jeux affichés, ${links.filter((l) => !l.cross).length} liens d'arbre` +
+    // Ligne sous Voisins / Profondeur : jeux affichés sur le maximum possible (pire cas W(k, d), budget 300).
+    $("#kd-msg").textContent =
+      `${level.size - 1} / ${worst(state.k, state.depth)} jeux affichés (max ${BUDGET}), ${links.filter((l) => !l.cross).length} liens d'arbre` +
       (state.cross ? `, ${links.filter((l) => l.cross).length} liens croisés` : "") +
       (truncated ? ` · tronqué à ${MAX_NODES} jeux` : "") +
       ` · ${nPass} / ${N.length} jeux passent les filtres` +
@@ -645,7 +666,7 @@
       .style("fill", (n) => textOn(fill(n)));
     node.select("text.label")
       .attr("x", (n) => R(n) + 5)
-      .text((n) => (n.d <= 1 || nodes.length <= 40 ? gameName(n.i) : ""));
+      .text((n) => (n.d === 0 || nodes.length <= 40 || (n.d === 1 && nodes.length <= 80) ? gameName(n.i) : ""));
 
     node
       .on("click", (e, n) => { e.stopPropagation(); select(n.i); })
@@ -709,11 +730,13 @@
   msvg.call(mzoom).on("dblclick.zoom", null);
   const onMap = N.map((g, i) => i).filter((i) => N[i].xy);
   let mx = null, my = null, mapFor = null, lastMap = -1;
-  const MAP_ALPHAS = D.meta.map_alphas || [];
-  // Carte affichée : celle choisie, ou en mode « auto » celle dont le α est le plus proche du α courant.
-  const mapIdx = () => (state.mapAlpha === "auto"
-    ? d3.minIndex(MAP_ALPHAS, (a) => Math.abs(a - state.alpha))
-    : state.mapAlpha);
+  const MAP_KEYS = D.meta.map_keys || [];
+  // Carte affichée : celle choisie, ou en mode « auto » celle de l'attribut le plus pondéré.
+  const mapIdx = () => {
+    if (state.mapSel !== "auto") return state.mapSel;
+    const w = attrWeights();
+    return Math.max(0, d3.maxIndex(MAP_KEYS, (k) => w[k] ?? -1));
+  };
   const P = (i) => N[i].xy[mapIdx()];
 
   // --- Centres des thèmes, sur chaque carte ----------------------------------------------------------
@@ -721,7 +744,7 @@
   // de format ou de licence (emoji.js, nonThematic). Un jeu appartient à un groupe s'il en a au moins une
   // catégorie, avec un poids w = (nb de ses catégories thématiques dans le groupe) / (nb total de ses catégories
   // thématiques) : un jeu mono-thème pèse plus qu'un jeu à cinq thèmes. Centre = moyenne pondérée ou pic
-  // d'enrichissement, calculé une fois par carte (une par α) et mis en cache.
+  // d'enrichissement, calculé une fois par carte (une par attribut) et mis en cache.
   const GROUPS = {};
   const GROUP_OF_CAT = D.dict.cat.map((name, t) => {
     if (NON_THEMATIC.has(t)) return null;
@@ -834,7 +857,7 @@
 
   function drawMap({ level, links }) {
     mapScales();
-    // Changement de carte (autre α) : les points glissent vers leur nouvelle place (cartes alignées par Procrustes).
+    // Changement de carte (autre attribut) : les points glissent vers leur nouvelle place (cartes alignées par Procrustes).
     const m = mapIdx();
     const changed = lastMap >= 0 && m !== lastMap;
     const T = (sel) => (changed ? sel.transition().duration(700) : sel);
@@ -958,24 +981,26 @@
     $("#map").toggleAttribute("hidden", v !== "map");
     $("#map-alpha-row").hidden = v !== "map";
     $("#fam-btn").hidden = v !== "map";
+    // la note écrite et les liens croisés n'existent que sur le graphe
+    $("#show-rating").hidden = $("#cross").hidden = v !== "graph";
     mapFor = null; // tailles à recalculer une fois la vue affichée
     tipHide();
     if (state.center >= 0) render();
     if (v === "map") focusMap();
   }
-  // Boutons de choix de la carte : Auto (suit α) ou une valeur de α précalculée.
+  // Boutons de choix de la carte : Auto (attribut le plus pondéré) ou la carte d'un attribut seul.
   function drawMapAlphaButtons() {
     const m = mapIdx();
-    const opts = [["auto", "Auto", "La carte suit le curseur α : on affiche la carte précalculée dont le α est le plus proche."]]
-      .concat(MAP_ALPHAS.map((a, j) => [j, String(a).replace(".", ","),
-        `Carte t-SNE calculée avec α = ${a} (${a === 0 ? "catégories seules" : a === 1 ? "mécaniques seules" : "mélange"}).`]));
+    const opts = [["auto", "Auto", "La carte suit les curseurs : on affiche la carte de l'attribut le plus pondéré."]]
+      .concat(MAP_KEYS.map((k, j) => [j, ATTRS[k].short,
+        `Carte t-SNE calculée avec « ${ATTRS[k].label} » seul (100 %), cosinus IDF.`]));
     $("#map-alpha-row").innerHTML = opts.map(([v, lab, help]) => {
-      const on = state.mapAlpha === v || (state.mapAlpha === "auto" && v === m);
-      return `<button type="button" class="view-btn${on ? " on" : ""}${v === "auto" && state.mapAlpha === "auto" ? " on" : ""}" ` +
+      const on = state.mapSel === v || (state.mapSel === "auto" && v === m);
+      return `<button type="button" class="view-btn${on ? " on" : ""}${v === "auto" && state.mapSel === "auto" ? " on" : ""}" ` +
         `data-ma="${v}" data-help="${escapeHtml(help)}">${lab}</button>`;
     }).join("");
     $("#map-alpha-row").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => {
-      state.mapAlpha = b.dataset.ma === "auto" ? "auto" : +b.dataset.ma;
+      state.mapSel = b.dataset.ma === "auto" ? "auto" : +b.dataset.ma;
       hideHelp();
       render();
     }));
@@ -1034,7 +1059,7 @@
     const sBreak = p
       ? `s = ${p[1].toFixed(3)} (${METRICS[state.metric].label}) · ${escapeHtml(breakdown(p[0], i))}`
       : "";
-    const nb = neighbors(i).slice(0, state.k)
+    const nb = neighbors(i).slice(0, Math.min(state.k, 50))
       .map(([j, s, g2]) => `<li data-i="${j}"${s < state.tau ? ' class="below"' : ""} data-help="` +
         escapeHtml(`Clic : recentrer sur ce jeu. Similarité s = ${s.toFixed(3)}` +
           (s < state.tau ? " (sous le seuil τ, absent du graphe)" : "") +
@@ -1042,6 +1067,14 @@
         `<span>${escapeHtml(label(j))}</span><span class="score">${s.toFixed(3)}</span></li>`)
       .join("") || `<li class="hint">aucun voisin avec ces filtres</li>`;
 
+    // Extensions officielles BGG (noms seulement : elles ne sont pas dans les données) et jeux de la même gamme.
+    const line = g.xl >= 0 ? N.map((_, j) => j).filter((j) => j !== i && N[j].xl === g.xl) : [];
+    const exNames = g.x.map((t) => D.dict.exp[t]).sort((a, b) => a.localeCompare(b));
+    const expBlock = `<h3 data-help="Extensions officielles listées par BGG (extensions de fans exclues). Les extensions ne sont pas des jeux de l'interface : noms seulement.">Extensions BGG (${exNames.length})</h3>` +
+      (exNames.length ? `<details class="exp-list"><summary>${exNames.length > 1 ? "Afficher la liste" : escapeHtml(exNames[0])}</summary>` +
+        `<ul>${exNames.map((x) => `<li>${escapeHtml(x)}</li>`).join("")}</ul></details>` : `<span class="hint">aucune</span>`) +
+      (line.length ? `<h3 data-help="Jeux qui partagent une extension avec celui-ci (même gamme compatible). « Sans extension » les écarte. Clic : recentrer.">Même gamme</h3>` +
+        `<ol class="nb-list">${line.map((j) => `<li data-i="${j}"><span>${escapeHtml(label(j))}</span></li>`).join("")}</ol>` : "");
     const d = $("#details");
     d.hidden = false;
     d.innerHTML = `
@@ -1067,7 +1100,8 @@
       <h3>Illustrateurs</h3><div class="chips">${addableChips("ar")}</div>
       <h3>Éditeurs</h3><div class="chips">${addableChips("pu", 6)}</div>
       <h3>Familles</h3><div class="chips">${addableChips("f", 10)}</div>
-      <h3>${state.k} plus proches voisins</h3>
+      ${expBlock}
+      <h3>${Math.min(state.k, 50)} plus proches voisins${state.k > 50 ? " (50 premiers affichés)" : ""}</h3>
       <ol class="nb-list">${nb}</ol>
       ${!isCenter ? `<p class="kv"><button type="button" id="recenter">Recentrer sur ce jeu</button></p>` : ""}`;
     d.querySelectorAll(".nb-list li[data-i]").forEach((li) => li.addEventListener("click", () => setCenter(+li.dataset.i)));
@@ -1102,16 +1136,58 @@
   $("#search").addEventListener("keydown", (e) => { if (e.key === "Enter") go(); });
   $("#search").addEventListener("change", () => { if (byLabel.has($("#search").value.trim().toLowerCase())) go(); });
 
-  for (const id of ["k", "depth"]) {
-    $(`#${id}`).addEventListener("input", (e) => {
-      state[id] = +e.target.value;
-      $(`#${id}-out`).textContent = e.target.value;
-      if (state.center >= 0) render();
-    });
+  // --- Voisins ↔ profondeur : budget W(k, d) = k + k² + … + k^d ≤ 300 (pire cas : chaque niveau entièrement nouveau) ---
+  // Les deux curseurs sont indépendants tant que le budget tient ; au-delà, celui qu'on bouge pousse l'autre
+  // (« butée ») : monter k fait descendre la profondeur, monter la profondeur fait descendre k.
+  const worst = (k, d) => { let t = 0, p = 1; for (let j = 1; j <= d; j++) { p *= k; t += p; } return t; };
+  const maxDepth = (k) => { let d = 1; while (d < D_MAX && worst(k, d + 1) <= BUDGET) d++; return d; };
+  const maxK = (d) => KS.filter((k) => worst(k, d) <= BUDGET).pop();
+  function drawKD(pushed) {
+    $("#k").value = KS.indexOf(state.k);
+    $("#depth").value = state.depth;
+    $("#k-out").textContent = state.k;
+    $("#depth-out").textContent = state.depth;
+    // Aide au survol de la ligne : budget détaillé pour les réglages courants.
+    $("#kd-msg").dataset.help = `Jeux affichés autour du jeu choisi / maximum possible avec ces réglages : au pire ` +
+      `k + k² + … + k^profondeur = ${worst(state.k, state.depth)} jeux (chaque niveau entièrement nouveau), limité à ${BUDGET}. ` +
+      `À profondeur ${state.depth} : voisins ≤ ${maxK(state.depth)} ; à ${state.k} voisins : profondeur ≤ ${maxDepth(state.k)}. ` +
+      `Monter un curseur au-delà du budget fait descendre l'autre ; en pratique les voisins se recoupent, d'où moins de jeux. ` +
+      `Les voisins sont cherchés parmi les seuls jeux qui passent les filtres.`;
+    for (const id of ["k", "depth"]) {
+      const out = $(`#${id}-out`);
+      out.classList.remove("pushed");
+      if (id === pushed) { void out.offsetWidth; out.classList.add("pushed"); } // relance l'animation
+    }
   }
-  $("#cross").addEventListener("change", (e) => { state.cross = e.target.checked; if (state.center >= 0) render(); });
-  $("#no-reimpl").addEventListener("change", (e) => { state.noReimpl = e.target.checked; applyFilters(); });
-  $("#emoji").addEventListener("change", (e) => { state.emoji = e.target.checked; if (state.center >= 0) render(); });
+  $("#k").addEventListener("input", (e) => {
+    state.k = KS[+e.target.value];
+    let pushed = null;
+    if (worst(state.k, state.depth) > BUDGET) { state.depth = maxDepth(state.k); pushed = "depth"; }
+    drawKD(pushed);
+    if (state.center >= 0) render();
+  });
+  $("#depth").addEventListener("input", (e) => {
+    state.depth = +e.target.value;
+    let pushed = null;
+    if (worst(state.k, state.depth) > BUDGET) { state.k = maxK(state.depth); pushed = "k"; }
+    drawKD(pushed);
+    if (state.center >= 0) render();
+  });
+  drawKD(null);
+  $("#cross").addEventListener("click", (e) => {
+    state.cross = !state.cross;
+    e.currentTarget.setAttribute("aria-pressed", state.cross);
+    if (state.center >= 0) render();
+  });
+  // Panneau « Options » (haut de la colonne droite) : boutons bascule. setOpt(clé d'état, id du bouton, valeur).
+  function setOpt(key, id, on) {
+    state[key] = on;
+    $(`#${id}`).setAttribute("aria-pressed", on);
+  }
+  for (const [key, id] of [["noReimpl", "no-reimpl"], ["noFranchise", "no-franchise"], ["noExpLine", "no-expline"]]) {
+    $(`#${id}`).addEventListener("click", () => { setOpt(key, id, !state[key]); applyFilters(); });
+  }
+  $("#emoji").addEventListener("click", () => { setOpt("emoji", "emoji", !state.emoji); if (state.center >= 0) render(); });
 
   // Légende des émojis (repliable) : familles de mécaniques puis thèmes.
   {
@@ -1203,6 +1279,46 @@
     }
     drawRate(k);
   }
+  // --- Curseurs doubles : glisser la bande entre les deux poignées déplace tout l'intervalle ---------------
+  // Largeur (haut − bas) conservée ; l'intervalle bute sur les bords. Les poignées gardent leur rôle habituel
+  // (les <input> ne captent que leurs poignées : un appui ailleurs dans la boîte arrive ici).
+  function bandDrag(box, { min, max, step, get, set }) {
+    const frac = (e) => { const r = box.getBoundingClientRect(); return (e.clientX - r.left) / r.width; };
+    const inBand = (e) => { const [lo, hi] = get(), x = min + frac(e) * (max - min); return hi > lo && x > lo && x < hi; };
+    let drag = null;
+    box.addEventListener("pointermove", (e) => {
+      if (drag) {
+        const [lo0, hi0] = drag.iv, w = hi0 - lo0;
+        let d = Math.round(((frac(e) - drag.f0) * (max - min)) / step) * step;
+        d = Math.max(min - lo0, Math.min(max - hi0, d));
+        const lo = +(lo0 + d).toFixed(6);
+        set(lo, +(lo + w).toFixed(6));
+        return;
+      }
+      box.style.cursor = e.target === box && inBand(e) ? "grab" : "";
+    });
+    box.addEventListener("pointerdown", (e) => {
+      if (e.target !== box || !inBand(e)) return;
+      e.preventDefault();
+      hideHelp();
+      drag = { f0: frac(e), iv: get() };
+      try { box.setPointerCapture(e.pointerId); } catch (_) { /* pointeur sans capture possible */ }
+      box.classList.add("dragging");
+      box.style.cursor = "grabbing";
+    });
+    const end = () => { drag = null; box.classList.remove("dragging"); box.style.cursor = ""; };
+    box.addEventListener("pointerup", end);
+    box.addEventListener("pointercancel", end);
+  }
+  for (const k of ["wish", "trade"]) {
+    bandDrag($(`#${k}-int`), { min: 0, max: 100, step: 1, get: () => [...sigInt[k]],
+      set: (lo, hi) => { sigInt[k] = [lo, hi]; sigChanged(); } });
+  }
+  for (const k of ["av", "b"]) {
+    bandDrag($(`#${k}-int`), { min: RATE[k].min, max: RATE[k].max, step: 0.1, get: () => [RATE[k].lo, RATE[k].hi],
+      set: (lo, hi) => { RATE[k].lo = lo; RATE[k].hi = hi; drawRate(k); clearTimeout(rtm); rtm = setTimeout(applyFilters, 150); } });
+  }
+
   document.querySelectorAll(".view-btn[data-view]").forEach((b) => b.addEventListener("click", () => setView(b.dataset.view)));
   $("#fam-center").addEventListener("click", () => {
     state.famCenter = state.famCenter === "peak" ? "mean" : "peak";
@@ -1228,63 +1344,52 @@
     clearTimeout(gt);
     gt = setTimeout(() => { state.gemBeta = e.target.value / 100; if (state.gems) invalidate(); }, 120);
   });
-  $("#show-rating").addEventListener("change", (e) => { state.showRating = e.target.checked; if (state.center >= 0) render(); });
-  $("#color-rating").addEventListener("change", (e) => {
-    state.colorRating = e.target.checked;
+  // Boutons d'affichage posés en haut à gauche du graphe : note écrite dans les bulles, couleur = note.
+  $("#show-rating").addEventListener("click", (e) => {
+    state.showRating = !state.showRating;
+    e.currentTarget.setAttribute("aria-pressed", state.showRating);
+    if (state.center >= 0) render();
+  });
+  $("#color-rating").addEventListener("click", (e) => {
+    state.colorRating = !state.colorRating;
+    e.currentTarget.setAttribute("aria-pressed", state.colorRating);
     $("#legend-rating").hidden = !state.colorRating;
     if (state.center >= 0) render();
   });
   $("#legend-rating .gradient").style.background =
     `linear-gradient(to right, ${d3.range(0, 1.01, 0.1).map((t) => d3.interpolateViridis(t)).join(", ")})`;
 
-  // --- Pondération des attributs : deux curseurs activables -----------------------------------------
-  //   groupe A : Thème ↔ Mécaniques (part méca. = alpha) · groupe B : Description ↔ Familles (part familles = beta)
-  //   un seul groupe actif : il porte 100 % du poids ; les deux : 50 % chacun. Au moins un groupe reste actif.
+  // --- Pondération des attributs : quatre curseurs normalisés -------------------------------------------
+  //   v_k ∈ [0, 100] par attribut, w_k = v_k / Σ v. La ligne des pourcentages (w_k) reste toujours visible ;
+  //   la case « Curseurs » affiche les curseurs. Clic sur un pourcentage : cet attribut seul.
   const pct = (x) => `${Math.round(x * 100)} %`;
   function drawWeights() {
     const w = attrWeights();
-    $("#alpha-out").textContent = `${pct(state.alpha)} méca.`;
-    $("#beta-out").textContent = `${pct(state.beta)} familles`;
-    for (const [g, on] of [["A", state.onA], ["B", state.onB]]) {
-      const btn = $(`#on${g}`);
-      btn.setAttribute("aria-pressed", on);
-      $(`#tool${g}`).classList.toggle("off", !on);
-      $(`#tool${g}`).querySelectorAll("input, .preset").forEach((el) => { el.disabled = !on; });
-    }
-    document.querySelectorAll(".preset[data-a]").forEach((b) => b.classList.toggle("on", state.onA && +b.dataset.a === Math.round(state.alpha * 100)));
-    document.querySelectorAll(".preset[data-b]").forEach((b) => b.classList.toggle("on", state.onB && +b.dataset.b === Math.round(state.beta * 100)));
+    for (const k of ATTR_KEYS) $(`#w-${k}`).value = state.wRaw[k];
     $("#weights").innerHTML = ATTR_KEYS.map((k) =>
-      `<span class="wchip${w[k] > 0 ? "" : " zero"}" data-help="Poids de « ${ATTRS[k].label} » dans la ressemblance totale.">` +
+      `<span class="wchip${w[k] > 0 ? "" : " zero"}" data-k="${k}" role="button" tabindex="0" ` +
+      `data-help="Poids de « ${ATTRS[k].label} » dans la ressemblance totale. Clic : ne garder que cet attribut.">` +
       `${ATTRS[k].label} <b>${pct(w[k])}</b></span>`).join("");
+    $("#weights").querySelectorAll(".wchip").forEach((el) => {
+      const solo = () => { hideHelp(); soloAttr(el.dataset.k); };
+      el.addEventListener("click", solo);
+      el.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); solo(); } });
+    });
   }
-  function setWeight(which, v) { // which : "alpha" | "beta", v en %
-    state[which] = v / 100;
-    drawWeights();
-    invalidate();
-  }
-  for (const [which, id] of [["alpha", "#alpha"], ["beta", "#beta"]]) {
+  for (const k of ATTR_KEYS) {
     let tm;
-    $(id).addEventListener("input", (e) => {
-      state[which] = e.target.value / 100;
+    $(`#w-${k}`).addEventListener("input", (e) => {
+      let v = +e.target.value;
+      // Au moins un attribut pondéré : le dernier curseur non nul ne descend pas à 0.
+      if (v === 0 && ATTR_KEYS.every((x) => x === k || state.wRaw[x] === 0)) v = 1;
+      state.wRaw[k] = v;
       drawWeights();
       clearTimeout(tm);
       tm = setTimeout(() => invalidate(), 120);
     });
   }
-  document.querySelectorAll(".preset[data-a]").forEach((b) => b.addEventListener("click", () => { $("#alpha").value = b.dataset.a; setWeight("alpha", +b.dataset.a); }));
-  document.querySelectorAll(".preset[data-b]").forEach((b) => b.addEventListener("click", () => { $("#beta").value = b.dataset.b; setWeight("beta", +b.dataset.b); }));
-  for (const g of ["A", "B"]) {
-    $(`#on${g}`).addEventListener("click", () => {
-      const other = g === "A" ? state.onB : state.onA;
-      if (state[`on${g}`] && !other) return; // au moins un groupe actif
-      state[`on${g}`] = !state[`on${g}`];
-      drawWeights();
-      invalidate();
-    });
-  }
+  $("#show-sliders").addEventListener("change", (e) => { $("#wsliders").hidden = !e.target.checked; });
   drawWeights();
-
-
 
   // τ : seuil appliqué après le top-k, sans recalcul des voisins.
   $("#tau").addEventListener("input", (e) => {
@@ -1293,7 +1398,6 @@
     if (state.center >= 0) render();
   });
 
-  $("#no-franchise").addEventListener("change", (e) => { state.noFranchise = e.target.checked; applyFilters(); });
   let ft;
   for (const id of ["pl-min", "pl-max", "t-min", "t-max", "age-max", "w-min", "w-max"]) {
     $(`#${id}`).addEventListener("input", () => { clearTimeout(ft); ft = setTimeout(applyFilters, 250); });
@@ -1301,11 +1405,12 @@
   $("#reset").addEventListener("click", () => {
     for (const id of ["pl-min", "pl-max", "t-min", "t-max", "age-max", "w-min", "w-max"]) $(`#${id}`).value = "";
     for (const k of Object.keys(TAG_KEYS)) { state.tags[k].clear(); drawTagChips(k); }
-    $("#no-franchise").checked = state.noFranchise = false;
-    $("#no-reimpl").checked = state.noReimpl = false;
+    setOpt("noFranchise", "no-franchise", false);
+    setOpt("noReimpl", "no-reimpl", false);
+    setOpt("noExpLine", "no-expline", false);
     $("#sig-filter").checked = state.sigFilter = false;
     for (const k of ["av", "b"]) { RATE[k].lo = RATE[k].min; RATE[k].hi = RATE[k].max; drawRate(k); }
-    clearReqBan(); drawRequired();
+    // « Garder / exclure » n'est pas touché : il a son propre bouton « Effacer ».
     applyFilters();
   });
   $("#req-clear").addEventListener("click", () => {
@@ -1325,6 +1430,82 @@
     `${D.meta.min_support} jeux ignorées) · source : ${D.meta.source} · généré le ${D.meta.generated}. ` +
     `Données BoardGameGeek, usage non commercial.`;
 
+  // --- Overlay des filtres actifs (survol du mot « Filtres ») ------------------------------------------
+  // Liste chaque filtre en place (y compris « Garder / exclure »), avec ✕ pour le retirer.
+  const fr = (x) => String(x).replace(".", ",");
+  function activeFilters() {
+    const out = [];
+    const add = (group, text, clear, cls = "") => out.push({ group, text, clear, cls });
+    const TAG_NAMES = { f: "Famille", d: "Auteur", ar: "Illustrateur", pu: "Éditeur" };
+    for (const key of Object.keys(TAG_KEYS)) for (const t of state.tags[key]) {
+      add("Filtres", `${TAG_NAMES[key]} : ${D.dict[TAG_KEYS[key]][t]}`, () => { state.tags[key].delete(t); drawTagChips(key); });
+    }
+    const F = readFilters();
+    const span = (lo, hi, unit = "") => (lo !== null && hi !== null ? `${fr(lo)} à ${fr(hi)}${unit}`
+      : lo !== null ? `≥ ${fr(lo)}${unit}` : `≤ ${fr(hi)}${unit}`);
+    const clearIds = (...ids) => () => ids.forEach((id) => { $(`#${id}`).value = ""; });
+    if (F.plMin !== null || F.plMax !== null) add("Filtres", `Joueurs : ${span(F.plMin, F.plMax)}`, clearIds("pl-min", "pl-max"));
+    if (F.tMin !== null || F.tMax !== null) add("Filtres", `Durée : ${span(F.tMin, F.tMax, " min")}`, clearIds("t-min", "t-max"));
+    if (F.ageMax !== null) add("Filtres", `Âge ≤ ${F.ageMax} ans`, clearIds("age-max"));
+    if (F.wMin !== null || F.wMax !== null) add("Filtres", `Poids : ${span(F.wMin, F.wMax)}`, clearIds("w-min", "w-max"));
+    for (const [k, name] of [["av", "Note BGG"], ["b", "Note bayésienne"]]) {
+      if (rateActive(k)) add("Filtres", `${name} : ${fr(RATE[k].lo.toFixed(1))} à ${fr(RATE[k].hi.toFixed(1))}`,
+        () => { RATE[k].lo = RATE[k].min; RATE[k].hi = RATE[k].max; drawRate(k); });
+    }
+    if (state.noFranchise) add("Filtres", "Sans franchise", () => setOpt("noFranchise", "no-franchise", false));
+    if (state.noReimpl) add("Filtres", "Sans réimplémentation", () => setOpt("noReimpl", "no-reimpl", false));
+    if (state.noExpLine) add("Filtres", "Sans extension (même gamme)", () => setOpt("noExpLine", "no-expline", false));
+    if (state.signals && state.sigFilter && (sigActive("wish") || sigActive("trade"))) {
+      const iv = (k) => `c${sigInt[k][0]}–c${sigInt[k][1]}`;
+      const parts = [sigActive("wish") ? `convoitise ${iv("wish")}` : null, sigActive("trade") ? `revente ${iv("trade")}` : null];
+      add("Filtres", `Signaux : ${parts.filter(Boolean).join(", ")}`, () => { $("#sig-filter").checked = state.sigFilter = false; });
+    }
+    for (const key of ATTR_KEYS) {
+      for (const t of state.req[key]) add("Garder / exclure", `✓ ${ATTRS[key].dict[t]} (${ATTRS[key].short})`,
+        () => { state.req[key].delete(t); drawRequired(); });
+      for (const t of state.ban[key]) add("Garder / exclure", `✕ ${ATTRS[key].dict[t]} (${ATTRS[key].short})`,
+        () => { state.ban[key].delete(t); drawRequired(); }, "ban");
+    }
+    return out;
+  }
+  const fpop = $("#filter-pop");
+  function drawFilterPop() {
+    const list = activeFilters();
+    const nPass = pass.reduce((a, b) => a + b, 0);
+    const groups = [...new Set(list.map((x) => x.group))];
+    fpop.innerHTML = (list.length
+      ? groups.map((gname) => `<h4>${gname}</h4><ul>` + list.map((x, j) => (x.group === gname
+        ? `<li><span class="${x.cls}">${escapeHtml(x.text)}</span><button type="button" data-j="${j}" aria-label="Retirer ce filtre">✕</button></li>` : ""))
+        .join("") + "</ul>").join("")
+      : "<h4>Aucun filtre actif</h4>") +
+      `<p>${nPass} / ${N.length} jeux passent les filtres. Les voisins sont cherchés parmi eux ; le jeu choisi reste ` +
+      `toujours affiché (contour pointillé s'il ne passe pas).</p>`;
+    fpop.querySelectorAll("button[data-j]").forEach((b) => b.addEventListener("click", (e) => {
+      e.stopPropagation();
+      list[+b.dataset.j].clear();
+      applyFilters();
+      drawFilterPop();
+    }));
+  }
+  {
+    const sum = $("#filters-sum");
+    let ht;
+    const open = () => {
+      clearTimeout(ht);
+      drawFilterPop();
+      fpop.hidden = false;
+      const r = sum.getBoundingClientRect();
+      fpop.style.left = `${Math.min(r.left, window.innerWidth - fpop.offsetWidth - 8)}px`;
+      fpop.style.top = `${Math.min(r.bottom + 4, window.innerHeight - fpop.offsetHeight - 8)}px`;
+    };
+    const close = () => { ht = setTimeout(() => { fpop.hidden = true; }, 200); };
+    sum.addEventListener("mouseenter", open);
+    sum.addEventListener("mouseleave", close);
+    fpop.addEventListener("mouseenter", () => clearTimeout(ht));
+    fpop.addEventListener("mouseleave", close);
+    window.addEventListener("scroll", (e) => { if (!fpop.contains(e.target)) fpop.hidden = true; }, true);
+  }
+
   // --- Comparateur : accord entre métriques, puis entre attributs ---------------------------------------
   // Pour le jeu central : A[a][b] = |V_k^a ∩ V_k^b| / k (voisins communs, mêmes filtres, sans le mode pépites).
   //   métriques : les 4 métriques avec la pondération courante ; attributs : chaque attribut seul, métrique courante.
@@ -1342,11 +1523,7 @@
   sel.addEventListener("change", () => setMetric(sel.value));
   // Faire d'un attribut le seul critère (clic dans la matrice des attributs).
   function soloAttr(key) {
-    const inA = key === "m" || key === "c";
-    state.onA = inA; state.onB = !inA;
-    if (key === "m") state.alpha = 1; else if (key === "c") state.alpha = 0;
-    else if (key === "f") state.beta = 1; else state.beta = 0;
-    $("#alpha").value = Math.round(state.alpha * 100); $("#beta").value = Math.round(state.beta * 100);
+    for (const k of ATTR_KEYS) state.wRaw[k] = k === key ? 100 : 0;
     drawWeights();
     invalidate();
   }
@@ -1370,7 +1547,7 @@
   function drawAgreement() {
     const box = $("#agree");
     if (state.center < 0 || box.closest("details").open === false) return;
-    const u = state.center, k = state.k, base = currentCfg();
+    const u = state.center, k = Math.min(state.k, 30), base = currentCfg(); // top 30 au plus : matrices lisibles
     const top = (cfg) => neighbors(u, cfg, false).slice(0, k).map((x) => x[0]);
     const mConfs = METRIC_KEYS.map((m) => ({ id: m, short: METRICS[m].short, label: METRICS[m].label,
       help: `${METRICS[m].label} : ${METRICS[m].help}`, top: top({ ...base, metric: m }) }));

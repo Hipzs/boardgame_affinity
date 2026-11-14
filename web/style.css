@@ -62,19 +62,19 @@ h2 { margin: 0 0 6px; font-size: 0.95rem; }
 main {
   flex: 1;
   display: grid;
-  grid-template-columns: 340px 1fr;
+  grid-template-columns: 320px minmax(0, 1fr) 340px;
   gap: 12px;
   padding: 8px 20px 12px;
   min-height: 0;
 }
-#panel {
+.side {
   display: flex;
   flex-direction: column;
   gap: 12px;
   overflow-y: auto;
   max-height: calc(100vh - 110px);
 }
-#panel > section {
+.side > section {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 10px;
@@ -216,8 +216,8 @@ button.preset.on { border-color: var(--accent); color: var(--accent); }
   stroke: var(--surface);
   pointer-events: none;
 }
-#tooltip .ds { display: block; margin-top: 4px; opacity: 0.85; font-size: 0.76rem; line-height: 1.35; }
-#tooltip .tg { display: block; margin-top: 3px; font-size: 0.76rem; }
+.tip .ds { display: block; margin-top: 4px; opacity: 0.85; font-size: 0.76rem; line-height: 1.35; }
+.tip .tg { display: block; margin-top: 3px; font-size: 0.76rem; }
 #graph:active { cursor: grabbing; }
 #graph .node circle { stroke: var(--surface); stroke-width: 1.5px; cursor: pointer; }
 #graph .node.selected circle.bubble { stroke: var(--text) !important; stroke-width: 3px !important; }
@@ -234,9 +234,10 @@ button.preset.on { border-color: var(--accent); color: var(--accent); }
 #graph .link.cross { stroke: var(--link-cross); stroke-dasharray: 3 3; }
 #graph .dim { opacity: 0.15; }
 
-#tooltip {
+.tip {
   position: absolute;
   pointer-events: none;
+  z-index: 6;
   background: var(--text);
   color: var(--surface);
   padding: 5px 8px;
@@ -255,7 +256,7 @@ footer { padding: 4px 20px 12px; color: var(--muted); font-size: 0.78rem; }
 .hint { margin: 4px 0 0; color: var(--muted); font-size: 0.8rem; }
 .hint-inline { color: var(--muted); font-size: 0.78rem; flex-basis: 100%; }
 
-#panel > details.filters {
+.side > details.filters {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 10px;
@@ -309,7 +310,7 @@ button.secondary {
 @media (max-width: 820px) {
   main { grid-template-columns: 1fr; padding: 8px 16px 12px; }
   header, footer { padding-left: 16px; padding-right: 16px; }
-  #panel { max-height: none; overflow: visible; }
+  .side { max-height: none; overflow: visible; }
   #graph-wrap { height: 70vh; }
 }
 
@@ -358,6 +359,9 @@ input[type="range"] { cursor: pointer; }
   align-items: flex-end;
   gap: 4px;
 }
+/* Boutons d'affichage (note BGG, couleur = note), en haut à gauche */
+#view-opts { position: absolute; top: 10px; left: 10px; z-index: 5; display: flex; gap: 6px; flex-wrap: wrap; }
+#view-opts [hidden] { display: none; }
 #view-switch .view-btn { background: var(--surface); }
 #view-switch .view-btn.on { background: var(--accent); }
 #view-switch .msg { margin: 0; background: var(--surface); padding: 2px 6px; border-radius: 5px; }
@@ -376,7 +380,7 @@ input[type="range"] { cursor: pointer; }
   font: inherit;
   font-size: 0.88rem;
 }
-#panel > details.agree-box {
+.side > details.agree-box {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 10px;
@@ -406,7 +410,6 @@ table.agree thead th { height: 58px; }
 }
 
 /* --- Pondération des attributs (deux groupes activables) --- */
-.wtool.off .ends, .wtool.off .presets, .wtool.off output { opacity: 0.4; }
 .grp-btn, .mod-btn {
   padding: 3px 10px;
   font-size: 0.82rem;
@@ -416,14 +419,22 @@ table.agree thead th { height: 58px; }
   border: 1px solid var(--border);
 }
 .grp-btn[aria-pressed="true"], .mod-btn[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
-.wtool .inline-row { justify-content: space-between; margin-bottom: 2px; }
-.wtool output { float: none; }
 .sub-title { margin-top: 6px; font-size: 0.8rem; }
 #mods { flex-wrap: wrap; }
 .mod-btn { font-size: 0.76rem; padding: 2px 8px; font-weight: 500; }
 .weights { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 0.8rem; color: var(--muted); }
 .weights b { color: var(--text); font-variant-numeric: tabular-nums; }
 .weights .zero { opacity: 0.45; }
+.weights .wchip { cursor: pointer; }
+.weights .wchip:hover { color: var(--accent); }
+/* Ligne des pourcentages + case « Curseurs », puis les 4 curseurs (pleine largeur de la barre d'outils) */
+.wbox { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 6px 14px; flex-wrap: wrap; }
+.wbox .weights { flex: 1; }
+.wbox .check { margin: 0; font-size: 0.8rem; white-space: nowrap; }
+.wsliders { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 4px 18px; }
+.wsliders[hidden] { display: none; }
+.wslider label { font-size: 0.8rem; margin: 0; }
+.wslider input { width: 100%; accent-color: var(--accent); }
 button:disabled { opacity: 0.5; cursor: default; }
 
 /* --- Signaux par jeu : revente (contour rouge), convoitise (point vert) --- */
@@ -521,9 +532,9 @@ button:disabled { opacity: 0.5; cursor: default; }
 .range2.rate input::-webkit-slider-thumb { background: var(--accent); }
 .range2.rate input::-moz-range-thumb { background: var(--accent); }
 /* Infobulle : lignes de critères compactes */
-#tooltip .tl { display: block; font-size: 0.76rem; line-height: 1.35; white-space: normal; }
-#tooltip .tl .w { color: var(--tip-wish); font-weight: 600; }
-#tooltip .tl .t { color: var(--tip-trade); font-weight: 600; }
+.tip .tl { display: block; font-size: 0.76rem; line-height: 1.35; white-space: normal; }
+.tip .tl .w { color: var(--tip-wish); font-weight: 600; }
+.tip .tl .t { color: var(--tip-trade); font-weight: 600; }
 
 /* --- Émojis --- */
 .emo { margin-right: 4px; font-family: "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", sans-serif; font-style: normal; }
@@ -546,3 +557,70 @@ button:disabled { opacity: 0.5; cursor: default; }
 #map .fam-link { stroke: var(--accent); stroke-opacity: 0.55; pointer-events: none; }
 #map .fam-link.all { stroke-opacity: 0.18; }
 #map .fam-link.open:not(.all) { stroke-opacity: 0.9; }
+
+/* --- Overlay des filtres actifs (survol du mot « Filtres ») --- */
+#filter-pop {
+  position: fixed; z-index: 40; width: 300px; max-height: 60vh; overflow-y: auto;
+  background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25); padding: 8px 10px; font-size: 0.82rem;
+}
+#filter-pop h4 { margin: 6px 0 2px; font-size: 0.78rem; color: var(--muted); font-weight: 600; }
+#filter-pop h4:first-child { margin-top: 0; }
+#filter-pop ul { list-style: none; margin: 0; padding: 0; }
+#filter-pop li { display: flex; justify-content: space-between; gap: 8px; padding: 2px 4px; border-radius: 4px; }
+#filter-pop li:hover { background: var(--bg); }
+#filter-pop li button { padding: 0 6px; background: transparent; color: var(--muted); font-weight: 400; }
+#filter-pop li button:hover { color: var(--accent); }
+#filter-pop .ban { color: var(--sig-trade); }
+#filter-pop p { margin: 6px 0 0; color: var(--muted); font-size: 0.76rem; }
+
+/* Fenêtre moyenne : colonnes latérales plus étroites ; étroite : tout en une colonne (règle plus haut) */
+@media (max-width: 1280px) and (min-width: 821px) {
+  main { grid-template-columns: 280px minmax(0, 1fr) 290px; gap: 10px; padding: 8px 12px 12px; }
+}
+
+/* Métrique sur la ligne des pondérations ; curseurs Voisins / Profondeur dans la barre centrale */
+.metric-inline { display: flex; align-items: center; gap: 6px; }
+.metric-inline label { margin: 0; white-space: nowrap; }
+.metric-inline #metric { width: auto; padding: 3px 6px; font-size: 0.82rem; }
+#toolbar .tool.slider { margin-top: 0; }
+
+/* Voisins ↔ profondeur : deux curseurs côte à côte et la ligne de budget ; la valeur poussée clignote */
+.kd { grid-column: span 2; display: grid; grid-template-columns: 1fr 1fr; gap: 0 18px; }
+.kd .kd-msg { grid-column: 1 / -1; margin: 2px 0 0; font-size: 0.76rem; }
+@keyframes pushed { 0% { background: var(--accent); color: #fff; } 100% { background: transparent; } }
+output.pushed { animation: pushed 0.9s ease-out; border-radius: 4px; padding: 0 3px; }
+@media (max-width: 1100px) { .kd { grid-column: 1 / -1; } }
+
+/* Bande entre les deux poignées : saisissable (glisser = déplacer tout l'intervalle) */
+.range2.dragging::after { height: 6px; }
+
+/* Panneau « Options » (haut de la colonne droite) */
+.opt-btns { display: flex; flex-wrap: wrap; gap: 6px; }
+/* Liste des extensions BGG dans les détails */
+.exp-list { font-size: 0.8rem; margin: 2px 0 6px; }
+.exp-list summary { cursor: pointer; color: var(--muted); }
+.exp-list ul { margin: 4px 0 0; padding-left: 18px; max-height: 220px; overflow-y: auto; }
+
+/* « Garder / exclure » en tête du panneau Filtres, au-dessus d'un séparateur */
+.required.in-filters { margin: 10px 0 4px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+.required.in-filters h2 { font-size: 0.9rem; }
+
+/* « Options » en bas du panneau Filtres, sous un séparateur */
+.options.in-filters { margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--border); }
+.options.in-filters h2 { font-size: 0.9rem; }
+.options.in-filters .fam-toggle { background: transparent; }
+.options.in-filters .fam-toggle[aria-pressed="true"] { background: var(--accent); }
+
+/* Garder / exclure : croix à droite de chaque pastille, visible au survol (ou au focus), clic = interdire */
+.chip.toggle { position: relative; padding-right: 20px; }
+.chip.toggle .ban-x {
+  position: absolute; right: 3px; top: 50%; transform: translateY(-50%);
+  width: 15px; height: 15px; line-height: 15px; text-align: center; border-radius: 50%;
+  font-size: 0.66rem; text-decoration: none; opacity: 0; transition: opacity 0.12s;
+  color: #d03030; background: var(--surface);
+}
+.chip.toggle:hover .ban-x, .chip.toggle:focus-visible .ban-x { opacity: 1; }
+.chip.toggle .ban-x:hover { background: #d03030; color: #fff; }
+.chip.toggle.ban .ban-x { display: none; }
+.chip.toggle.ban:hover .ban-x { display: block; }

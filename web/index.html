@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Boardgame Affinity</title>
-  <link rel="stylesheet" href="style.css?v=44">
+  <link rel="stylesheet" href="style.css?v=57">
 </head>
 <body>
   <!-- Aide au survol : tout élément portant data-help affiche son texte dans #help (voir app.js, « Aide au survol »). -->
@@ -14,7 +14,7 @@
   </header>
 
   <main>
-    <aside id="panel">
+    <aside id="panel" class="side">
       <section class="controls">
         <label for="search">Jeu</label>
         <div class="search-row">
@@ -25,25 +25,12 @@
         <datalist id="games"></datalist>
         <p id="search-msg" class="msg" aria-live="polite"></p>
 
-        <div class="slider" data-help="Nombre k de plus proches voisins gardés pour chaque jeu, à chaque niveau du graphe.">
-          <label for="k">Voisins <output id="k-out">5</output></label>
-          <input id="k" type="range" min="1" max="12" value="5">
-        </div>
-        <div class="slider" data-help="Nombre de niveaux : 1 = voisins du jeu choisi ; 2 = + voisins des voisins ; etc. (300 jeux au plus).">
-          <label for="depth">Profondeur <output id="depth-out">2</output></label>
-          <input id="depth" type="range" min="1" max="4" value="2">
-        </div>
         <div class="checks">
-          <label class="check" data-help="Ajoute en pointillés les liens k-NN entre jeux déjà visibles (pas seulement ceux de l'arbre) : fait apparaître les grappes."><input id="cross" type="checkbox"> Liens croisés</label>
-          <label class="check" data-help="Écrit dans chaque bulle la note BGG moyenne des joueurs (sur 10). Les bulles grossissent pour que le chiffre tienne."><input id="show-rating" type="checkbox"> Note BGG</label>
-          <label class="check" data-help="Remplit les bulles selon la note BGG (viridis, de 5,5 à 8,5) à la place de la couleur de niveau. S'applique aussi à la carte."><input id="color-rating" type="checkbox"> Couleur = note</label>
           <label class="check" data-help="Signaux par jeu, calculés sur les collections BGG : point vert si la convoitise (souhaits / possédés) est dans l'intervalle choisi, contour rouge si la revente (à échanger / possédés) l'est. Chaque signal a son intervalle de centiles, indépendant de l'autre."><input id="signals" type="checkbox" checked> Convoit./revente</label>
-          <label class="check" data-help="Écarte les réimplémentations (nouvelles versions des mêmes règles selon BGG, ex. Pandemic → Iberia, Reign of Cthulhu, WoW: Wrath of the Lich King) du jeu dont on part. Groupes : composantes connexes des liens BGG."><input id="no-reimpl" type="checkbox"> Sans réimpl.</label>
-          <label class="check" data-help="Ajoute devant le nom de chaque jeu, sur le graphe et la carte, l'émoji de son thème dominant (sa catégorie BGG la plus spécifique). Les émojis des étiquettes restent toujours affichés dans les pastilles."><input id="emoji" type="checkbox"> Émojis</label>
         </div>
         <div id="sig-row" class="sig-row">
           <div class="sig-head">
-            <span data-help="Choisis, pour chaque signal, l'intervalle de centiles à retenir (0 = le plus bas des 4672 jeux, 100 = le plus haut). Un signal laissé sur [0, 100] est inactif. Les jeux dans l'intervalle sont marqués (point vert, contour rouge).">Signaux</span>
+            <span data-help="Choisis, pour chaque signal, l'intervalle de centiles à retenir (0 = le plus bas des 4672 jeux, 100 = le plus haut). Glisser la barre colorée entre les deux poignées déplace tout l'intervalle, sans changer sa largeur. Un signal laissé sur [0, 100] est inactif. Les jeux dans l'intervalle sont marqués (point vert, contour rouge).">Signaux</span>
             <label class="check" data-help="Ne garde que les jeux dont chaque signal actif est dans son intervalle. Un signal sur [0, 100] ne filtre rien. Le jeu choisi reste affiché."><input id="sig-filter" type="checkbox"> Filtrer</label>
           </div>
           <div class="sig-line" data-help="Convoitise = souhaits / possédés. Haut = très désiré par ceux qui ne l'ont pas. Point vert dans la bulle si le jeu est dans l'intervalle.">
@@ -68,32 +55,56 @@
           </div>
           <p id="sig-count" class="msg"></p>
         </div>
-        <p id="stats" class="msg"></p>
       </section>
 
-      <section class="required">
-        <h2 data-help="Étiquettes du jeu central (mécaniques, thème, familles fines, mots-clés de la description). 1 clic : indispensable (✓, chaque voisin doit l'avoir). 2 clics : interdite (✕, aucun voisin ne doit l'avoir). 3 clics : neutre. Conservé quand tu recentres.">Garder / exclure <span id="req-count" class="badge"></span></h2>
-        <h3>Mécaniques</h3>
-        <div id="req-m" class="chips"></div>
-        <h3>Thème</h3>
-        <div id="req-c" class="chips"></div>
-        <h3 data-help="Les 16 familles BGG les plus caractéristiques du jeu central (hors Admin:, Crowdfunding:, Game:…).">Familles fines</h3>
-        <div id="req-f" class="chips"></div>
-        <h3 data-help="Les 14 mots les plus caractéristiques de la description du jeu central (TF-IDF, titre retiré). « Indispensable » : le mot doit être parmi les 40 mots-clés du voisin.">Description (mots-clés)</h3>
-        <div id="req-d" class="chips"></div>
-        <button id="req-clear" type="button" class="secondary" data-help="Remet toutes les mécaniques et catégories à l'état neutre.">Effacer</button>
-      </section>
-
-      <details class="agree-box" id="agree-box" open>
-        <summary data-help="Compare, sur le jeu central, les 4 métriques entre elles puis les 4 attributs pris seuls : part de voisins communs, et jeux recommandés par la plupart des configurations.">Accord métriques / attributs</summary>
-        <div id="agree"></div>
-      </details>
 
       <details class="filters" open>
-        <summary data-help="Les voisins sont cherchés parmi les seuls jeux qui passent tous les filtres. Le jeu choisi reste toujours affiché (contour pointillé s'il ne passe pas).">Filtres <span id="filter-count" class="badge"></span></summary>
-
-        <label class="check" data-help="Écarte les voisins qui partagent une famille « Game: … » (même franchise, ex. Pandemic: X) avec le jeu dont on part."><input id="no-franchise" type="checkbox"> Sans franchise</label>
-
+        <summary id="filters-sum">Filtres <span id="filter-count" class="badge"></span></summary>
+        <div class="required in-filters">
+          <h2 data-help="Étiquettes du jeu central (mécaniques, thème, familles fines, mots-clés de la description). Clic sur une étiquette : indispensable (✓, chaque voisin doit l'avoir), nouveau clic : neutre. Croix à droite (au survol) : interdite (✕, aucun voisin ne doit l'avoir). Conservé quand tu recentres.">Garder / exclure <span id="req-count" class="badge"></span></h2>
+          <h3>Mécaniques</h3>
+          <div id="req-m" class="chips"></div>
+          <h3>Thème</h3>
+          <div id="req-c" class="chips"></div>
+          <h3 data-help="Les 16 familles BGG les plus caractéristiques du jeu central (hors Admin:, Crowdfunding:, Game:…).">Familles fines</h3>
+          <div id="req-f" class="chips"></div>
+          <h3 data-help="Les 14 mots les plus caractéristiques de la description du jeu central (TF-IDF, titre retiré). « Indispensable » : le mot doit être parmi les 40 mots-clés du voisin.">Description (mots-clés)</h3>
+          <div id="req-d" class="chips"></div>
+          <button id="req-clear" type="button" class="secondary" data-help="Remet toutes les mécaniques et catégories à l'état neutre.">Effacer</button>
+        </div>
+        <div class="sig-line rate-line" data-help="Note BGG moyenne des joueurs (sur 10) : garde les jeux dont la note est dans l'intervalle.">
+          <span class="sig-name">Note BGG</span><output id="av-out"></output>
+          <div class="dual range2 rate" id="av-int">
+            <input id="av-lo" type="range" aria-label="Note BGG minimale">
+            <input id="av-hi" type="range" aria-label="Note BGG maximale">
+          </div>
+        </div>
+        <div class="sig-line rate-line" data-help="Note bayésienne BGG (« Geek Rating ») : moyenne tirée vers 5,5 tant que le jeu a peu d'avis ; sert au classement BGG. Garde les jeux dont la note est dans l'intervalle.">
+          <span class="sig-name">Note bayés.</span><output id="b-out"></output>
+          <div class="dual range2 rate" id="b-int">
+            <input id="b-lo" type="range" aria-label="Note bayésienne minimale">
+            <input id="b-hi" type="range" aria-label="Note bayésienne maximale">
+          </div>
+        </div>
+        <div class="range" data-help="Garde les jeux jouables pour au moins un nombre de joueurs de l'intervalle (ex. 2 à 2 : jouables à deux). Nombre inconnu : exclu.">
+          <span class="rl">Joueurs</span>
+          <input id="pl-min" type="number" min="1" max="20" placeholder="de"> –
+          <input id="pl-max" type="number" min="1" max="20" placeholder="à">
+        </div>
+        <div class="range" data-help="Durée de partie annoncée, en minutes. Durée inconnue : exclu.">
+          <span class="rl">Durée (min)</span>
+          <input id="t-min" type="number" min="0" step="5" placeholder="de"> –
+          <input id="t-max" type="number" min="0" step="5" placeholder="à">
+        </div>
+        <div class="range" data-help="Âge du plus jeune joueur : garde les jeux dont l'âge minimal est inférieur ou égal. Âge inconnu : exclu.">
+          <span class="rl">Âge ≤</span>
+          <input id="age-max" type="number" min="0" max="21" placeholder="âge">
+        </div>
+        <div class="range" id="weight-row" data-help="Poids BGG (complexité, de 1 à 5).">
+          <span class="rl">Poids (1–5)</span>
+          <input id="w-min" type="number" min="1" max="5" step="0.1" placeholder="de"> –
+          <input id="w-max" type="number" min="1" max="5" step="0.1" placeholder="à">
+        </div>
         <div class="tagfilter" data-key="f" data-help="Garde les jeux d'au moins une des familles choisies (thème, série, composants…). Plusieurs champs remplis : tous doivent correspondre.">
           <label for="tf-f">Famille</label>
           <input id="tf-f" list="dl-f" placeholder="ex. Theme: Space Exploration">
@@ -119,43 +130,17 @@
           <div class="chips"></div>
         </div>
 
-        <div class="range" data-help="Garde les jeux jouables pour au moins un nombre de joueurs de l'intervalle (ex. 2 à 2 : jouables à deux). Nombre inconnu : exclu.">
-          <span class="rl">Joueurs</span>
-          <input id="pl-min" type="number" min="1" max="20" placeholder="de"> –
-          <input id="pl-max" type="number" min="1" max="20" placeholder="à">
-        </div>
-        <div class="range" data-help="Durée de partie annoncée, en minutes. Durée inconnue : exclu.">
-          <span class="rl">Durée (min)</span>
-          <input id="t-min" type="number" min="0" step="5" placeholder="de"> –
-          <input id="t-max" type="number" min="0" step="5" placeholder="à">
-        </div>
-        <div class="range" data-help="Âge du plus jeune joueur : garde les jeux dont l'âge minimal est inférieur ou égal. Âge inconnu : exclu.">
-          <span class="rl">Âge ≤</span>
-          <input id="age-max" type="number" min="0" max="21" placeholder="âge">
-        </div>
-        <div class="sig-line rate-line" data-help="Note BGG moyenne des joueurs (sur 10) : garde les jeux dont la note est dans l'intervalle.">
-          <span class="sig-name">Note BGG</span><output id="av-out"></output>
-          <div class="dual range2 rate" id="av-int">
-            <input id="av-lo" type="range" aria-label="Note BGG minimale">
-            <input id="av-hi" type="range" aria-label="Note BGG maximale">
+        <div class="options in-filters">
+          <h2>Options</h2>
+          <div class="opt-btns">
+            <button type="button" class="fam-toggle" id="no-reimpl" aria-pressed="false" data-help="Écarte les réimplémentations (nouvelles versions des mêmes règles selon BGG, ex. Pandemic → Iberia, Reign of Cthulhu, WoW: Wrath of the Lich King) du jeu dont on part. Groupes : composantes connexes des liens BGG.">Sans réimpl.</button>
+            <button type="button" class="fam-toggle" id="no-franchise" aria-pressed="false" data-help="Écarte les voisins qui partagent une famille « Game: … » (même franchise, ex. Pandemic: X) avec le jeu dont on part.">Sans franchise</button>
+            <button type="button" class="fam-toggle" id="no-expline" aria-pressed="false" data-help="Écarte les jeux de la même gamme compatible que le jeu dont on part : jeux qui partagent une extension officielle BGG dont le nom commence par leur titre (ex. Dominion, Dominion: Intrigue et Dominion (Second Edition) ; Evolution et Evolution: Climate ; les boîtes D&amp;D Adventure System). Les extensions elles-mêmes ne sont pas dans les données (seulement les jeux de base) : 230 jeux concernés, en 81 gammes.">Sans extension</button>
+            <button type="button" class="fam-toggle" id="emoji" aria-pressed="false" data-help="Ajoute devant le nom de chaque jeu, sur le graphe et la carte, l'émoji de son thème dominant (sa catégorie BGG la plus spécifique). Les émojis des étiquettes restent toujours affichés dans les pastilles.">Émojis</button>
           </div>
         </div>
-        <div class="sig-line rate-line" data-help="Note bayésienne BGG (« Geek Rating ») : moyenne tirée vers 5,5 tant que le jeu a peu d'avis ; sert au classement BGG. Garde les jeux dont la note est dans l'intervalle.">
-          <span class="sig-name">Note bayés.</span><output id="b-out"></output>
-          <div class="dual range2 rate" id="b-int">
-            <input id="b-lo" type="range" aria-label="Note bayésienne minimale">
-            <input id="b-hi" type="range" aria-label="Note bayésienne maximale">
-          </div>
-        </div>
-        <div class="range" id="weight-row" data-help="Poids BGG (complexité, de 1 à 5).">
-          <span class="rl">Poids (1–5)</span>
-          <input id="w-min" type="number" min="1" max="5" step="0.1" placeholder="de"> –
-          <input id="w-max" type="number" min="1" max="5" step="0.1" placeholder="à">
-        </div>
-        <button id="reset" type="button" class="secondary" data-help="Vide tous les filtres, y compris « Garder / exclure ».">Réinitialiser</button>
+        <button id="reset" type="button" class="secondary" data-help="Vide tous les filtres, sauf « Garder / exclure » (bouton « Effacer » dédié).">Réinitialiser</button>
       </details>
-
-      <section id="details" class="details" hidden></section>
 
       <section class="legend">
         <h2>Lecture</h2>
@@ -180,35 +165,31 @@
 
     <section id="graph-wrap">
       <div id="toolbar">
-        <div class="tool wtool" id="toolA" data-help="Groupe 1 : mécaniques (règles, façon de jouer) ↔ thème (catégories BGG : genre, univers). Le bouton active ou coupe ce groupe ; si les deux groupes sont actifs, chacun pèse 50 %.">
-          <div class="inline-row">
-            <button type="button" class="grp-btn" id="onA" aria-pressed="true" data-help="Active ou coupe le groupe Mécaniques ↔ Thème.">Méca. ↔ Thème</button>
-            <output id="alpha-out">100 % méca.</output>
+        <div class="wbox">
+          <div class="metric-inline" id="metric-tool">
+            <label for="metric">Métrique</label>
+            <select id="metric"></select>
           </div>
-          <div class="ends"><span>Thème</span><input id="alpha" type="range" min="0" max="100" value="100"><span>Méca.</span></div>
-          <div class="presets">
-            <button type="button" class="preset" data-a="0" data-help="Thème seul dans ce groupe.">Thème</button>
-            <button type="button" class="preset" data-a="50" data-help="Mécaniques et thème à parts égales.">50/50</button>
-            <button type="button" class="preset" data-a="100" data-help="Mécaniques seules dans ce groupe.">Méca.</button>
-          </div>
+          <div id="weights" class="weights" aria-live="polite"></div>
+          <label class="check" data-help="Affiche les 4 curseurs de pondération des attributs."><input id="show-sliders" type="checkbox"> Curseurs</label>
         </div>
-        <div class="tool wtool off" id="toolB" data-help="Groupe 2 : familles fines (thèmes et composants détaillés de BGG) ↔ description (mots-clés du texte). Le bouton active ou coupe ce groupe ; si les deux groupes sont actifs, chacun pèse 50 %.">
-          <div class="inline-row">
-            <button type="button" class="grp-btn" id="onB" aria-pressed="false" data-help="Active ou coupe le groupe Familles ↔ Description.">Familles ↔ Descr.</button>
-            <output id="beta-out">50 % familles</output>
-          </div>
-          <div class="ends"><span>Descr.</span><input id="beta" type="range" min="0" max="100" value="50"><span>Familles</span></div>
-          <div class="presets">
-            <button type="button" class="preset" data-b="0" data-help="Description seule dans ce groupe.">Descr.</button>
-            <button type="button" class="preset" data-b="50" data-help="Familles et description à parts égales.">50/50</button>
-            <button type="button" class="preset" data-b="100" data-help="Familles seules dans ce groupe.">Familles</button>
-          </div>
+        <div id="wsliders" class="wsliders" hidden>
+          <div class="wslider" data-help="Poids relatif des mécaniques (règles, façon de jouer). Les 4 curseurs sont normalisés : chaque attribut pèse v / (somme des 4)."><label for="w-m">Mécaniques</label><input id="w-m" data-k="m" type="range" min="0" max="100" value="100"></div>
+          <div class="wslider" data-help="Poids relatif du thème (catégories BGG : genre, univers). Les 4 curseurs sont normalisés : chaque attribut pèse v / (somme des 4)."><label for="w-c">Thème</label><input id="w-c" data-k="c" type="range" min="0" max="100" value="0"></div>
+          <div class="wslider" data-help="Poids relatif des familles fines (thèmes et composants détaillés de BGG). Les 4 curseurs sont normalisés : chaque attribut pèse v / (somme des 4)."><label for="w-f">Familles fines</label><input id="w-f" data-k="f" type="range" min="0" max="100" value="0"></div>
+          <div class="wslider" data-help="Poids relatif de la description (mots-clés du texte). Les 4 curseurs sont normalisés : chaque attribut pèse v / (somme des 4)."><label for="w-d">Description</label><input id="w-d" data-k="d" type="range" min="0" max="100" value="0"></div>
         </div>
-        <div class="tool" id="metric-tool">
-          <label for="metric">Métrique</label>
-          <select id="metric"></select>
+        <div class="kd">
+          <div class="tool slider" data-help="Nombre k de plus proches voisins gardés pour chaque jeu, à chaque niveau du graphe (1 à 15). Si k est trop grand pour la profondeur choisie (plus de 300 jeux au pire), la profondeur baisse d'elle-même.">
+            <label for="k">Voisins <output id="k-out">5</output></label>
+            <input id="k" type="range" min="0" max="14" value="4">
+          </div>
+          <div class="tool slider" data-help="Nombre de niveaux : 1 = voisins du jeu choisi ; 2 = + voisins des voisins ; etc. Si la profondeur est trop grande pour k (plus de 300 jeux au pire), le nombre de voisins baisse de lui-même.">
+            <label for="depth">Profondeur <output id="depth-out">2</output></label>
+            <input id="depth" type="range" min="1" max="6" value="2">
+          </div>
+          <p id="kd-msg" class="msg kd-msg"></p>
         </div>
-        <div id="weights" class="weights" aria-live="polite"></div>
         <div class="tool">
           <span class="tool-title">Découverte</span>
           <div class="inline-row">
@@ -227,27 +208,41 @@
       <div id="stage">
         <svg id="graph" role="img" aria-label="Graphe des plus proches voisins"></svg>
         <svg id="map" role="img" aria-label="Carte 2D des jeux" hidden></svg>
+        <div id="view-opts">
+          <button type="button" class="fam-toggle" id="show-rating" aria-pressed="false" data-help="Écrit dans chaque bulle la note BGG moyenne des joueurs (sur 10). Les bulles grossissent pour que le chiffre tienne.">Note BGG</button>
+          <button type="button" class="fam-toggle" id="color-rating" aria-pressed="false" data-help="Remplit les bulles selon la note BGG (viridis, de 5,5 à 8,5) à la place de la couleur de niveau. S'applique aussi à la carte.">Couleur = note</button>
+          <button type="button" class="fam-toggle" id="cross" aria-pressed="false" data-help="Ajoute en pointillés les liens k-NN entre jeux déjà visibles (pas seulement ceux de l'arbre) : fait apparaître les grappes.">Liens croisés</button>
+        </div>
         <div id="view-switch">
           <div class="presets seg">
             <button type="button" class="view-btn on" data-view="graph" aria-pressed="true" data-help="Graphe des plus proches voisins, organisé par niveaux autour du jeu choisi.">Graphe</button>
-            <button type="button" class="view-btn" data-view="map" aria-pressed="false" id="map-btn" data-help="Carte 2D (t-SNE) : chaque point est un jeu ; deux jeux proches se ressemblent (mécaniques/thème). Le graphe courant est superposé.">Carte</button>
+            <button type="button" class="view-btn" data-view="map" aria-pressed="false" id="map-btn" data-help="Carte 2D (t-SNE) : chaque point est un jeu ; deux jeux proches se ressemblent selon un seul attribut (une carte par attribut : mécaniques, thème, familles, description). Le graphe courant est superposé.">Carte</button>
           </div>
           <div class="presets seg map-alpha" id="map-alpha-row" hidden></div>
-          <button type="button" class="fam-toggle" id="fam-btn" aria-pressed="false" hidden data-help="Affiche le centre de chaque thème (catégories BGG regroupées par émoji, hors format et licence) sur la carte, relié aux jeux du graphe de ce thème. Clic sur un émoji : liens vers tous les jeux du thème. Conseil : les thèmes forment des grappes nettes sur la carte α = 0 (thème seul).">🗺️ Thèmes</button>
+          <button type="button" class="fam-toggle" id="fam-btn" aria-pressed="false" hidden data-help="Affiche le centre de chaque thème (catégories BGG regroupées par émoji, hors format et licence) sur la carte, relié aux jeux du graphe de ce thème. Clic sur un émoji : liens vers tous les jeux du thème. Conseil : les thèmes forment des grappes nettes sur la carte « Thème ».">🗺️ Thèmes</button>
           <button type="button" class="fam-toggle" id="fam-center" hidden data-help="Bascule la définition du centre d'un thème. Moyenne : centroïde pondéré de ses jeux (les grands thèmes, présents partout, retombent au milieu de la carte). Pic : endroit où le thème est le plus sur-représenté par rapport à l'ensemble des jeux (densités lissées sur une grille).">Centre : moyenne</button>
           <p id="map-msg" class="msg"></p>
         </div>
       </div>
-      <div id="tooltip" hidden></div>
+      <div id="tooltip" class="tip" hidden></div>
     </section>
+    <aside id="info" class="side">
+      <section id="details" class="details" hidden></section>
+      <details class="agree-box" id="agree-box" open>
+        <summary data-help="Compare, sur le jeu central, les 4 métriques entre elles puis les 4 attributs pris seuls : part de voisins communs, et jeux recommandés par la plupart des configurations.">Accord métriques / attributs</summary>
+        <div id="agree"></div>
+      </details>
+
+    </aside>
   </main>
 
+  <div id="filter-pop" hidden></div>
   <div id="help" role="tooltip" hidden></div>
   <footer id="meta"></footer>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
-  <script src="emoji.js?v=44"></script>
-  <script src="data/games.js?v=44"></script>
-  <script src="app.js?v=44"></script>
+  <script src="emoji.js?v=57"></script>
+  <script src="data/games.js?v=57"></script>
+  <script src="app.js?v=57"></script>
 </body>
 </html>

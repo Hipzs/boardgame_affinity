@@ -1,7 +1,7 @@
 """Exporte les attributs de chaque jeu pour l'interface web, qui calcule la similarité dans le navigateur.
 
 La similarité n'est pas précalculée : avec les filtres, les plus proches voisins doivent être cherchés
-parmi les seuls jeux retenus, et le poids α entre mécaniques et catégories est réglable.
+parmi les seuls jeux retenus, et les poids des attributs sont réglables.
 
 Sortie : web/data/games.js, qui définit `window.BGG_DATA = {...}`. C'est un script et non un .json :
 un fichier .json lu par fetch() ne charge pas depuis file://.
@@ -10,11 +10,13 @@ un fichier .json lu par fetch() ne charge pas depuis file://.
   idf  : {mech, cat} = IDF lissé sur tout le dump (n_m < MIN_SUPPORT -> 0)
   words : vocabulaire des descriptions ; nodes[].dv : 40 mots les plus caractéristiques [[indice, poids], ...]
           (TF-IDF, titre du jeu retiré, renormalisé L2) ; nodes[].ri : groupe de réimplémentations (-1 si aucun)
+  nodes[].x : extensions officielles BGG du jeu (indices dans dict.exp, extensions de fans exclues) ;
+          nodes[].xl : groupe de gamme compatible (jeux partageant une extension, voir expansion_lines ; -1 si seul)
   nodes[].ow, tr, wa, wi : nombres de joueurs BGG qui possèdent / échangent / recherchent / souhaitent le jeu
   npmi : {mech, cat} = lignes creuses de S = max(0, NPMI) entre étiquettes (cosinus souple)
   nodes: [{id, n, y, b, av, r, p:[min,max], t, a, w, m, c, f, d, ar, pu}]
          b : note bayésienne (Geek Rating), av : note moyenne des joueurs
-         ds : début de la description (≤ 240 car.), xy : [[x, y] par α de meta.map_alphas] ou null
+         ds : début de la description (≤ 240 car.), xy : [[x, y] par carte de meta.map_keys] ou null
          t : durée (min), a : âge min., w : poids 1-5 ou null ; 0 ou null = inconnu
 
 Poids (complexité) : absent du dump TidyTuesday. Si data/raw/weights.csv existe (colonnes id, weight),
@@ -154,6 +156,45 @@ def implementation_groups(g, d):
     return [ids.get(r, -1) for r in roots]
 
 
+def official_expansions(lists):
+    """Extensions listées par BGG pour chaque jeu, sans les extensions de fans (« … (fan expansion for …) »)."""
+    return [[x for x in l if "fan expansion" not in x.lower()] for l in lists]
+
+
+def title_root(name):
+    """Racine d'un titre : texte avant « : », « ( », « – » ou « - » (ex. « Dominion: Intrigue » -> « dominion »)."""
+    return re.split(r"[:(–—]| - ", name)[0].strip().lower()
+
+
+def expansion_lines(names, exps):
+    """Gammes compatibles : deux jeux sont reliés s'ils partagent une extension officielle dont le nom commence par
+    la racine du titre de chacun (ex. Evolution et Evolution: Climate partagent « Evolution: Climate – … »).
+    La condition de préfixe écarte les coffrets promo multi-jeux (« Brettspiel Adventskalender 2015 »…).
+    Le dump ne contient pas les extensions elles-mêmes (seulement les jeux de base) : c'est la seule trace utilisable.
+    Renvoie un numéro de groupe par jeu (composantes connexes ; -1 si seul)."""
+    inv = {}
+    for i, l in enumerate(exps):
+        for x in l:
+            inv.setdefault(x, []).append(i)
+    roots = [title_root(n) for n in names]
+    parent = list(range(len(names)))
+
+    def find(x):
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+    for x, games in inv.items():
+        rx = x.lower()
+        ok = [i for i in games if len(roots[i]) >= 3 and rx.startswith(roots[i])]
+        for i in ok[1:]:
+            parent[find(i)] = find(ok[0])
+    comp = [find(i) for i in range(len(names))]
+    size = pd.Series(comp).value_counts()
+    ids = {r: k for k, r in enumerate(size[size > 1].index)}
+    return [ids.get(r, -1) for r in comp]
+
+
 def excerpt(text, n=EXCERPT_CHARS):
     """Début de la description BGG : entités HTML décodées, espaces normalisés, coupé à une fin de phrase
     (ou à un mot) avant n caractères."""
@@ -197,21 +238,25 @@ def main():
         return int(x) if x == x and x > 0 else 0  # NaN ou 0 -> 0 (inconnu)
 
     # Carte 2D (src/build_map.py), facultative.
-    # Une carte par α : xy = [[x, y] pour chaque α] ; meta.map_alphas donne l'ordre.
+    # Une carte par attribut seul : xy = [[x, y] pour chaque carte] ; meta.map_keys donne l'ordre (ex. m, c, f, d).
     mpath = PROC / "map_xy.csv"
-    xy, map_method, map_alphas = {}, None, []
+    xy, map_method, map_keys = {}, None, []
     if mpath.exists():
         mdf = pd.read_csv(mpath).set_index("id")
         meth_lines = (PROC / "map_xy.method").read_text().split("\n")
-        map_method, map_alphas = meth_lines[0].strip(), [float(x) for x in meth_lines[1].split(",")]
+        map_method, map_keys = meth_lines[0].strip(), meth_lines[1].strip().split(",")
         for gid, row in mdf.iterrows():
-            xy[gid] = [[row[f"x{j}"], row[f"y{j}"]] for j in range(len(map_alphas))]
+            xy[gid] = [[row[f"x{j}"], row[f"y{j}"]] for j in range(len(map_keys))]
 
     words, desc_vec = description_vectors(g["description"].map(clean_text).tolist(), g["primary"].tolist())
     groups = implementation_groups(g, d)
+    exps = official_expansions(g["boardgameexpansion"].map(parse_list))
+    lines = expansion_lines(g["primary"].tolist(), exps)
+    dicts["exp"] = sorted({x for l in exps for x in l})
+    exp_index = {x: i for i, x in enumerate(dicts["exp"])}
 
     nodes = []
-    for row, dv, ri in zip(g.itertuples(index=False), desc_vec, groups):
+    for row, dv, ri, ex, xl in zip(g.itertuples(index=False), desc_vec, groups, exps, lines):
         w = weights.get(row.id)
         pt = xy.get(row.id)
         node = {"id": int(row.id), "n": row.primary, "y": num(row.yearpublished) or None,
@@ -219,7 +264,7 @@ def main():
                 "p": [num(row.minplayers), num(row.maxplayers)], "t": num(row.playingtime), "a": num(row.minage),
                 "w": round(float(w), 2) if w is not None and w == w and w > 0 else None,
                 "ds": excerpt(row.description),
-                "dv": dv, "ri": ri,
+                "dv": dv, "ri": ri, "x": [exp_index[x] for x in ex], "xl": xl,
                 # comportement des joueurs (collections BGG) : possédé, à échanger, recherché, liste de souhaits
                 "ow": num(row.owned), "tr": num(row.trading), "wa": num(row.wanting), "wi": num(row.wishing),
                 "xy": pt}
@@ -229,7 +274,7 @@ def main():
 
     data = {
         "meta": {"min_ratings": a.min_ratings, "min_support": MIN_SUPPORT, "has_weight": bool(weights),
-                 "map_method": map_method, "map_alphas": map_alphas,
+                 "map_method": map_method, "map_keys": map_keys,
                  "source": "BGG via TidyTuesday 2022-01-25", "generated": dt.date.today().isoformat()},
         "dict": dicts,
         "idf": {"mech": [round(idf["mech"].get(x, 0.0), 4) for x in dicts["mech"]],

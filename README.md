@@ -5,7 +5,7 @@ Interface web d'exploration de jeux de société par ressemblance : graphe des p
 - **Attributs** comparés : mécaniques, thème (catégories BGG), familles fines, description (mots-clés TF-IDF).
 - **Métriques** : cosinus IDF, Jaccard, recouvrement, cosinus souple (co-occurrences NPMI).
 - **Filtres** : garder / exclure des étiquettes, famille, auteur, illustrateur, éditeur, joueurs, durée, âge, notes, franchise, réimplémentations, convoitise et revente (intervalles de centiles).
-- **Vues** : graphe (parcours en largeur des k plus proches voisins), carte t-SNE pour 5 valeurs de α, comparateur d'accord entre métriques et attributs, mode « pépites cachées ».
+- **Vues** : graphe (parcours en largeur des k plus proches voisins), une carte t-SNE par attribut seul (mécaniques, thème, familles, description), comparateur d'accord entre métriques et attributs, mode « pépites cachées ».
 
 ## Installation et données
 
@@ -14,7 +14,7 @@ Python 3 avec `pandas`, `numpy`, `scipy`, `scikit-learn`. Les données ne sont p
 ```bash
 bash src/download_data.sh          # dump BGG (TidyTuesday 2022-01-25) -> data/raw/
 python3 src/build_matrix.py        # matrice jeux x mécaniques -> data/processed/
-python3 src/build_map.py           # cartes 2D t-SNE (≈ 1 min) -> data/processed/map_xy.csv
+python3 src/build_map.py           # 4 cartes 2D t-SNE, une par attribut (≈ 1 min) -> data/processed/map_xy.csv
 python3 src/export_web.py          # attributs, NPMI, descriptions -> web/data/games.js
 ```
 
