@@ -1,0 +1,17 @@
+# Données : téléchargées ou régénérées par le pipeline (voir README.md)
+data/raw/
+data/processed/
+web/data/
+
+# Python
+__pycache__/
+*.pyc
+
+# Éditeurs / système
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Journal de travail local (non publié)
+CLAUDE.md

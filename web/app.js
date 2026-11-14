@@ -1,0 +1,1221 @@
+/* Graphe des plus proches voisins, calculé dans le navigateur à partir des attributs (src/export_web.py).
+ *
+ * Similarité : s(u,v) = α·cos_IDF(méca) + (1−α)·cos_IDF(catég), via des listes inversées.
+ * Les voisins sont cherchés parmi les jeux qui passent les filtres ; le graphe est un parcours en largeur (BFS).
+ */
+(() => {
+  "use strict";
+  const D = window.BGG_DATA;
+  const $ = (s) => document.querySelector(s);
+  if (!D || !window.d3) {
+    $("#search-msg").textContent = !D
+      ? "Données absentes : lancer python3 src/export_web.py."
+      : "d3 n'a pas pu être chargé (connexion internet requise pour le CDN).";
+    $("#search-msg").classList.add("err");
+    return;
+  }
+
+  const MAX_NODES = 300;
+  const K_MAX = 12;
+  const N = D.nodes;
+  const css = getComputedStyle(document.documentElement);
+  const depthColor = (d) => css.getPropertyValue(`--d${Math.min(d, 4)}`).trim();
+  const TAG_KEYS = { f: "fam", d: "des", ar: "art", pu: "pub" };
+
+  // --- Attributs (blocs d'étiquettes) ------------------------------------------------------------
+  // Quatre attributs, chacun un ensemble d'étiquettes par jeu, avec un poids IDF par étiquette :
+  //   m : mécaniques · c : thème (catégories BGG) · f : familles fines · d : description (40 mots-clés TF-IDF)
+  // Toute métrique s'applique à chaque attribut ; la ressemblance est la somme pondérée par les curseurs.
+  const FAM_SKIP = /^(Admin|Crowdfunding|Digital Implementations|Game|Versions & Editions|Misc):/;
+  const smoothIdf = (counts, nDocs, keep = () => true) =>
+    Array.from(counts, (x, t) => (x >= 2 && keep(t) ? Math.log((nDocs + 1) / (x + 1)) + 1 : 0));
+  const famIdf = (() => {
+    const n = new Float64Array(D.dict.fam.length);
+    N.forEach((g) => g.f.forEach((t) => n[t]++));
+    return smoothIdf(n, N.length, (t) => !FAM_SKIP.test(D.dict.fam[t]));
+  })();
+  const ATTRS = {
+    m: { label: "Mécaniques", short: "Méca.", dict: D.dict.mech, terms: (g) => g.m, idf: D.idf.mech, npmi: D.npmi.mech },
+    c: { label: "Thème", short: "Thème", dict: D.dict.cat, terms: (g) => g.c, idf: D.idf.cat, npmi: D.npmi.cat },
+    f: { label: "Familles fines", short: "Familles", dict: D.dict.fam, terms: (g) => g.f.filter((t) => famIdf[t] > 0),
+      idf: famIdf, npmi: D.npmi.fam },
+    // Description : les poids TF-IDF sont déjà dans dv (pas d'IDF supplémentaire) ; pas de matrice S (cosinus souple → cosinus).
+    d: { label: "Description", short: "Descr.", dict: D.words, terms: (g) => g.dv.map((x) => x[0]), weights: (g) => g.dv, npmi: null },
+  };
+  const ATTR_KEYS = Object.keys(ATTRS);
+  for (const [key, A] of Object.entries(ATTRS)) {
+    const nT = A.dict.length;
+    A.vec = new Array(N.length);   // vecteur pondéré normalisé L2 : Map(t -> w)
+    A.set = new Array(N.length);   // ensemble brut des étiquettes
+    A.post = Array.from({ length: nT }, () => []); // liste inversée : t -> [[i, w]]
+    N.forEach((g, i) => {
+      const ts = A.terms(g);
+      A.set[i] = new Set(ts);
+      const pairs = A.weights ? A.weights(g) : ts.filter((t) => A.idf[t] > 0).map((t) => [t, A.idf[t]]);
+      const norm = Math.hypot(...pairs.map((x) => x[1])) || 1;
+      A.vec[i] = new Map(pairs.map(([t, w]) => [t, w / norm]));
+      for (const t of A.set[i]) A.post[t].push(i);
+    });
+    // Cosinus souple : S = I + max(0, NPMI) ; ‖x‖_S = √(xᵀ S x) précalculée par jeu.
+    if (A.npmi) {
+      A.sTimes = (x) => {
+        const out = new Float64Array(nT);
+        for (const [t, w] of x) {
+          out[t] += w;
+          for (const [t2, sv] of A.npmi[t]) out[t2] += sv * w;
+        }
+        return out;
+      };
+      A.snorm = A.vec.map((x) => {
+        if (!x.size) return 0;
+        const sx = A.sTimes(x);
+        let q = 0;
+        for (const [t, w] of x) q += w * sx[t];
+        return Math.sqrt(q);
+      });
+    }
+  }
+  const franchise = N.map((g) => new Set(g.f.filter((t) => D.dict.fam[t].startsWith("Game:"))));
+
+  // --- Métriques (appliquées à chaque attribut) ---------------------------------------------------
+  const METRICS = {
+    cos: { label: "Cosinus IDF", short: "Cos IDF",
+      help: "Cosinus entre vecteurs d'étiquettes pondérés par l'IDF (TF-IDF pour la description) : une étiquette rare partagée compte beaucoup, une banale peu. Métrique de référence." },
+    jac: { label: "Jaccard", short: "Jaccard",
+      help: "|A∩B| / |A∪B| : part des étiquettes communes. Toutes les étiquettes pèsent pareil, banales comme rares." },
+    ovl: { label: "Recouvrement", short: "Recouv.",
+      help: "|A∩B| / min(|A|,|B|) : vaut 1 si les étiquettes d'un jeu sont toutes dans l'autre. Trouve les versions simplifiées ou enrichies ; favorise les jeux à peu d'étiquettes." },
+    soft: { label: "Cosinus souple", short: "Souple",
+      help: "Cosinus IDF où deux étiquettes différentes mais souvent associées sur BGG (NPMI > 0) comptent en partie comme communes : xᵀSy / (‖x‖_S‖y‖_S). Mécaniques, thème, familles ; la description retombe sur le cosinus." },
+  };
+  const METRIC_KEYS = Object.keys(METRICS);
+
+  // Ressemblance d'un attribut pour une paire, avec une métrique.
+  // ctx (facultatif) : S·x_u déjà calculé pour le cosinus souple.
+  function attrPair(key, metric, u, v, ctx) {
+    const A = ATTRS[key];
+    if (metric === "jac" || metric === "ovl") {
+      const a = A.set[u], b = A.set[v];
+      if (!a.size || !b.size) return 0;
+      let inter = 0;
+      for (const t of a) if (b.has(t)) inter++;
+      return metric === "jac" ? inter / (a.size + b.size - inter) : inter / Math.min(a.size, b.size);
+    }
+    if (metric === "soft" && A.npmi) {
+      if (!A.snorm[u] || !A.snorm[v]) return 0;
+      const su = (ctx && ctx[key]) || A.sTimes(A.vec[u]);
+      let d = 0;
+      for (const [t, w] of A.vec[v]) d += su[t] * w;
+      return d / (A.snorm[u] * A.snorm[v]);
+    }
+    let s = 0; // cosinus (et repli du souple)
+    const x = A.vec[v];
+    for (const [t, w] of A.vec[u]) s += w * (x.get(t) || 0);
+    return s;
+  }
+
+  // --- Signaux par jeu : convoitise et revente ------------------------------------------------------
+  // Log-ratios lissés (+1) des collections BGG, par jeu : convoitise = ln((souhaits+1)/(possédés+1)),
+  // revente = ln((à échanger+1)/(possédés+1)). Chaque jeu reçoit son centile (0–100) parmi les jeux de l'interface ;
+  // l'utilisateur choisit un intervalle de centiles par signal.
+  // (La comparaison entre jeux par ces indicateurs, les « modulateurs », est notée dans Joplin, non appliquée.)
+  const BEH = {};
+  for (const [key, f] of [["wish", (g) => Math.log((g.wi + 1) / (g.ow + 1))], ["trade", (g) => Math.log((g.tr + 1) / (g.ow + 1))]]) {
+    const x = Float64Array.from(N, f);
+    const q = Float64Array.from(x).sort();
+    const at = (p) => q[Math.floor(p * (q.length - 1))];
+    BEH[key] = { x, median: at(0.5), at, rank: (v) => d3.bisectLeft(q, v) / (q.length - 1) };
+  }
+  // Seuils réglables (centiles, curseur double) : un jeu est « élevé » si sa valeur atteint le centile choisi.
+  // Intervalle de centiles [bas, haut] par signal ; [0, 100] = signal inactif (ni marquage ni filtre).
+  for (const key of ["wish", "trade"]) BEH[key].pct = Float64Array.from(BEH[key].x, (v) => 100 * BEH[key].rank(v));
+  const sigInt = { wish: [0, 100], trade: [0, 100] };
+  const sigActive = (k) => sigInt[k][0] > 0 || sigInt[k][1] < 100;
+  const inInt = (k, i) => BEH[k].pct[i] >= sigInt[k][0] && BEH[k].pct[i] <= sigInt[k][1];
+  // Marquage : point vert (convoitise) / contour rouge (revente) pour les jeux dans l'intervalle actif.
+  const markWish = (i) => sigActive("wish") && inInt("wish", i);
+  const markTrade = (i) => sigActive("trade") && inInt("trade", i);
+
+
+  // --- État ---------------------------------------------------------------------------------
+  const state = {
+    center: -1, selected: -1, k: 5, depth: 2, cross: false, tau: 0, showRating: false, colorRating: false,
+    // Pondération : deux groupes activables. A = mécaniques ↔ thème (part méca. = alpha) ; B = familles ↔ description
+    // (part familles = beta). Deux groupes actifs : 50 % chacun.
+    alpha: 1, beta: 0.5, onA: true, onB: false,
+    metric: "cos", signals: true, sigFilter: false,
+    gems: false, gemBeta: 1, view: "graph", mapAlpha: "auto",
+    noFranchise: false, noReimpl: false, tags: { f: new Set(), d: new Set(), ar: new Set(), pu: new Set() },
+    req: { m: new Set(), c: new Set(), f: new Set(), d: new Set() }, // étiquettes indispensables (ET logique)
+    ban: { m: new Set(), c: new Set(), f: new Set(), d: new Set() }, // étiquettes interdites
+  };
+  function attrWeights() {
+    const gA = state.onA ? (state.onB ? 0.5 : 1) : 0, gB = state.onB ? (state.onA ? 0.5 : 1) : 0;
+    return { m: gA * state.alpha, c: gA * (1 - state.alpha), f: gB * state.beta, d: gB * (1 - state.beta) };
+  }
+  // Configuration du calcul : métrique, poids par attribut, modulateurs.
+  const currentCfg = () => ({ metric: state.metric, w: attrWeights() });
+  const cfgKey = (c) => `${c.metric}|${ATTR_KEYS.map((k) => c.w[k].toFixed(3)).join(",")}`;
+
+  // Ressemblance d'une paire pour une configuration (infobulles, détails) et sa décomposition par attribut.
+  function pairDetail(u, v, cfg = currentCfg()) {
+    const parts = {};
+    let s = 0;
+    for (const key of ATTR_KEYS) {
+      if (cfg.w[key] <= 0) continue;
+      parts[key] = attrPair(key, cfg.metric, u, v);
+      s += cfg.w[key] * parts[key];
+    }
+    return { s, parts };
+  }
+
+  let pass = new Uint8Array(N.length).fill(1);
+  let nbCache = new Map();
+  const seen = new Uint8Array(N.length);
+
+  // Top-K_MAX voisins de u parmi les jeux qui passent les filtres (mis en cache tant que les réglages ne changent pas).
+  // Candidats : jeux partageant au moins une étiquette d'un attribut pondéré ; tous les jeux en cosinus souple
+  // (deux jeux sans étiquette commune peuvent y être proches).
+  function neighbors(u, cfg = currentCfg(), gems = state.gems) {
+    const ck = `${cfgKey(cfg)}|${gems ? 1 : 0}|${u}`;
+    if (nbCache.has(ck)) return nbCache.get(ck);
+    const active = ATTR_KEYS.filter((k) => cfg.w[k] > 0);
+    let cand;
+    if (cfg.metric === "soft") cand = N.map((_, i) => i);
+    else {
+      cand = [];
+      for (const key of active) {
+        for (const t of ATTRS[key].set[u]) for (const v of ATTRS[key].post[t]) if (!seen[v]) { seen[v] = 1; cand.push(v); }
+      }
+      cand.forEach((v) => { seen[v] = 0; });
+    }
+    const ctx = {};
+    if (cfg.metric === "soft") for (const key of active) if (ATTRS[key].npmi) ctx[key] = ATTRS[key].sTimes(ATTRS[key].vec[u]);
+    const fu = franchise[u], ru = N[u].ri;
+    const out = [];
+    for (const v of cand) {
+      if (v === u || !pass[v]) continue;
+      if (state.noFranchise && fu.size && [...franchise[v]].some((t) => fu.has(t))) continue;
+      if (state.noReimpl && ru >= 0 && N[v].ri === ru) continue;
+      let s = 0;
+      for (const key of active) s += cfg.w[key] * attrPair(key, cfg.metric, u, v, ctx);
+      if (s > 0) out.push([v, Math.min(s, 1)]);
+    }
+    let top;
+    if (gems) {
+      // Mode pépites : parmi les candidats assez similaires (s ≥ ρ·s_max), classement par s·q_v^β.
+      const sMax = out.reduce((m, x) => Math.max(m, x[1]), 0);
+      top = out.filter((x) => x[1] >= GEM_RHO * sMax)
+        .map(([v, s]) => [v, s, s * Math.pow(gemQ[v], state.gemBeta)])
+        .sort((a, b) => b[2] - a[2])
+        .slice(0, K_MAX);
+    } else {
+      out.sort((a, b) => b[1] - a[1] || N[b[0]].b - N[a[0]].b); // score, puis note bayésienne
+      top = out.slice(0, K_MAX);
+    }
+    nbCache.set(ck, top);
+    return top;
+  }
+
+  // Qualité « pépite » q_v = Q_v · O_v ∈ [0,1] :
+  //   Q_v = σ((note_v − 7) / 0,3)  (bien noté : 0,5 à 7, 0,97 à 8, 0,03 à 6)
+  //   O_v = 1 − rang centile du nombre d'avis  (peu connu → 1, très connu → 0)
+  const GEM_RHO = 0.6;
+  const gemQ = (() => {
+    const byR = N.map((_, i) => i).sort((a, b) => N[a].r - N[b].r);
+    const pct = new Float64Array(N.length);
+    byR.forEach((i, k) => { pct[i] = k / (N.length - 1); });
+    return N.map((g, i) => (1 / (1 + Math.exp(-(g.av - 7) / 0.3))) * (1 - pct[i]));
+  })();
+
+  // --- Filtres -------------------------------------------------------------------------------
+  const num = (id) => {
+    const v = parseFloat($(id).value);
+    return Number.isFinite(v) ? v : null;
+  };
+  function readFilters() {
+    return {
+      plMin: num("#pl-min"), plMax: num("#pl-max"), tMin: num("#t-min"), tMax: num("#t-max"),
+      ageMax: num("#age-max"), wMin: num("#w-min"), wMax: num("#w-max"),
+    };
+  }
+  // Filtres de note (curseurs à deux poignées) : intervalle [bas, haut] ; inactif s'il couvre toute la plage.
+  const RATE = {
+    av: { min: 2, max: 9, lo: 2, hi: 9 },
+    b: { min: 3.5, max: 8.6, lo: 3.5, hi: 8.6 },
+  };
+  const rateActive = (k) => RATE[k].lo > RATE[k].min || RATE[k].hi < RATE[k].max;
+  function passes(g, i, F) {
+    for (const k of ["av", "b"]) if (rateActive(k) && (g[k] < RATE[k].lo || g[k] > RATE[k].hi)) return false;
+    // Filtre par signaux : convoitise ET revente au moins au centile choisi (un curseur à 0 neutralise son critère).
+    // Filtre par signaux : chaque intervalle actif doit contenir le centile du jeu (signaux indépendants).
+    if (state.signals && state.sigFilter) for (const k of ["wish", "trade"]) if (sigActive(k) && !inInt(k, i)) return false;
+    for (const key of ATTR_KEYS) {
+      const set = ATTRS[key].set[i];
+      for (const t of state.req[key]) if (!set.has(t)) return false;
+      for (const t of state.ban[key]) if (set.has(t)) return false;
+    }
+    for (const key of Object.keys(TAG_KEYS)) {
+      const sel = state.tags[key];
+      if (sel.size && !g[key].some((t) => sel.has(t))) return false;
+    }
+    if (F.plMin !== null || F.plMax !== null) {
+      const [mn, mx] = g.p;
+      if (!mn || !mx) return false;
+      if (mn > (F.plMax ?? Infinity) || mx < (F.plMin ?? 0)) return false; // intersection d'intervalles non vide
+    }
+    if (F.tMin !== null || F.tMax !== null) {
+      if (!g.t || g.t < (F.tMin ?? 0) || g.t > (F.tMax ?? Infinity)) return false;
+    }
+    if (F.ageMax !== null && (!g.a || g.a > F.ageMax)) return false;
+    if (F.wMin !== null || F.wMax !== null) {
+      if (g.w === null || g.w < (F.wMin ?? 0) || g.w > (F.wMax ?? Infinity)) return false;
+    }
+    return true;
+  }
+  function applyFilters() {
+    const F = readFilters();
+    pass = Uint8Array.from(N, (g, i) => (passes(g, i, F) ? 1 : 0));
+    const active = Object.values(state.tags).filter((s) => s.size).length
+      + [F.plMin ?? F.plMax, F.tMin ?? F.tMax, F.ageMax, F.wMin ?? F.wMax].filter((x) => x !== null).length
+      + (state.noFranchise ? 1 : 0) + (state.noReimpl ? 1 : 0) + (state.signals && state.sigFilter && (sigActive("wish") || sigActive("trade")) ? 1 : 0)
+      + (rateActive("av") ? 1 : 0) + (rateActive("b") ? 1 : 0);
+    $("#filter-count").textContent = active || "";
+    const nReq = ATTR_KEYS.reduce((n, k) => n + state.req[k].size + state.ban[k].size, 0);
+    $("#req-count").textContent = nReq || "";
+    invalidate();
+  }
+
+  // Indispensables / interdites : pastilles à trois états, construites depuis le jeu central.
+  //   neutre --clic--> indispensable (✓, le voisin doit l'avoir) --clic--> interdite (✕, il ne doit pas l'avoir) --clic--> neutre
+  // Une étiquette active absente du nouveau jeu central reste affichée (« extra ») pour pouvoir la retirer.
+  const clearReqBan = () => { for (const k of ATTR_KEYS) { state.req[k].clear(); state.ban[k].clear(); } };
+  const REQ_SHOW = { m: Infinity, c: Infinity, f: 16, d: 14 }; // nombre de pastilles proposées (familles et mots : les plus informatives)
+  function drawRequired() {
+    if (state.center < 0) return;
+    const c = N[state.center];
+    for (const key of ATTR_KEYS) {
+      const A = ATTRS[key];
+      const ci = state.center;
+      const own = A.set[ci];
+      // Familles et description : les étiquettes les plus caractéristiques (poids décroissant) ; sinon toutes.
+      const ranked = [...A.vec[ci]].sort((a, b) => b[1] - a[1]).map((x) => x[0]);
+      const base = key === "m" || key === "c" ? [...own] : ranked.slice(0, REQ_SHOW[key]);
+      const items = [...new Set([...base, ...state.req[key], ...state.ban[key]])]
+        .map((t) => [t, A.dict[t]])
+        .sort((a, b) => a[1].localeCompare(b[1]));
+      const box = $(`#req-${key}`);
+      box.innerHTML = items.map(([t, name]) => {
+        const st = state.req[key].has(t) ? "on" : state.ban[key].has(t) ? "ban" : "";
+        const extra = st && !own.has(t);
+        const help = st === "on" ? "Indispensable : chaque voisin doit l'avoir. Clic : l'interdire."
+          : st === "ban" ? "Interdite : aucun voisin ne doit l'avoir. Clic : revenir à neutre."
+            : "Neutre. Clic : la rendre indispensable ; deuxième clic : l'interdire.";
+        return `<span class="chip toggle${st ? ` ${st}` : ""}${extra ? " extra" : ""}" data-t="${t}" role="button" ` +
+          `tabindex="0" data-help="${escapeHtml(help + (extra ? " (absente du jeu central)" : ""))}">${escapeHtml(name)}</span>`;
+      }).join("") || `<span class="hint">aucune</span>`;
+      box.querySelectorAll(".chip").forEach((ch) => {
+        const cycle = () => {
+          const t = +ch.dataset.t;
+          if (state.req[key].has(t)) { state.req[key].delete(t); state.ban[key].add(t); }
+          else if (state.ban[key].has(t)) state.ban[key].delete(t);
+          else state.req[key].add(t);
+          hideHelp();
+          drawRequired();
+          applyFilters();
+        };
+        ch.addEventListener("click", cycle);
+        ch.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); cycle(); } });
+      });
+    }
+  }
+  function invalidate() {
+    nbCache = new Map();
+    if (state.center >= 0) render();
+  }
+
+  // Champs d'étiquettes (famille, auteur, illustrateur, éditeur) : liste de suggestions et pastilles.
+  const tagIndex = {};
+  for (const [key, dname] of Object.entries(TAG_KEYS)) {
+    const labels = D.dict[dname];
+    tagIndex[key] = new Map(labels.map((l, i) => [l.toLowerCase(), i]));
+    const freq = new Array(labels.length).fill(0);
+    N.forEach((g) => g[key].forEach((t) => freq[t]++));
+    const order = labels.map((_, i) => i).sort((a, b) => freq[b] - freq[a]);
+    $(`#dl-${key}`).innerHTML = order.map((i) => `<option value="${escapeHtml(labels[i])}">${freq[i]} jeux</option>`).join("");
+    const input = $(`#tf-${key}`);
+    const tryAdd = () => {
+      const i = tagIndex[key].get(input.value.trim().toLowerCase());
+      if (i === undefined) return;
+      input.value = "";
+      addTag(key, i);
+    };
+    input.addEventListener("change", tryAdd);
+    input.addEventListener("keydown", (e) => { if (e.key === "Enter") tryAdd(); });
+  }
+  function addTag(key, i) {
+    state.tags[key].add(i);
+    drawTagChips(key);
+    applyFilters();
+  }
+  function drawTagChips(key) {
+    const box = document.querySelector(`.tagfilter[data-key="${key}"] .chips`);
+    box.innerHTML = [...state.tags[key]]
+      .map((i) => `<span class="chip removable" data-i="${i}" data-help="Clic : retirer ce filtre.">${escapeHtml(D.dict[TAG_KEYS[key]][i])}</span>`)
+      .join("");
+    box.querySelectorAll(".chip").forEach((c) => c.addEventListener("click", () => {
+      state.tags[key].delete(+c.dataset.i);
+      drawTagChips(key);
+      applyFilters();
+    }));
+  }
+
+  // Poids : désactivé si absent des données.
+  if (!D.meta.has_weight) {
+    $("#w-min").disabled = $("#w-max").disabled = true;
+    $("#weight-row").dataset.help = "Poids BGG (complexité, 1–5) : absent du dump actuel, filtre désactivé. " +
+      "Il faut data/raw/weights.csv (API BGG ou autre source), puis relancer src/export_web.py.";
+  }
+
+  // --- Recherche du jeu -----------------------------------------------------------------------
+  const label = (i) => `${N[i].n}${N[i].y ? ` (${N[i].y})` : ""}`;
+  const byLabel = new Map(N.map((_, i) => [label(i).toLowerCase(), i]));
+  // N est déjà trié par nombre d'avis décroissant (export_web.py).
+  $("#games").innerHTML = N.map((_, i) => `<option value="${escapeHtml(label(i))}">`).join("");
+  function resolve(q) {
+    q = q.trim().toLowerCase();
+    if (!q) return -1;
+    if (byLabel.has(q)) return byLabel.get(q);
+    const exact = N.findIndex((g) => g.n.toLowerCase() === q);
+    if (exact >= 0) return exact;
+    return N.findIndex((g) => g.n.toLowerCase().includes(q));
+  }
+
+  // --- BFS ------------------------------------------------------------------------------------
+  const key = (a, b) => (a < b ? `${a}-${b}` : `${b}-${a}`);
+  function expand() {
+    const { center, k, depth, cross, tau } = state;
+    const level = new Map([[center, 0]]);
+    const parent = new Map();
+    const links = [];
+    let frontier = [center];
+    let truncated = false;
+    let pruned = 0;
+    // k plus proches voisins de u, puis seuil τ sur la similarité.
+    const nbk = (u) => {
+      const top = neighbors(u).slice(0, k);
+      const kept = top.filter(([, s]) => s >= tau);
+      return [kept, top.length - kept.length];
+    };
+    for (let d = 0; d < depth && frontier.length && !truncated; d++) {
+      const next = [];
+      for (const u of frontier) {
+        const [kept, cut] = nbk(u);
+        pruned += cut;
+        for (const [v, s] of kept) {
+          if (level.has(v)) continue;
+          if (level.size >= MAX_NODES) { truncated = true; break; }
+          level.set(v, d + 1);
+          parent.set(v, [u, s]);
+          links.push({ source: u, target: v, s, cross: false });
+          next.push(v);
+        }
+        if (truncated) break;
+      }
+      frontier = next;
+    }
+    if (cross) {
+      const seen = new Set(links.map((l) => key(l.source, l.target)));
+      for (const u of level.keys()) {
+        for (const [v, s] of nbk(u)[0]) {
+          if (!level.has(v) || seen.has(key(u, v))) continue;
+          seen.add(key(u, v));
+          links.push({ source: u, target: v, s, cross: true });
+        }
+      }
+    }
+    return { level, parent, links, truncated, pruned };
+  }
+
+  // --- Rendu SVG ----------------------------------------------------------------------------
+  const svg = d3.select("#graph");
+  const root = svg.append("g");
+  const gLinks = root.append("g");
+  const gHits = root.append("g");
+  const gNodes = root.append("g");
+  const zoom = d3.zoom().scaleExtent([0.2, 5]).on("zoom", (e) => root.attr("transform", e.transform));
+  svg.call(zoom).on("dblclick.zoom", null);
+  const tip = $("#tooltip");
+  let sim = null;
+  let current = { parent: new Map() };
+
+  // ∝ log(nombre d'avis) ; rayon minimal de 11 px quand la note est écrite dans la bulle.
+  const radius = (i) => {
+    const r = 4 + 2.2 * Math.log10(Math.max(N[i].r, 10));
+    return state.showRating ? Math.max(r, 11) : r;
+  };
+  // Note moyenne BGG -> couleur (viridis, saturée en dehors de [5,5 ; 8,5]).
+  const ratingColor = d3.scaleSequential(d3.interpolateViridis).domain([5.5, 8.5]).clamp(true);
+  // Texte noir ou blanc selon la luminance du fond.
+  const textOn = (bg) => {
+    const c = d3.rgb(bg);
+    return 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b > 140 ? "#111" : "#fff";
+  };
+
+  // --- Infobulles -------------------------------------------------------------------------------
+  function tipShow(html, e) { tip.innerHTML = html; tip.hidden = false; tipMove(e); }
+  function tipMove(e) {
+    const r = $("#graph-wrap").getBoundingClientRect();
+    const x = e.clientX - r.left + 12, y = e.clientY - r.top + 12;
+    // Reste dans la zone du graphe (bascule à gauche / au-dessus près des bords).
+    tip.style.left = `${x + tip.offsetWidth > r.width ? x - tip.offsetWidth - 24 : x}px`;
+    tip.style.top = `${y + tip.offsetHeight > r.height ? y - tip.offsetHeight - 24 : y}px`;
+  }
+  function tipHide() { tip.hidden = true; }
+  const sharedNames = (key, u, v) => {
+    const A = ATTRS[key], a = A.set[u];
+    return [...A.set[v]].filter((t) => a.has(t)).map((t) => A.dict[t]).sort();
+  };
+  // « s = … (Cosinus IDF) · méca 0,8 · thème 0,2 · … » : décomposition par attribut pondéré.
+  function breakdown(u, v) {
+    const { parts } = pairDetail(u, v);
+    const w = attrWeights();
+    return Object.entries(parts).map(([k, x]) => `${ATTRS[k].short} ${x.toFixed(2)} (×${w[k].toFixed(2)})`).join(" · ");
+  }
+  // Infobulle d'un jeu : titre, puis deux lignes de critères, puis le début de la description.
+  //   ligne 1 : note moyenne · note bayésienne · avis · ressemblance avec le jeu parent
+  //   ligne 2 : convoitise · revente (centile et ratio à la médiane) · niveau dans le graphe
+  function nodeTip(i, level = null) {
+    const g = N[i];
+    const p = current.parent.get(i);
+    const sig = (k, name) => {
+      const cls = (k === "wish" ? markWish(i) : markTrade(i)) ? ` class="${k === "wish" ? "w" : "t"}"` : "";
+      return `<span${cls}>${name} c${Math.round(BEH[k].pct[i])} (×${Math.exp(BEH[k].x[i] - BEH[k].median).toFixed(2)})</span>`;
+    };
+    // Votes : « ★ note des joueurs (note bayésienne BGG) »
+    const l1 = [`★ ${g.av.toFixed(2)} (${g.b.toFixed(2)} BGG)`, `${g.r.toLocaleString("fr-FR")} avis`,
+      p ? `s ${p[1].toFixed(3)} avec ${escapeHtml(N[p[0]].n)}` : null].filter(Boolean).join(" · ");
+    const l2 = [sig("wish", "convoitise"), sig("trade", "revente"),
+      level !== null ? (level === 0 ? "jeu choisi" : `niveau ${level}`) : null].filter(Boolean).join(" · ");
+    return `<b>${escapeHtml(label(i))}</b><span class="tl">${l1}</span><span class="tl">${l2}</span>` +
+      (g.ds ? `<span class="ds">${escapeHtml(g.ds)}</span>` : "");
+  }
+  function linkTip(u, v, s) {
+    const list = (xs) => (xs.length ? xs.map(escapeHtml).join(", ") : "aucune");
+    const w = attrWeights();
+    const commons = ATTR_KEYS.filter((k) => w[k] > 0 || k === "m" || k === "c").map((k) => {
+      const xs = sharedNames(k, u, v);
+      return `<span class="tg"><b>${ATTRS[k].label} en commun (${xs.length})</b> : ${list(xs)}</span>`;
+    }).join("");
+    return `<b>${escapeHtml(N[u].n)} ↔ ${escapeHtml(N[v].n)}</b><br>s = ${s.toFixed(3)} (${METRICS[state.metric].label})` +
+      `<br>${escapeHtml(breakdown(u, v))}${commons}`;
+  }
+
+  function render() {
+    const ex = expand();
+    const { level, parent, links, truncated, pruned } = ex;
+    current = { parent };
+    $("#tau-msg").textContent = state.tau > 0 ? `${pruned} lien${pruned > 1 ? "s" : ""} coupé${pruned > 1 ? "s" : ""}` : "";
+    const nPass = pass.reduce((a, b) => a + b, 0);
+    $("#stats").textContent =
+      `${level.size} jeux affichés, ${links.filter((l) => !l.cross).length} liens d'arbre` +
+      (state.cross ? `, ${links.filter((l) => l.cross).length} liens croisés` : "") +
+      (truncated ? ` · tronqué à ${MAX_NODES} jeux` : "") +
+      ` · ${nPass} / ${N.length} jeux passent les filtres` +
+      (level.size === 1 ? " · aucun voisin : élargir les filtres" : "");
+    if (state.view === "map") drawMap(ex); else drawGraph(ex);
+    drawAgreement();
+    select(state.selected >= 0 && (level.has(state.selected) || state.view === "map") ? state.selected : state.center);
+  }
+
+  function drawGraph({ level, parent, links }) {
+    const { width, height } = svg.node().getBoundingClientRect();
+    const cx = width / 2, cy = height / 2;
+
+    // Continuité des positions (corrige le « saut » à chaque actualisation) :
+    // sans x/y, d3 place les nouveaux nœuds en spirale autour de (0,0), puis ils glissent vers le centre.
+    // 1) on reprend les positions de la simulation précédente, translatées pour que le nouveau centre soit au milieu ;
+    // 2) un nœud nouveau naît à côté de son parent (ordre BFS : le parent est déjà placé).
+    const prev = new Map(sim ? sim.nodes().map((n) => [n.i, n]) : []);
+    const pc = prev.get(state.center);
+    const dx = pc ? cx - pc.x : 0, dy = pc ? cy - pc.y : 0;
+    const placed = new Map();
+    const nodes = [...level.keys()].map((i) => {
+      const n = { i, d: level.get(i) };
+      const o = prev.get(i);
+      if (o) {
+        n.x = o.x + dx; n.y = o.y + dy;
+      } else if (n.d === 0) {
+        n.x = cx; n.y = cy;
+      } else {
+        const p = placed.get(parent.get(i)[0]) || { x: cx, y: cy };
+        const a = Math.random() * 2 * Math.PI;
+        n.x = p.x + 30 * Math.cos(a); n.y = p.y + 30 * Math.sin(a);
+      }
+      n.vx = 0; n.vy = 0;
+      if (n.d === 0) { n.fx = cx; n.fy = cy; }
+      placed.set(i, n);
+      return n;
+    });
+    const reused = nodes.filter((n) => prev.has(n.i)).length;
+    // Recentrage : la translation (dx, dy) est compensée par le zoom, puis on revient en douceur (panoramique animé).
+    if (dx || dy) {
+      const t = d3.zoomTransform(svg.node());
+      svg.interrupt().call(zoom.transform, t.translate(-dx, -dy));
+      svg.transition().duration(450).call(zoom.transform, t);
+    }
+    const lk = links.map((l) => ({ ...l }));
+
+    const sMin = d3.min(lk, (l) => l.s) ?? 0;
+    const lw = d3.scaleLinear().domain([Math.min(sMin, 0.99), 1]).range([0.6, 4]).clamp(true);
+    const lkey = (l) => key(l.source.i ?? l.source, l.target.i ?? l.target);
+
+    const link = gLinks.selectAll("line").data(lk, lkey)
+      .join("line")
+      .attr("class", (l) => `link${l.cross ? " cross" : ""}`)
+      .attr("stroke-width", (l) => (l.cross ? 0.8 : lw(l.s)));
+    // Zone de survol élargie (trait transparent de 9 px) : mécaniques et catégories communes.
+    const hit = gHits.selectAll("line").data(lk, lkey)
+      .join("line")
+      .attr("class", "hit")
+      .on("mouseenter", (e, l) => {
+        link.classed("hover", (x) => x === l);
+        tipShow(linkTip(l.source.i, l.target.i, l.s), e);
+      })
+      .on("mousemove", tipMove)
+      .on("mouseleave", () => { link.classed("hover", false); tipHide(); });
+
+    const node = gNodes.selectAll("g.node").data(nodes, (n) => n.i)
+      .join((enter) => {
+        const g = enter.append("g");
+        g.append("circle").attr("class", "bubble");
+        g.append("circle").attr("class", "wish-dot");
+        g.append("text").attr("class", "rating").attr("dy", "0.35em");
+        g.append("text").attr("class", "label").attr("dy", "0.32em");
+        return g;
+      })
+      .attr("class", (n) => `node d${n.d}${n.i === state.selected ? " selected" : ""}` +
+        `${n.d === 0 && !pass[n.i] ? " filtered-out" : ""}`);
+    const R = (n) => radius(n.i) + (n.d === 0 ? 3 : 0);
+    const fill = (n) => (state.colorRating ? ratingColor(N[n.i].av) : depthColor(n.d));
+    // Signaux par jeu : revente élevée → contour rouge ; convoitise élevée → point vert intérieur.
+    node.select("circle.bubble")
+      .attr("r", R)
+      .attr("fill", fill)
+      .style("stroke", (n) => (state.signals && markTrade(n.i) ? "var(--sig-trade)" : null))
+      .style("stroke-width", (n) => (state.signals && markTrade(n.i) ? "3px" : null));
+    // Point vert : en haut de la bulle si la note y est écrite, sinon au centre.
+    node.select("circle.wish-dot")
+      .attr("r", (n) => (state.signals && markWish(n.i) ? Math.max(2.5, R(n) * (state.showRating ? 0.22 : 0.32)) : 0))
+      .attr("cy", (n) => (state.showRating ? -R(n) * 0.6 : 0));
+    node.select("text.rating")
+      .text((n) => (state.showRating ? N[n.i].av.toFixed(1) : ""))
+      .style("font-size", (n) => `${Math.min(12, R(n) * 0.72).toFixed(1)}px`)
+      .style("fill", (n) => textOn(fill(n)));
+    node.select("text.label")
+      .attr("x", (n) => R(n) + 5)
+      .text((n) => (n.d <= 1 || nodes.length <= 40 ? N[n.i].n : ""));
+
+    node
+      .on("click", (e, n) => { e.stopPropagation(); select(n.i); })
+      .on("dblclick", (e, n) => { e.stopPropagation(); setCenter(n.i); })
+      .on("mouseenter", (e, n) => {
+        tipShow(nodeTip(n.i, n.d), e);
+        highlight(n.i, lk);
+      })
+      .on("mousemove", tipMove)
+      .on("mouseleave", () => { tipHide(); highlight(-1, lk); })
+      .call(d3.drag()
+        .on("start", (e, n) => { if (!e.active) sim.alphaTarget(0.2).restart(); n.fx = n.x; n.fy = n.y; })
+        .on("drag", (e, n) => { n.fx = e.x; n.fy = e.y; })
+        .on("end", (e, n) => { if (!e.active) sim.alphaTarget(0); if (n.d !== 0) { n.fx = null; n.fy = null; } }));
+
+    if (sim) sim.stop();
+    // Énergie initiale réduite quand la plupart des nœuds gardent leur place : mouvement limité aux changements.
+    const alpha0 = reused / nodes.length > 0.6 ? 0.3 : 1;
+    sim = d3.forceSimulation(nodes)
+      .alpha(alpha0)
+      .force("link", d3.forceLink(lk).id((n) => n.i)
+        .distance((l) => (l.cross ? 140 : 40 + 110 * (1 - l.s)))
+        .strength((l) => (l.cross ? 0.05 : 0.7)))
+      .force("charge", d3.forceManyBody().strength(nodes.length > 120 ? -90 : -180))
+      .force("collide", d3.forceCollide((n) => radius(n.i) + 3))
+      .force("radial", d3.forceRadial((n) => n.d * 95, width / 2, height / 2).strength(0.25))
+      .on("tick", ticked);
+    // Dessin immédiat aux positions initiales : sinon les éléments nouveaux restent une frame en (0,0).
+    ticked();
+    function ticked() {
+      for (const sel of [link, hit]) {
+        sel.attr("x1", (l) => l.source.x).attr("y1", (l) => l.source.y)
+          .attr("x2", (l) => l.target.x).attr("y2", (l) => l.target.y);
+      }
+      node.attr("transform", (n) => `translate(${n.x},${n.y})`);
+    }
+  }
+
+  // --- Vue carte 2D (coordonnées de src/build_map.py) ------------------------------------------
+  const msvg = d3.select("#map");
+  const mroot = msvg.append("g");
+  const mPts = mroot.append("g");
+  const mEdges = mroot.append("g");
+  const mSel = mroot.append("g");
+  const mLabels = mroot.append("g");
+  let mk = 1; // facteur de zoom courant, pour garder des points de taille constante à l'écran
+  const mzoom = d3.zoom().scaleExtent([0.5, 40]).on("zoom", (e) => {
+    if (!Number.isFinite(e.transform.k)) return;
+    mroot.attr("transform", e.transform);
+    mk = e.transform.k;
+    mPts.selectAll("circle").attr("r", 2.6 / mk);
+    mSel.selectAll("circle").attr("r", (n) => (n.d === 0 ? 8 : 5.5) / mk).attr("stroke-width", 1.5 / mk);
+    mEdges.selectAll("line").attr("stroke-width", 1.2 / mk);
+    mLabels.selectAll("text").style("font-size", `${11 / mk}px`).style("stroke-width", `${3 / mk}px`).attr("dx", 7 / mk);
+  });
+  msvg.call(mzoom).on("dblclick.zoom", null);
+  const onMap = N.map((g, i) => i).filter((i) => N[i].xy);
+  let mx = null, my = null, mapFor = null, lastMap = -1;
+  const MAP_ALPHAS = D.meta.map_alphas || [];
+  // Carte affichée : celle choisie, ou en mode « auto » celle dont le α est le plus proche du α courant.
+  const mapIdx = () => (state.mapAlpha === "auto"
+    ? d3.minIndex(MAP_ALPHAS, (a) => Math.abs(a - state.alpha))
+    : state.mapAlpha);
+  const P = (i) => N[i].xy[mapIdx()];
+
+  function mapScales() {
+    const { width, height } = msvg.node().getBoundingClientRect();
+    if (mapFor === `${width}x${height}`) return;
+    mapFor = `${width}x${height}`;
+    const s = Math.min(width, height) / 2 - 24;
+    mx = (v) => width / 2 + s * v;
+    my = (v) => height / 2 - s * v;
+  }
+
+  function drawMap({ level, links }) {
+    mapScales();
+    // Changement de carte (autre α) : les points glissent vers leur nouvelle place (cartes alignées par Procrustes).
+    const m = mapIdx();
+    const changed = lastMap >= 0 && m !== lastMap;
+    const T = (sel) => (changed ? sel.transition().duration(700) : sel);
+    lastMap = m;
+    if (changed) focusMap(); // la vue suit le jeu central sur la nouvelle carte
+    drawMapAlphaButtons();
+    const ptFill = (i) => (state.colorRating ? ratingColor(N[i].av) : "var(--d4)");
+    mPts.selectAll("circle").data(onMap, (i) => i)
+      .join("circle")
+      .attr("class", (i) => `pt${pass[i] ? "" : " out"}`)
+      .call((sel) => T(sel).attr("cx", (i) => mx(P(i)[0])).attr("cy", (i) => my(P(i)[1])))
+      .attr("r", 2.6 / mk)
+      .attr("fill", ptFill)
+      .on("mouseenter", (e, i) => tipShow(nodeTip(i, level.has(i) ? level.get(i) : null), e))
+      .on("mousemove", tipMove)
+      .on("mouseleave", tipHide)
+      .on("click", (e, i) => { e.stopPropagation(); select(i); })
+      .on("dblclick", (e, i) => { e.stopPropagation(); setCenter(i); });
+
+    // Jeux du graphe courant : liens de l'arbre puis points mis en avant (couleur du niveau ou de la note).
+    const tree = links.filter((l) => !l.cross && N[l.source].xy && N[l.target].xy);
+    mEdges.selectAll("line").data(tree, (l) => key(l.source, l.target))
+      .join("line")
+      .attr("class", "edge")
+      .call((sel) => T(sel).attr("x1", (l) => mx(P(l.source)[0])).attr("y1", (l) => my(P(l.source)[1]))
+        .attr("x2", (l) => mx(P(l.target)[0])).attr("y2", (l) => my(P(l.target)[1])))
+      .attr("stroke-width", 1.2 / mk);
+    const sel = [...level.keys()].filter((i) => N[i].xy).map((i) => ({ i, d: level.get(i) }));
+    mSel.selectAll("circle").data(sel, (n) => n.i)
+      .join("circle")
+      .attr("class", "pt in")
+      .call((sel) => T(sel).attr("cx", (n) => mx(P(n.i)[0])).attr("cy", (n) => my(P(n.i)[1])))
+      .attr("r", (n) => (n.d === 0 ? 8 : 5.5) / mk)
+      .attr("stroke-width", 1.5 / mk)
+      .attr("fill", (n) => (state.colorRating ? ratingColor(N[n.i].av) : depthColor(n.d)))
+      .style("stroke", (n) => (state.signals && markTrade(n.i) ? "var(--sig-trade)" : null))
+      .on("mouseenter", (e, n) => tipShow(nodeTip(n.i, n.d), e))
+      .on("mousemove", tipMove)
+      .on("mouseleave", tipHide)
+      .on("click", (e, n) => { e.stopPropagation(); select(n.i); })
+      .on("dblclick", (e, n) => { e.stopPropagation(); setCenter(n.i); });
+    mLabels.selectAll("text").data(sel.filter((n) => n.d <= 1), (n) => n.i)
+      .join("text")
+      .call((sel) => T(sel).attr("x", (n) => mx(P(n.i)[0])).attr("y", (n) => my(P(n.i)[1])))
+      .attr("dx", 7 / mk).attr("dy", "0.32em")
+      .style("font-size", `${11 / mk}px`).style("stroke-width", `${3 / mk}px`)
+      .text((n) => N[n.i].n);
+  }
+
+  function setView(v) {
+    if (v === "map" && !D.meta.map_method) {
+      $("#map-msg").textContent = "Carte absente : lancer python3 src/build_map.py puis src/export_web.py.";
+      return;
+    }
+    state.view = v;
+    document.querySelectorAll(".view-btn").forEach((b) => {
+      b.classList.toggle("on", b.dataset.view === v);
+      b.setAttribute("aria-pressed", b.dataset.view === v);
+    });
+    // Sur un <svg>, la propriété .hidden n'existe pas (simple expando) : on manipule l'attribut.
+    $("#graph").toggleAttribute("hidden", v !== "graph");
+    $("#map").toggleAttribute("hidden", v !== "map");
+    $("#map-alpha-row").hidden = v !== "map";
+    mapFor = null; // tailles à recalculer une fois la vue affichée
+    tipHide();
+    if (state.center >= 0) render();
+    if (v === "map") focusMap();
+  }
+  // Boutons de choix de la carte : Auto (suit α) ou une valeur de α précalculée.
+  function drawMapAlphaButtons() {
+    const m = mapIdx();
+    const opts = [["auto", "Auto", "La carte suit le curseur α : on affiche la carte précalculée dont le α est le plus proche."]]
+      .concat(MAP_ALPHAS.map((a, j) => [j, String(a).replace(".", ","),
+        `Carte t-SNE calculée avec α = ${a} (${a === 0 ? "catégories seules" : a === 1 ? "mécaniques seules" : "mélange"}).`]));
+    $("#map-alpha-row").innerHTML = opts.map(([v, lab, help]) => {
+      const on = state.mapAlpha === v || (state.mapAlpha === "auto" && v === m);
+      return `<button type="button" class="view-btn${on ? " on" : ""}${v === "auto" && state.mapAlpha === "auto" ? " on" : ""}" ` +
+        `data-ma="${v}" data-help="${escapeHtml(help)}">${lab}</button>`;
+    }).join("");
+    $("#map-alpha-row").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => {
+      state.mapAlpha = b.dataset.ma === "auto" ? "auto" : +b.dataset.ma;
+      hideHelp();
+      render();
+    }));
+  }
+  // Recadre la carte sur le jeu central (zoom ×3), en douceur.
+  function focusMap() {
+    const g = N[state.center];
+    if (!g || !g.xy) return;
+    mapScales();
+    const xy = P(state.center);
+    const { width, height } = msvg.node().getBoundingClientRect();
+    const k = Math.max(mk, 3);
+    msvg.transition().duration(500).call(mzoom.transform,
+      d3.zoomIdentity.translate(width / 2, height / 2).scale(k).translate(-mx(xy[0]), -my(xy[1])));
+  }
+
+  function highlight(i, lk) {
+    if (i < 0) {
+      gNodes.selectAll("g.node").classed("dim", false);
+      gLinks.selectAll("line").classed("dim", false);
+      return;
+    }
+    const near = new Set([i]);
+    lk.forEach((l) => {
+      if (l.source.i === i) near.add(l.target.i);
+      if (l.target.i === i) near.add(l.source.i);
+    });
+    gNodes.selectAll("g.node").classed("dim", (n) => !near.has(n.i));
+    gLinks.selectAll("line").classed("dim", (l) => l.source.i !== i && l.target.i !== i);
+  }
+
+  // --- Panneau de détails -------------------------------------------------------------------
+  function select(i) {
+    state.selected = i;
+    gNodes.selectAll("g.node").classed("selected", (n) => n.i === i);
+    const g = N[i];
+    const c = N[state.center];
+    const isCenter = i === state.center;
+    const p = current.parent.get(i);
+
+    const sharedChips = (key, dname) => {
+      const ref = new Set(c[key]);
+      return g[key].map((t) => [t, D.dict[dname][t]]).sort((a, b) => a[1].localeCompare(b[1]))
+        .map(([t, name]) => `<span class="chip${!isCenter && ref.has(t) ? " shared" : ""}">${escapeHtml(name)}</span>`)
+        .join("") || `<span class="hint">aucune</span>`;
+    };
+    const addableChips = (key, max = 8) => {
+      const items = g[key];
+      const shown = items.slice(0, max)
+        .map((t) => `<span class="chip addable" data-key="${key}" data-t="${t}" data-help="Clic : ajouter aux filtres (seuls les jeux qui l'ont seront proposés).">` +
+          `${escapeHtml(D.dict[TAG_KEYS[key]][t])}</span>`).join("");
+      return (shown || `<span class="hint">aucun</span>`) +
+        (items.length > max ? `<span class="hint"> +${items.length - max}</span>` : "");
+    };
+    const fmt = (x, unit = "") => (x ? `${x}${unit}` : "?");
+    const sBreak = p
+      ? `s = ${p[1].toFixed(3)} (${METRICS[state.metric].label}) · ${escapeHtml(breakdown(p[0], i))}`
+      : "";
+    const nb = neighbors(i).slice(0, state.k)
+      .map(([j, s, g2]) => `<li data-i="${j}"${s < state.tau ? ' class="below"' : ""} data-help="` +
+        escapeHtml(`Clic : recentrer sur ce jeu. Similarité s = ${s.toFixed(3)}` +
+          (s < state.tau ? " (sous le seuil τ, absent du graphe)" : "") +
+          (g2 !== undefined ? ` · pépite : s·q^β = ${g2.toFixed(3)}, note ${N[j].av.toFixed(1)}, ${N[j].r} avis` : "")) + `">` +
+        `<span>${escapeHtml(label(j))}</span><span class="score">${s.toFixed(3)}</span></li>`)
+      .join("") || `<li class="hint">aucun voisin avec ces filtres</li>`;
+
+    const d = $("#details");
+    d.hidden = false;
+    d.innerHTML = `
+      <h2>${escapeHtml(g.n)}</h2>
+      <dl>
+        <dt>Année</dt><dd>${g.y ?? "?"}</dd>
+        <dt>Note BGG</dt><dd>${g.av.toFixed(2)} (moyenne) · ${g.b.toFixed(2)} (bayésienne) · ${g.r.toLocaleString("fr-FR")} avis</dd>
+        <dt>Collections</dt><dd>${g.ow.toLocaleString("fr-FR")} possèdent · ${g.wi.toLocaleString("fr-FR")} souhaitent · ${g.tr.toLocaleString("fr-FR")} échangent</dd>
+        <dt>Convoitise</dt><dd data-help="Souhaits / possédés, relatif à la médiane des jeux de l'interface (×1 = typique). Point vert : centile dans l'intervalle choisi.">×${Math.exp(BEH.wish.x[i] - BEH.wish.median).toFixed(2)} la médiane · centile ${Math.round(BEH.wish.pct[i])}${markWish(i) ? ' <span class="sig wish">dans l\'intervalle</span>' : ""}</dd>
+        <dt>Revente</dt><dd data-help="À échanger / possédés, relatif à la médiane des jeux de l'interface (×1 = typique). Contour rouge : centile dans l'intervalle choisi.">×${Math.exp(BEH.trade.x[i] - BEH.trade.median).toFixed(2)} la médiane · centile ${Math.round(BEH.trade.pct[i])}${markTrade(i) ? ' <span class="sig trade">dans l\'intervalle</span>' : ""}</dd>
+        <dt>Joueurs</dt><dd>${g.p[0] && g.p[1] ? (g.p[0] === g.p[1] ? g.p[0] : `${g.p[0]}–${g.p[1]}`) : "?"}</dd>
+        <dt>Durée</dt><dd>${fmt(g.t, " min")}</dd>
+        <dt>Âge minimal</dt><dd>${fmt(g.a, " ans")}</dd>
+        <dt>Poids</dt><dd>${g.w ?? "non disponible"}</dd>
+        <dt>Fiche</dt><dd><a href="https://boardgamegeek.com/boardgame/${g.id}" target="_blank" rel="noopener">BoardGameGeek</a></dd>
+      </dl>
+      ${p ? `<p class="kv">Atteint via ${escapeHtml(N[p[0]].n)} : ${sBreak}</p>` : ""}
+      ${isCenter && !pass[i] ? `<p class="kv">Ce jeu ne passe pas les filtres (affiché car choisi).</p>` : ""}
+      ${!isCenter ? `<p class="kv">Surlignées : communes avec ${escapeHtml(c.n)}</p>` : ""}
+      <h3>Mécaniques</h3><div class="chips">${sharedChips("m", "mech")}</div>
+      <h3>Catégories</h3><div class="chips">${sharedChips("c", "cat")}</div>
+      <h3>Auteurs</h3><div class="chips">${addableChips("d")}</div>
+      <h3>Illustrateurs</h3><div class="chips">${addableChips("ar")}</div>
+      <h3>Éditeurs</h3><div class="chips">${addableChips("pu", 6)}</div>
+      <h3>Familles</h3><div class="chips">${addableChips("f", 10)}</div>
+      <h3>${state.k} plus proches voisins</h3>
+      <ol class="nb-list">${nb}</ol>
+      ${!isCenter ? `<p class="kv"><button type="button" id="recenter">Recentrer sur ce jeu</button></p>` : ""}`;
+    d.querySelectorAll(".nb-list li[data-i]").forEach((li) => li.addEventListener("click", () => setCenter(+li.dataset.i)));
+    d.querySelectorAll(".chip.addable").forEach((ch) =>
+      ch.addEventListener("click", () => addTag(ch.dataset.key, +ch.dataset.t)));
+    const rc = d.querySelector("#recenter");
+    if (rc) rc.addEventListener("click", () => setCenter(i));
+  }
+
+  // --- Contrôles ------------------------------------------------------------------------------
+  function setCenter(i) {
+    state.center = i;
+    state.selected = i;
+    $("#search").value = label(i);
+    $("#search-msg").textContent = "";
+    $("#search-msg").classList.remove("err");
+    try { history.replaceState(null, "", `#${N[i].id}`); } catch (_) { /* file:// selon le navigateur */ }
+    drawRequired();
+    render(); // le zoom courant est conservé : render() replace le nouveau centre au milieu sans saut
+    if (state.view === "map") focusMap();
+  }
+  function go() {
+    const i = resolve($("#search").value);
+    if (i < 0) {
+      $("#search-msg").textContent = `Aucun jeu trouvé (seuls les ${N.length} jeux ayant au moins ${D.meta.min_ratings} avis sont inclus).`;
+      $("#search-msg").classList.add("err");
+      return;
+    }
+    setCenter(i);
+  }
+  $("#go").addEventListener("click", go);
+  $("#search").addEventListener("keydown", (e) => { if (e.key === "Enter") go(); });
+  $("#search").addEventListener("change", () => { if (byLabel.has($("#search").value.trim().toLowerCase())) go(); });
+
+  for (const id of ["k", "depth"]) {
+    $(`#${id}`).addEventListener("input", (e) => {
+      state[id] = +e.target.value;
+      $(`#${id}-out`).textContent = e.target.value;
+      if (state.center >= 0) render();
+    });
+  }
+  $("#cross").addEventListener("change", (e) => { state.cross = e.target.checked; if (state.center >= 0) render(); });
+  $("#no-reimpl").addEventListener("change", (e) => { state.noReimpl = e.target.checked; applyFilters(); });
+  $("#signals").addEventListener("change", (e) => {
+    state.signals = e.target.checked;
+    $("#legend-signals").hidden = !state.signals;
+    $("#sig-row").hidden = !state.signals;
+    applyFilters(); // le filtre par signaux ne s'applique que si les signaux sont affichés
+  });
+  // Un curseur à deux poignées par signal : intervalle [bas, haut] de centiles. Raccourcis pour les cas courants.
+  const SIG_PRESETS = {
+    "keep": { wish: [80, 100], trade: [0, 30] },
+    "flip": { wish: [80, 100], trade: [70, 100] },
+    "cold": { wish: [0, 20], trade: [0, 100] },
+    "all": { wish: [0, 100], trade: [0, 100] },
+  };
+  function drawSig() {
+    const fmt = (k) => (sigActive(k) ? `c${sigInt[k][0]} → c${sigInt[k][1]}` : "tous");
+    for (const k of ["wish", "trade"]) {
+      const [lo, hi] = sigInt[k];
+      $(`#${k}-lo`).value = lo; $(`#${k}-hi`).value = hi;
+      // Poignées superposées : à droite, la poignée basse passe dessus (sinon bloquée sous la haute en 100/100).
+      $(`#${k}-lo`).style.zIndex = lo > 50 ? 3 : 1;
+      $(`#${k}-out`).textContent = fmt(k);
+      const box = $(`#${k}-int`);
+      box.style.setProperty("--lo", `${lo}%`); box.style.setProperty("--hi", `${hi}%`);
+      box.classList.toggle("inactive", !sigActive(k));
+    }
+    const n = (f) => N.reduce((a, _, i) => a + (f(i) ? 1 : 0), 0);
+    const both = n((i) => ["wish", "trade"].every((k) => !sigActive(k) || inInt(k, i)));
+    $("#sig-count").textContent = (sigActive("wish") || sigActive("trade"))
+      ? `${both} jeux dans les intervalles actifs` : "aucun intervalle actif : glisse une poignée";
+    document.querySelectorAll(".sig-preset").forEach((b) => {
+      const P = SIG_PRESETS[b.dataset.p];
+      b.classList.toggle("on", ["wish", "trade"].every((k) => P[k][0] === sigInt[k][0] && P[k][1] === sigInt[k][1]));
+    });
+  }
+  let sgt;
+  const sigChanged = () => {
+    drawSig();
+    clearTimeout(sgt);
+    sgt = setTimeout(() => { if (state.sigFilter) applyFilters(); else if (state.center >= 0) render(); }, 120);
+  };
+  for (const k of ["wish", "trade"]) {
+    $(`#${k}-lo`).addEventListener("input", (e) => { sigInt[k][0] = Math.min(+e.target.value, sigInt[k][1]); sigChanged(); });
+    $(`#${k}-hi`).addEventListener("input", (e) => { sigInt[k][1] = Math.max(+e.target.value, sigInt[k][0]); sigChanged(); });
+  }
+  document.querySelectorAll(".sig-preset").forEach((b) => b.addEventListener("click", () => {
+    const P = SIG_PRESETS[b.dataset.p];
+    for (const k of ["wish", "trade"]) sigInt[k] = [...P[k]];
+    hideHelp();
+    sigChanged();
+  }));
+  $("#sig-filter").addEventListener("change", (e) => { state.sigFilter = e.target.checked; applyFilters(); });
+  drawSig();
+
+  // Curseurs de note : pas de 0,1 (valeurs ×10 dans les <input range>).
+  function drawRate(k) {
+    const R = RATE[k], box = $(`#${k}-int`);
+    $(`#${k}-lo`).value = Math.round(R.lo * 10); $(`#${k}-hi`).value = Math.round(R.hi * 10);
+    $(`#${k}-lo`).style.zIndex = R.lo > (R.min + R.max) / 2 ? 3 : 1;
+    const pos = (v) => `${(100 * (v - R.min)) / (R.max - R.min)}%`;
+    box.style.setProperty("--lo", pos(R.lo)); box.style.setProperty("--hi", pos(R.hi));
+    box.classList.toggle("inactive", !rateActive(k));
+    $(`#${k}-out`).textContent = rateActive(k) ? `${R.lo.toFixed(1)} → ${R.hi.toFixed(1)}` : "toutes";
+  }
+  let rtm;
+  for (const k of ["av", "b"]) {
+    const R = RATE[k];
+    for (const end of ["lo", "hi"]) {
+      const el = $(`#${k}-${end}`);
+      el.min = Math.round(R.min * 10); el.max = Math.round(R.max * 10); el.step = 1;
+      el.addEventListener("input", (e) => {
+        const v = e.target.value / 10;
+        if (end === "lo") R.lo = Math.min(v, R.hi); else R.hi = Math.max(v, R.lo);
+        drawRate(k);
+        clearTimeout(rtm);
+        rtm = setTimeout(applyFilters, 150);
+      });
+    }
+    drawRate(k);
+  }
+  document.querySelectorAll(".view-btn").forEach((b) => b.addEventListener("click", () => setView(b.dataset.view)));
+  msvg.on("click", () => { if (state.center >= 0) select(state.center); });
+  $("#gems-btn").addEventListener("click", () => {
+    state.gems = !state.gems;
+    $("#gems-btn").setAttribute("aria-pressed", state.gems);
+    $("#gem-row").hidden = !state.gems;
+    invalidate();
+  });
+  let gt;
+  $("#gem-beta").addEventListener("input", (e) => {
+    $("#gem-beta-out").textContent = (e.target.value / 100).toFixed(1).replace(".", ",");
+    clearTimeout(gt);
+    gt = setTimeout(() => { state.gemBeta = e.target.value / 100; if (state.gems) invalidate(); }, 120);
+  });
+  $("#show-rating").addEventListener("change", (e) => { state.showRating = e.target.checked; if (state.center >= 0) render(); });
+  $("#color-rating").addEventListener("change", (e) => {
+    state.colorRating = e.target.checked;
+    $("#legend-rating").hidden = !state.colorRating;
+    if (state.center >= 0) render();
+  });
+  $("#legend-rating .gradient").style.background =
+    `linear-gradient(to right, ${d3.range(0, 1.01, 0.1).map((t) => d3.interpolateViridis(t)).join(", ")})`;
+
+  // --- Pondération des attributs : deux curseurs activables -----------------------------------------
+  //   groupe A : Thème ↔ Mécaniques (part méca. = alpha) · groupe B : Description ↔ Familles (part familles = beta)
+  //   un seul groupe actif : il porte 100 % du poids ; les deux : 50 % chacun. Au moins un groupe reste actif.
+  const pct = (x) => `${Math.round(x * 100)} %`;
+  function drawWeights() {
+    const w = attrWeights();
+    $("#alpha-out").textContent = `${pct(state.alpha)} méca.`;
+    $("#beta-out").textContent = `${pct(state.beta)} familles`;
+    for (const [g, on] of [["A", state.onA], ["B", state.onB]]) {
+      const btn = $(`#on${g}`);
+      btn.setAttribute("aria-pressed", on);
+      $(`#tool${g}`).classList.toggle("off", !on);
+      $(`#tool${g}`).querySelectorAll("input, .preset").forEach((el) => { el.disabled = !on; });
+    }
+    document.querySelectorAll(".preset[data-a]").forEach((b) => b.classList.toggle("on", state.onA && +b.dataset.a === Math.round(state.alpha * 100)));
+    document.querySelectorAll(".preset[data-b]").forEach((b) => b.classList.toggle("on", state.onB && +b.dataset.b === Math.round(state.beta * 100)));
+    $("#weights").innerHTML = ATTR_KEYS.map((k) =>
+      `<span class="wchip${w[k] > 0 ? "" : " zero"}" data-help="Poids de « ${ATTRS[k].label} » dans la ressemblance totale.">` +
+      `${ATTRS[k].label} <b>${pct(w[k])}</b></span>`).join("");
+  }
+  function setWeight(which, v) { // which : "alpha" | "beta", v en %
+    state[which] = v / 100;
+    drawWeights();
+    invalidate();
+  }
+  for (const [which, id] of [["alpha", "#alpha"], ["beta", "#beta"]]) {
+    let tm;
+    $(id).addEventListener("input", (e) => {
+      state[which] = e.target.value / 100;
+      drawWeights();
+      clearTimeout(tm);
+      tm = setTimeout(() => invalidate(), 120);
+    });
+  }
+  document.querySelectorAll(".preset[data-a]").forEach((b) => b.addEventListener("click", () => { $("#alpha").value = b.dataset.a; setWeight("alpha", +b.dataset.a); }));
+  document.querySelectorAll(".preset[data-b]").forEach((b) => b.addEventListener("click", () => { $("#beta").value = b.dataset.b; setWeight("beta", +b.dataset.b); }));
+  for (const g of ["A", "B"]) {
+    $(`#on${g}`).addEventListener("click", () => {
+      const other = g === "A" ? state.onB : state.onA;
+      if (state[`on${g}`] && !other) return; // au moins un groupe actif
+      state[`on${g}`] = !state[`on${g}`];
+      drawWeights();
+      invalidate();
+    });
+  }
+  drawWeights();
+
+
+
+  // τ : seuil appliqué après le top-k, sans recalcul des voisins.
+  $("#tau").addEventListener("input", (e) => {
+    state.tau = e.target.value / 100;
+    $("#tau-out").textContent = `${Math.round(state.tau * 100)} %`;
+    if (state.center >= 0) render();
+  });
+
+  $("#no-franchise").addEventListener("change", (e) => { state.noFranchise = e.target.checked; applyFilters(); });
+  let ft;
+  for (const id of ["pl-min", "pl-max", "t-min", "t-max", "age-max", "w-min", "w-max"]) {
+    $(`#${id}`).addEventListener("input", () => { clearTimeout(ft); ft = setTimeout(applyFilters, 250); });
+  }
+  $("#reset").addEventListener("click", () => {
+    for (const id of ["pl-min", "pl-max", "t-min", "t-max", "age-max", "w-min", "w-max"]) $(`#${id}`).value = "";
+    for (const k of Object.keys(TAG_KEYS)) { state.tags[k].clear(); drawTagChips(k); }
+    $("#no-franchise").checked = state.noFranchise = false;
+    $("#no-reimpl").checked = state.noReimpl = false;
+    $("#sig-filter").checked = state.sigFilter = false;
+    for (const k of ["av", "b"]) { RATE[k].lo = RATE[k].min; RATE[k].hi = RATE[k].max; drawRate(k); }
+    clearReqBan(); drawRequired();
+    applyFilters();
+  });
+  $("#req-clear").addEventListener("click", () => {
+    clearReqBan(); drawRequired();
+    applyFilters();
+  });
+
+  svg.on("click", () => { if (state.center >= 0) select(state.center); });
+  let rt;
+  window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => state.center >= 0 && render(), 200); });
+
+  // Légende et méta-données
+  $("#legend-depth").innerHTML = [0, 1, 2, 3, 4]
+    .map((d) => `<li><span class="dot" style="background:${depthColor(d)}"></span>${d === 0 ? "jeu choisi" : `niveau ${d}`}</li>`)
+    .join("");
+  $("#meta").textContent = `${N.length} jeux (≥ ${D.meta.min_ratings} avis) · cosinus IDF lissé (étiquettes de moins de ` +
+    `${D.meta.min_support} jeux ignorées) · source : ${D.meta.source} · généré le ${D.meta.generated}. ` +
+    `Données BoardGameGeek, usage non commercial.`;
+
+  // --- Comparateur : accord entre métriques, puis entre attributs ---------------------------------------
+  // Pour le jeu central : A[a][b] = |V_k^a ∩ V_k^b| / k (voisins communs, mêmes filtres, sans le mode pépites).
+  //   métriques : les 4 métriques avec la pondération courante ; attributs : chaque attribut seul, métrique courante.
+  // Consensus : jeux présents dans le top-k d'au moins la moitié des 8 configurations.
+  const sel = $("#metric");
+  sel.innerHTML = METRIC_KEYS.map((m) => `<option value="${m}">${METRICS[m].label}</option>`).join("");
+  const metricHelp = () => `Métrique appliquée à chaque attribut : ${METRICS[state.metric].help}`;
+  $("#metric-tool").dataset.help = metricHelp();
+  function setMetric(m) {
+    state.metric = m;
+    sel.value = m;
+    $("#metric-tool").dataset.help = metricHelp();
+    invalidate();
+  }
+  sel.addEventListener("change", () => setMetric(sel.value));
+  // Faire d'un attribut le seul critère (clic dans la matrice des attributs).
+  function soloAttr(key) {
+    const inA = key === "m" || key === "c";
+    state.onA = inA; state.onB = !inA;
+    if (key === "m") state.alpha = 1; else if (key === "c") state.alpha = 0;
+    else if (key === "f") state.beta = 1; else state.beta = 0;
+    $("#alpha").value = Math.round(state.alpha * 100); $("#beta").value = Math.round(state.beta * 100);
+    drawWeights();
+    invalidate();
+  }
+
+  function agreementTable(confs, cur, onClick, k) {
+    const color = d3.scaleSequential(d3.interpolateBlues).domain([0, 1]);
+    const head = confs.map((c) => `<th scope="col" data-help="${escapeHtml(c.help)}">${c.short}</th>`).join("");
+    const rows = confs.map((a) => `<tr${a.id === cur ? ' class="cur"' : ""}>` +
+      `<th scope="row" data-id="${a.id}" data-help="${escapeHtml(onClick.help(a))}">${a.short}</th>` +
+      confs.map((b) => {
+        if (!a.top.length && !b.top.length) return "<td>–</td>";
+        const B = new Set(b.top);
+        const v = a.top.filter((x) => B.has(x)).length / k;
+        const bg = color(0.15 + 0.85 * v);
+        return `<td style="background:${bg};color:${textOn(bg)}" data-help="${escapeHtml(
+          `${a.label} et ${b.label} : ${Math.round(v * k)} voisin(s) commun(s) sur ${k}.`)}">${Math.round(v * 100)}</td>`;
+      }).join("") + "</tr>").join("");
+    return `<table class="agree"><thead><tr><th></th>${head}</tr></thead><tbody>${rows}</tbody></table>`;
+  }
+
+  function drawAgreement() {
+    const box = $("#agree");
+    if (state.center < 0 || box.closest("details").open === false) return;
+    const u = state.center, k = state.k, base = currentCfg();
+    const top = (cfg) => neighbors(u, cfg, false).slice(0, k).map((x) => x[0]);
+    const mConfs = METRIC_KEYS.map((m) => ({ id: m, short: METRICS[m].short, label: METRICS[m].label,
+      help: `${METRICS[m].label} : ${METRICS[m].help}`, top: top({ ...base, metric: m }) }));
+    const aConfs = ATTR_KEYS.map((key) => ({ id: key, short: ATTRS[key].short, label: ATTRS[key].label,
+      help: `${ATTRS[key].label} seul, avec la métrique ${METRICS[state.metric].label}.`,
+      top: top({ ...base, w: Object.fromEntries(ATTR_KEYS.map((x) => [x, x === key ? 1 : 0])) }) }));
+    const w = attrWeights();
+    const curAttr = ATTR_KEYS.find((x) => w[x] === 1);
+    const all = mConfs.map((c) => ({ ...c, name: c.label })).concat(aConfs.map((c) => ({ ...c, name: c.label + " seul" })));
+    const count = new Map();
+    all.forEach((c) => c.top.forEach((v, r) => {
+      const x = count.get(v) || { n: 0, rk: 0, ms: [] };
+      x.n++; x.rk += r + 1; x.ms.push(c.name);
+      count.set(v, x);
+    }));
+    const half = Math.ceil(all.length / 2);
+    const cons = [...count].filter(([, c]) => c.n >= half)
+      .sort((x, y) => y[1].n - x[1].n || x[1].rk / x[1].n - y[1].rk / y[1].n);
+    box.innerHTML = `
+      <h3 data-help="Les 4 métriques avec la pondération courante des attributs.">Métriques</h3>
+      ${agreementTable(mConfs, state.metric, { help: (a) => `Clic : utiliser la métrique « ${a.label} ».` }, k)}
+      <h3 data-help="Chaque attribut pris seul, avec la métrique courante (${escapeHtml(METRICS[state.metric].label)}).">Attributs</h3>
+      ${agreementTable(aConfs, curAttr, { help: (a) => `Clic : ne garder que « ${a.label} » comme critère.` }, k)}
+      <p class="hint">Case = % de voisins communs (top ${k}) pour ${escapeHtml(N[u].n)}.</p>
+      <h3 data-help="Jeux présents dans le top ${k} d'au moins ${half} des ${all.length} configurations (4 métriques + 4 attributs seuls) : recommandations robustes.">Consensus (≥ ${half}/${all.length})</h3>
+      <ol class="nb-list">${cons.map(([v, c]) => `<li data-i="${v}" data-help="${escapeHtml(`Clic : recentrer. Présent pour ${c.n} configurations : ${c.ms.join(", ")} ; rang moyen ${(c.rk / c.n).toFixed(1)}.`)}">` +
+        `<span>${escapeHtml(label(v))}</span><span class="score">${c.n}/${all.length}</span></li>`).join("")
+        || '<li class="hint">aucun jeu commun à la moitié des configurations</li>'}</ol>`;
+    const tables = box.querySelectorAll("table.agree");
+    tables[0].querySelectorAll("th[data-id]").forEach((th) => th.addEventListener("click", () => { hideHelp(); setMetric(th.dataset.id); }));
+    tables[1].querySelectorAll("th[data-id]").forEach((th) => th.addEventListener("click", () => { hideHelp(); soloAttr(th.dataset.id); }));
+    box.querySelectorAll("li[data-i]").forEach((li) => li.addEventListener("click", () => { hideHelp(); setCenter(+li.dataset.i); }));
+  }
+  $("#agree-box").addEventListener("toggle", drawAgreement);
+
+  // --- Aide au survol : tout élément [data-help] affiche son texte après 300 ms (souris ou focus clavier) ---
+  const help = $("#help");
+  let helpTimer = null, helpFor = null;
+  function showHelp(el) {
+    helpFor = el;
+    help.textContent = el.dataset.help;
+    help.hidden = false;
+    const r = el.getBoundingClientRect();
+    const w = help.offsetWidth, h = help.offsetHeight;
+    let x = Math.min(Math.max(8, r.left), window.innerWidth - w - 8);
+    let y = r.bottom + 6;
+    if (y + h > window.innerHeight - 8) y = r.top - h - 6; // au-dessus si pas la place en dessous
+    help.style.left = `${x}px`;
+    help.style.top = `${Math.max(8, y)}px`;
+  }
+  function hideHelp() { clearTimeout(helpTimer); help.hidden = true; helpFor = null; }
+  document.addEventListener("mouseover", (e) => {
+    const el = e.target.closest("[data-help]");
+    if (el === helpFor) return;
+    hideHelp();
+    if (el) helpTimer = setTimeout(() => showHelp(el), 300);
+  });
+  document.addEventListener("focusin", (e) => {
+    const el = e.target.closest("[data-help]");
+    hideHelp();
+    if (el) showHelp(el);
+  });
+  document.addEventListener("focusout", hideHelp);
+  document.addEventListener("mousedown", hideHelp);
+  window.addEventListener("scroll", hideHelp, true);
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+  }
+
+  // Jeu initial : id BGG dans l'URL (#30549), sinon Pandemic, sinon le plus noté.
+  const fromHash = N.findIndex((g) => String(g.id) === location.hash.slice(1));
+  const pandemic = resolve("Pandemic");
+  setCenter(fromHash >= 0 ? fromHash : pandemic >= 0 ? pandemic : 0);
+})();
