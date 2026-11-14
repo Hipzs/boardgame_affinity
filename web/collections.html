@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mes collections</title>
+  <link rel="stylesheet" href="style.css?v=83">
+</head>
+<body class="coll-page">
+  <header class="top">
+    <div>
+      <h1>Mes collections</h1>
+      <p class="sub">Jeux ajoutés depuis l'explorateur, à ranger par glisser-déposer dans tes collections · données BoardGameGeek</p>
+    </div>
+    <nav class="tabs" aria-label="Pages">
+      <a href="index.html" class="tab" target="bga-explorer" data-help="Ouvre l'explorateur (le même onglet à chaque clic).">Explorateur</a>
+      <a href="collections.html" class="tab on" aria-current="page">Mes collections <span id="coll-count" class="badge"></span></a>
+    </nav>
+  </header>
+
+  <main class="colls-main">
+    <aside class="panel filt-panel">
+      <div class="kw-search" data-help="Recherche par mots-clés dans tous tes jeux : nom, description (début et mots-clés), mécaniques, thèmes, familles, auteurs, illustrateurs, éditeurs, extensions, année. Plusieurs mots : le jeu doit tous les contenir (accents et majuscules ignorés). Préfixe « - » pour exclure un mot (ex. -dice).">
+        <input id="f-kw" type="search" placeholder="Mots-clés : nom, description, mécanique, auteur…" autocomplete="off" aria-label="Recherche par mots-clés dans mes jeux">
+      </div>
+      <div id="f-save" class="f-save">
+        <button type="button" id="f-save-btn" class="secondary" data-help="Crée une nouvelle collection avec tous tes jeux qui passent les filtres actifs (nouveaux jeux et collections confondus). Les jeux restent aussi là où ils sont.">＋ Collection avec ces jeux</button>
+        <form id="f-save-form" class="new-coll" hidden>
+          <input id="f-save-name" maxlength="60" autocomplete="off" aria-label="Nom de la nouvelle collection">
+          <button type="submit">Créer</button>
+        </form>
+      </div>
+        <div class="filters">
+          <h2 id="filters-sum" class="filters-title">Filtres <span id="filter-count" class="badge"></span></h2>
+          <div class="required in-filters">
+            <h2 data-help="Étiquettes de tes jeux (mécaniques, thème, familles fines), des plus fréquentes aux plus rares ; « + » : les afficher toutes. Clic sur une étiquette : indispensable (✓, le jeu doit l'avoir), nouveau clic : neutre. Croix à droite (au survol) : interdite (✕, le jeu ne doit pas l'avoir). Non vidé par « Réinitialiser » (bouton « Effacer »).">Garder / exclure <span id="req-count" class="badge"></span></h2>
+            <details class="req-sec" data-sec="m" open><summary><h3>Mécaniques <span class="sec-n" id="sec-n-m"></span></h3></summary>
+              <div id="req-m" class="chips"></div></details>
+            <details class="req-sec" data-sec="c" open><summary><h3>Thème <span class="sec-n" id="sec-n-c"></span></h3></summary>
+              <div id="req-c" class="chips"></div></details>
+            <details class="req-sec" data-sec="f" open><summary><h3 data-help="Familles BGG de tes jeux (hors Admin:, Crowdfunding:, Game:…).">Familles fines <span class="sec-n" id="sec-n-f"></span></h3></summary>
+              <div id="req-f" class="chips"></div></details>
+            <button id="req-clear" type="button" class="secondary" data-help="Remet toutes les mécaniques et catégories à l'état neutre.">Effacer</button>
+          </div>
+          <div class="sig-line rate-line" data-help="Note BGG moyenne des joueurs (sur 10) : garde les jeux dont la note est dans l'intervalle.">
+            <span class="sig-name">Note BGG</span><output id="av-out"></output>
+            <div class="dual range2 rate" id="av-int">
+              <input id="av-lo" type="range" aria-label="Note BGG minimale">
+              <input id="av-hi" type="range" aria-label="Note BGG maximale">
+            </div>
+          </div>
+          <div class="sig-line rate-line" data-help="Note bayésienne BGG (« Geek Rating ») : moyenne tirée vers 5,5 tant que le jeu a peu d'avis ; sert au classement BGG. Garde les jeux dont la note est dans l'intervalle.">
+            <span class="sig-name">Note bayés.</span><output id="b-out"></output>
+            <div class="dual range2 rate" id="b-int">
+              <input id="b-lo" type="range" aria-label="Note bayésienne minimale">
+              <input id="b-hi" type="range" aria-label="Note bayésienne maximale">
+            </div>
+          </div>
+          <div class="range" data-help="Garde les jeux jouables pour au moins un nombre de joueurs de l'intervalle (ex. 2 à 2 : jouables à deux). Nombre inconnu : exclu.">
+            <span class="rl">Joueurs</span>
+            <input id="pl-min" type="number" min="1" max="20" placeholder="de"> –
+            <input id="pl-max" type="number" min="1" max="20" placeholder="à">
+          </div>
+          <div class="range" data-help="Durée de partie annoncée, en minutes. Durée inconnue : exclu.">
+            <span class="rl">Durée (min)</span>
+            <input id="t-min" type="number" min="0" step="5" placeholder="de"> –
+            <input id="t-max" type="number" min="0" step="5" placeholder="à">
+          </div>
+          <div class="range" data-help="Âge du plus jeune joueur : garde les jeux dont l'âge minimal est inférieur ou égal. Âge inconnu : exclu.">
+            <span class="rl">Âge ≤</span>
+            <input id="age-max" type="number" min="0" max="21" placeholder="âge">
+          </div>
+          <div class="range" id="weight-row" data-help="Poids BGG (complexité, de 1 à 5).">
+            <span class="rl">Poids (1–5)</span>
+            <input id="w-min" type="number" min="1" max="5" step="0.1" placeholder="de"> –
+            <input id="w-max" type="number" min="1" max="5" step="0.1" placeholder="à">
+          </div>
+          <div class="tagfilter" data-key="f" data-help="Garde les jeux qui ont les familles choisis : au moins un (OU) ou tous (ET), selon la petite étiquette à côté du titre.">
+            <label for="tf-f">Famille</label>
+            <input id="tf-f" list="dl-f" placeholder="ex. Theme: Space Exploration">
+            <datalist id="dl-f"></datalist>
+            <div class="chips"></div>
+          </div>
+          <div class="tagfilter" data-key="d" data-help="Garde les jeux qui ont les auteurs choisis : au moins un (OU) ou tous (ET), selon la petite étiquette à côté du titre.">
+            <label for="tf-d">Auteur</label>
+            <input id="tf-d" list="dl-d" placeholder="ex. Reiner Knizia">
+            <datalist id="dl-d"></datalist>
+            <div class="chips"></div>
+          </div>
+          <div class="tagfilter" data-key="ar" data-help="Garde les jeux qui ont les illustrateurs choisis : au moins un (OU) ou tous (ET), selon la petite étiquette à côté du titre.">
+            <label for="tf-ar">Illustrateur</label>
+            <input id="tf-ar" list="dl-ar" placeholder="ex. Michael Menzel">
+            <datalist id="dl-ar"></datalist>
+            <div class="chips"></div>
+          </div>
+          <div class="tagfilter" data-key="pu" data-help="Garde les jeux qui ont les éditeurs choisis : au moins un (OU) ou tous (ET), selon la petite étiquette à côté du titre.">
+            <label for="tf-pu">Éditeur</label>
+            <input id="tf-pu" list="dl-pu" placeholder="ex. Days of Wonder">
+            <datalist id="dl-pu"></datalist>
+            <div class="chips"></div>
+          </div>
+
+          <button id="reset" type="button" class="secondary" data-help="Vide tous les filtres, sauf « Garder / exclure » (bouton « Effacer » dédié).">Réinitialiser</button>
+        </div>
+      <p id="f-stats" class="msg"></p>
+    </aside>
+
+    <section class="panel inbox-panel">
+      <div class="panel-head">
+        <h2 data-help="Jeux ajoutés depuis l'explorateur (« ☆ Ajouter à mes collections ») et rangés dans aucune collection. Glisse-les vers une collection à droite.">Nouveaux jeux <span id="inbox-count" class="badge"></span></h2>
+      </div>
+      <div class="inbox-tools">
+        <select id="inbox-sort" aria-label="Tri">
+          <option value="added">Ajout récent</option>
+          <option value="name">Nom</option>
+          <option value="av">Note BGG</option>
+          <option value="y">Année</option>
+          <option value="t">Durée</option>
+        </select>
+      </div>
+      <label class="check" data-help="Affiche aussi les jeux déjà rangés, avec leurs collections. Les glisser vers une collection les y ajoute sans les retirer des autres."><input id="show-all" type="checkbox"> Tous mes jeux</label>
+      <div id="inbox" class="gamelist dropzone" data-drop="" aria-label="Nouveaux jeux"></div>
+    </section>
+
+    <section class="panel colls-panel">
+      <div class="panel-head">
+        <h2 data-help="Tes groupes de jeux. Glisse un jeu sur une collection pour l'y ranger ; d'une collection à l'autre, il est déplacé (Ctrl ou Alt enfoncé : copié). Glisse-le vers « Nouveaux jeux » pour le sortir d'une collection.">Collections <span id="colls-count" class="badge"></span></h2>
+        <form id="new-coll" class="new-coll">
+          <input id="new-coll-name" placeholder="Nouvelle collection (ex. Soirées à 2)" autocomplete="off" aria-label="Nom de la nouvelle collection" maxlength="60">
+          <button type="submit">Créer</button>
+        </form>
+      </div>
+      <div id="colls" class="colls-grid"></div>
+    </section>
+
+    <aside class="panel gdetail-panel">
+      <section id="gdetail" class="details" aria-live="polite">
+        <p class="hint">Clique sur un jeu pour afficher ses détails ici.</p>
+      </section>
+    </aside>
+  </main>
+
+  <div class="coll-foot">
+    <p id="coll-msg" class="msg" aria-live="polite"></p>
+    <span class="coll-spacer"></span>
+    <button type="button" class="secondary" id="coll-export" data-help="Télécharge tes jeux et tes collections en JSON : sauvegarde, ou transfert vers un autre navigateur.">Exporter</button>
+    <label class="secondary file-btn" data-help="Ajoute les jeux et collections d'un fichier JSON exporté (fusion : rien n'est retiré ; collections de même nom réunies).">Importer<input id="coll-import" type="file" accept="application/json,.json" hidden></label>
+    <button type="button" class="secondary" id="coll-clear" data-help="Retire tous les jeux et toutes les collections (confirmation demandée).">Tout vider</button>
+  </div>
+
+  <div id="filter-pop" hidden></div>
+  <div id="coll-pop" class="coll-pop" role="dialog" aria-label="Modifier la collection" hidden></div>
+  <div id="help" role="tooltip" hidden></div>
+  <footer>Enregistré dans ce navigateur (localStorage, adresse http://localhost:8765) : exporter pour sauvegarder. Données BoardGameGeek, usage non commercial.</footer>
+
+  <script src="emoji.js?v=83"></script>
+  <script src="data/games.js?v=83"></script>
+  <script src="collection-store.js?v=83"></script>
+  <script src="collections.js?v=83"></script>
+</body>
+</html>
