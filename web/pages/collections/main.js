@@ -13,6 +13,4 @@ window.BGG_COLLECTION = createCollectionStore({
 });
 installTabLinks();
 
-const s = document.createElement("script");
-s.src = "collections.js";
-document.body.append(s);
+await import("../../collections.js");

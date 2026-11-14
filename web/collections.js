@@ -6,6 +6,11 @@
  * Glisser-déposer (HTML5) : gauche -> collection = ranger ; collection -> collection = déplacer (Ctrl/Alt : copier) ;
  * collection -> gauche = sortir de cette collection.
  */
+import { TAG_KEYS, TAG_NAMES } from "./lib/dataset.js";
+import { createKeywordText } from "./lib/keywords.js";
+import { createFilterState, passes as passesL, filterCount as filterCountL, reqBanCount, rateActive as rateActiveL, setKeywords, includeTag, excludeTag, isIncluded as isIncludedL, isExcluded as isExcludedL } from "./lib/filters.js";
+import { serializeUI, deserializeUI, UI_KEY } from "./lib/ui-persistence.js";
+
 (() => {
   "use strict";
   const $ = (s) => document.querySelector(s);
@@ -41,83 +46,31 @@
   const FAM_SKIP_F = /^(Admin|Crowdfunding|Digital Implementations|Game|Versions & Editions|Misc):/;
   const REQ = { m: { dict: "mech", label: "Méca." }, c: { dict: "cat", label: "Thème" }, f: { dict: "fam", label: "Familles" } };
   const REQ_SHOW = 12; // étiquettes visibles par rubrique avant « + »
-  const req = { m: new Set(), c: new Set(), f: new Set() }, ban = { m: new Set(), c: new Set(), f: new Set() };
+  // Filtres : état unique (web/lib/filters.js), alias courts vers ses parties.
+  const FS = createFilterState({ reqKeys: ["m", "c", "f"] });
+  const { req, ban, tags, notTags, modeReq, modeTag } = FS;
   const expanded = { m: false, c: false, f: false };
-  const TAG_KEYS = { f: "fam", d: "des", ar: "art", pu: "pub" };
-  const TAG_NAMES = { f: "Famille", d: "Auteur", ar: "Illustrateur", pu: "Éditeur" };
-  const tags = { f: new Set(), d: new Set(), ar: new Set(), pu: new Set() };
-  // Exclusions (croix sur les étiquettes du jeu affiché) : auteur, illustrateur, éditeur. Mécaniques, thème et
-  // familles fines passent par « Garder / exclure » (ban).
-  const notTags = { d: new Set(), ar: new Set(), pu: new Set() };
-  // Combinaison des choix de chaque rubrique (petite étiquette ET / OU à côté du titre) :
-  //   Garder / exclure (indispensables) : ET par défaut (toutes) ; famille, auteur, illustrateur, éditeur : OU (au moins un).
-  //   Les interdites (✕) excluent toujours un jeu qui en a au moins une.
-  const modeReq = { m: "and", c: "and", f: "and" }, modeTag = { f: "or", d: "or", ar: "or", pu: "or" };
-  const RATE = { av: { min: 2, max: 9, lo: 2, hi: 9 }, b: { min: 3.5, max: 8.6, lo: 3.5, hi: 8.6 } };
-  const rateActive = (k) => RATE[k].lo > RATE[k].min || RATE[k].hi < RATE[k].max;
-  const NUM_IDS = ["pl-min", "pl-max", "t-min", "t-max", "age-max", "w-min", "w-max"];
+  const RATE = FS.rate;
+  const rateActive = (k) => rateActiveL(FS, k);
+  const NUM_IDS = ["pl-min", "pl-max", "t-min", "t-max", "age-max", "w-min", "w-max"]; // champs numériques (même ordre que FS.nums)
+  const NUM_STATE = ["plMin", "plMax", "tMin", "tMax", "ageMax", "wMin", "wMax"];
   const num = (id) => { const v = parseFloat($(`#${id}`).value); return Number.isFinite(v) ? v : null; };
   const mine = () => COLL.list().map((x) => byId.get(x.id)).filter(Boolean);
   const reqTerms = (g, k) => (k === "f" ? g.f.filter((t) => !FAM_SKIP_F.test(D.dict.fam[t])) : g[k]);
 
-  // Recherche par mots-clés : texte normalisé (minuscules, sans accents) de chaque jeu, construit à la demande.
-  // Champs : nom, début de description, 40 mots-clés TF-IDF, mécaniques, thèmes, familles, auteurs, illustrateurs,
-  // éditeurs, extensions, année. Tous les mots doivent y être (sous-chaînes) ; « -mot » exclut.
-  const norm = (x) => String(x).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-  const kwCache = new Map();
-  function kwText(g) {
-    let t = kwCache.get(g.id);
-    if (t === undefined) {
-      const parts = [g.n, g.ds || "", g.y || "", ...(g.dv || []).map((x) => D.words[x[0]]),
-        ...g.m.map((i) => D.dict.mech[i]), ...g.c.map((i) => D.dict.cat[i]), ...g.f.map((i) => D.dict.fam[i]),
-        ...g.d.map((i) => D.dict.des[i]), ...g.ar.map((i) => D.dict.art[i]), ...g.pu.map((i) => D.dict.pub[i]),
-        ...(g.x || []).map((i) => D.dict.exp[i])];
-      t = norm(parts.join(" | "));
-      kwCache.set(g.id, t);
-    }
-    return t;
-  }
-  const kwTerms = (q) => norm(q).split(/\s+/).filter((w) => w && w !== "-");
+  // Recherche par mots-clés (web/lib/keywords.js) ; prédicat unique web/lib/filters.js.
+  const kwText = createKeywordText(D);
+  const passCtx = { kwText: (g) => kwText(g), terms: (g, i, key) => new Set(g[key]) };
   function readF() {
-    const F = { kw: kwTerms($("#f-kw").value) };
+    setKeywords(FS, $("#f-kw").value);
+    NUM_IDS.forEach((id, j) => { FS.nums[NUM_STATE[j]] = num(id); });
+    const F = { kw: FS.kw };
     for (const id of NUM_IDS) F[id] = num(id);
     return F;
   }
-  function passes(g, F) {
-    if (!g) return !F.active; // jeu absent des données : visible seulement sans filtre
-    if (F.kw.length) {
-      const txt = kwText(g);
-      for (const w of F.kw) if (w.startsWith("-") ? txt.includes(w.slice(1)) : !txt.includes(w)) return false;
-    }
-    for (const k of ["av", "b"]) if (rateActive(k) && (g[k] < RATE[k].lo || g[k] > RATE[k].hi)) return false;
-    for (const k of Object.keys(REQ)) {
-      if (!req[k].size && !ban[k].size) continue;
-      const has = new Set(g[k]);
-      if (req[k].size && (modeReq[k] === "and" ? [...req[k]].some((t) => !has.has(t)) : ![...req[k]].some((t) => has.has(t)))) return false;
-      for (const t of ban[k]) if (has.has(t)) return false;
-    }
-    for (const k of Object.keys(TAG_KEYS)) {
-      if (!tags[k].size) continue;
-      const has = new Set(g[k]);
-      if (modeTag[k] === "and" ? [...tags[k]].some((t) => !has.has(t)) : ![...tags[k]].some((t) => has.has(t))) return false;
-    }
-    for (const k of Object.keys(notTags)) if (notTags[k].size && g[k].some((t) => notTags[k].has(t))) return false;
-    if (F["pl-min"] !== null || F["pl-max"] !== null) {
-      const [mn, mx] = g.p;
-      if (!mn || !mx || mn > (F["pl-max"] ?? Infinity) || mx < (F["pl-min"] ?? 0)) return false;
-    }
-    if (F["t-min"] !== null || F["t-max"] !== null) if (!g.t || g.t < (F["t-min"] ?? 0) || g.t > (F["t-max"] ?? Infinity)) return false;
-    if (F["age-max"] !== null && (!g.a || g.a > F["age-max"])) return false;
-    if (F["w-min"] !== null || F["w-max"] !== null) if (g.w === null || g.w < (F["w-min"] ?? 0) || g.w > (F["w-max"] ?? Infinity)) return false;
-    return true;
-  }
-  const nReqBan = () => Object.keys(REQ).reduce((n, k) => n + req[k].size + ban[k].size, 0);
-  function filterCount(F) {
-    return (F.kw.length ? 1 : 0) + Object.values(tags).filter((x) => x.size).length + Object.values(notTags).filter((x) => x.size).length
-      + [F["pl-min"] ?? F["pl-max"], F["t-min"] ?? F["t-max"], F["age-max"], F["w-min"] ?? F["w-max"]].filter((x) => x !== null).length
-      + (rateActive("av") ? 1 : 0) + (rateActive("b") ? 1 : 0) + (nReqBan() ? 1 : 0);
-  }
-
+  const passes = (g, F) => (g ? passesL(g, 0, FS, passCtx) : !F.active); // jeu absent des données : visible seulement sans filtre
+  const nReqBan = () => reqBanCount(FS);
+  const filterCount = () => filterCountL(FS, { reqInCount: true });
   // Garder / exclure : pastilles à trois états, sur toutes les étiquettes de mes jeux.
   function drawRequired() {
     const G = mine();
@@ -445,28 +398,14 @@
   // auteur, éditeur -> filtre d'exclusion (pastille « ✕ » sous Auteur / Éditeur). Nouveau clic : retirer.
   // Filtre positif à gauche (indispensable dans « Garder / exclure », ou choisi sous Famille / Auteur / Éditeur) :
   // l'étiquette du jeu affiché est marquée ✓.
-  const isIncluded = (key, t) => !!(req[key]?.has(t) || tags[key]?.has(t));
-  const isExcluded = (key, t) => (ban[key] ? ban[key].has(t) : notTags[key] ? notTags[key].has(t) : false);
+  // Une étiquette est soit sélectionnée (✓), soit barrée (✕), jamais les deux : règles dans web/lib/filters.js.
+  const isIncluded = (key, t) => isIncludedL(FS, key, t);
+  const isExcluded = (key, t) => isExcludedL(FS, key, t);
   // Filtre positif depuis le jeu affiché : méca., thème, famille fine -> « Garder / exclure » (indispensable) ;
   // auteur, éditeur -> champ Auteur / Éditeur. Déjà actif (y compris sous Famille) : retiré partout.
-  function toggleInclude(key, t) {
-    if (isIncluded(key, t)) { req[key]?.delete(t); tags[key]?.delete(t); }
-    else {
-      ban[key]?.delete(t); notTags[key]?.delete(t);
-      if (req[key]) req[key].add(t); else tags[key].add(t);
-    }
-    draw();
-  }
-  // Une étiquette est soit sélectionnée (✓), soit barrée (✕), jamais les deux : exclure retire toute sélection
-  // (y compris sous Famille / Auteur / Éditeur), sélectionner retire toute exclusion.
-  function toggleExclude(key, t) {
-    if (isExcluded(key, t)) { ban[key]?.delete(t); notTags[key]?.delete(t); }
-    else {
-      req[key]?.delete(t); tags[key]?.delete(t);
-      if (ban[key]) ban[key].add(t); else notTags[key]?.add(t);
-    }
-    draw();
-  }
+  function toggleInclude(key, t) { includeTag(FS, key, t); draw(); }
+  // Exclusion : mécanique, thème, famille -> interdite ; auteur, illustrateur, éditeur -> filtre d'exclusion.
+  function toggleExclude(key, t) { excludeTag(FS, key, t); draw(); }
   const tIdx = Object.fromEntries(Object.entries(HL_NAMES).map(([k, [dn]]) => [k, new Map(D.dict[dn].map((x, i) => [x, i]))]));
   function drawDetail() {
     document.querySelectorAll(".gcard").forEach((c) => c.classList.toggle("sel", +c.dataset.id === selected));
@@ -797,37 +736,24 @@
   // --- État de la page mémorisé (jeu affiché, filtres, surbrillance, tri) -----------------------------------
   // Retrouvé en revenant sur l'onglet, même si la page a été rechargée. localStorage de ce navigateur ; illisible
   // ou absent : la page part de l'état vide.
-  const UI_KEY = "bga.collections.ui.v1";
-  const arr = (o) => Object.fromEntries(Object.entries(o).map(([k, v]) => [k, [...v]]));
   function saveUI() {
-    const nums = Object.fromEntries(NUM_IDS.map((id) => [id, $(`#${id}`).value]));
-    const st = { selected, req: arr(req), ban: arr(ban), tags: arr(tags), notTags: arr(notTags),
-      rate: { av: [RATE.av.lo, RATE.av.hi], b: [RATE.b.lo, RATE.b.hi] }, nums, expanded,
-      showAll: $("#show-all").checked, sort: $("#inbox-sort").value, modeReq, modeTag, kw: $("#f-kw").value };
+    readF();
+    const st = serializeUI(FS, { selected, expanded, showAll: $("#show-all").checked, sort: $("#inbox-sort").value });
     try { localStorage.setItem(UI_KEY, JSON.stringify(st)); } catch (_) { /* stockage indisponible */ }
   }
   function loadUI() {
     let st;
     try { st = JSON.parse(localStorage.getItem(UI_KEY) || "null"); } catch (_) { st = null; }
-    if (!st) return;
-    const fill = (dst, src) => { for (const k of Object.keys(dst)) { dst[k].clear(); (src?.[k] || []).forEach((t) => Number.isFinite(t) && dst[k].add(t)); } };
-    fill(req, st.req); fill(ban, st.ban); fill(tags, st.tags); fill(notTags, st.notTags);
-    for (const k of ["av", "b"]) {
-      const v = st.rate?.[k];
-      if (Array.isArray(v) && v.every(Number.isFinite)) {
-        RATE[k].lo = Math.max(RATE[k].min, Math.min(v[0], RATE[k].max));
-        RATE[k].hi = Math.max(RATE[k].lo, Math.min(v[1], RATE[k].max));
-      }
-      drawRate(k);
-    }
-    for (const id of NUM_IDS) if (st.nums && typeof st.nums[id] === "string") $(`#${id}`).value = st.nums[id];
-    if (typeof st.kw === "string") $("#f-kw").value = st.kw;
-    for (const k of Object.keys(expanded)) expanded[k] = !!st.expanded?.[k];
-    $("#show-all").checked = !!st.showAll;
-    if (st.sort && SORTS[st.sort]) $("#inbox-sort").value = st.sort;
-    for (const [dst, src] of [[modeReq, st.modeReq], [modeTag, st.modeTag]]) for (const k of Object.keys(dst)) if (src?.[k] === "and" || src?.[k] === "or") dst[k] = src[k];
+    const r = deserializeUI(FS, st, { sorts: Object.keys(SORTS), has: (id) => COLL.has(id) });
+    if (!r) return;
+    for (const k of ["av", "b"]) drawRate(k);
+    NUM_IDS.forEach((id, j) => { $(`#${id}`).value = FS.nums[NUM_STATE[j]] ?? ""; });
+    $("#f-kw").value = FS.kwText;
+    Object.assign(expanded, r.expanded);
+    $("#show-all").checked = r.showAll;
+    if (r.sort) $("#inbox-sort").value = r.sort;
     modeBtns.forEach((b) => b.redraw());
-    if (Number.isFinite(st.selected) && COLL.has(st.selected)) selected = st.selected; // jeu retiré entre-temps : pas restauré
+    if (r.selected !== null) selected = r.selected; // jeu retiré entre-temps : pas restauré
   }
   loadUI();
   window.addEventListener("pagehide", saveUI);

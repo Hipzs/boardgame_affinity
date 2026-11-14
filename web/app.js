@@ -4,6 +4,19 @@
  * w_k = v_k / Σ v (4 curseurs), via des listes inversées.
  * Les voisins sont cherchés parmi les jeux qui passent les filtres ; le graphe est un parcours en largeur (BFS).
  */
+import { BUDGET, MAX_NODES, KS, worst, maxDepth, maxK, expand as expandL } from "./lib/bfs.js";
+import { loadDataset, TAG_KEYS } from "./lib/dataset.js";
+import { buildAttrs } from "./lib/attrs.js";
+import { buildEmojiIndex } from "./lib/emoji-index.js";
+import { METRICS, METRIC_KEYS, attrPair as attrPairL, attrWeights as attrWeightsL, pairDetail as pairDetailL } from "./lib/metrics.js";
+import { buildSignals, sigActive as sigActiveL, inInt as inIntL, SIG_DEFAULT } from "./lib/signals.js";
+import { buildGemQ } from "./lib/gems.js";
+import { createNeighborIndex } from "./lib/neighbors.js";
+import { createKeywordText } from "./lib/keywords.js";
+import { createFilterState, computePass, filterCount, reqBanCount, rateActive as rateActiveL, setKeywords, clearReqBan as clearReqBanL } from "./lib/filters.js";
+import { createCenters } from "./lib/map-centers.js";
+import { agreementConfigs, consensus } from "./lib/agreement.js";
+
 (() => {
   "use strict";
   const D = window.BGG_DATA;
@@ -16,329 +29,77 @@
     return;
   }
 
-  // Budget du graphe : au plus 300 jeux autour du jeu choisi. Voisins k ∈ KS = {1, …, 15}.
-  const BUDGET = 300;
-  const MAX_NODES = BUDGET + 1;
-  const KS = Array.from({ length: 15 }, (_, j) => j + 1);
-  const K_MAX = KS[KS.length - 1];
-  const D_MAX = 6;
   const N = D.nodes;
+  const ds = loadDataset(D);
   const css = getComputedStyle(document.documentElement);
   const depthColor = (d) => css.getPropertyValue(`--d${Math.min(d, 4)}`).trim();
-  const TAG_KEYS = { f: "fam", d: "des", ar: "art", pu: "pub" };
 
-  // --- Attributs (blocs d'étiquettes) ------------------------------------------------------------
-  // Quatre attributs, chacun un ensemble d'étiquettes par jeu, avec un poids IDF par étiquette :
-  //   m : mécaniques · c : thème (catégories BGG) · f : familles fines · d : description (40 mots-clés TF-IDF)
-  // Toute métrique s'applique à chaque attribut ; la ressemblance est la somme pondérée par les curseurs.
-  const FAM_SKIP = /^(Admin|Crowdfunding|Digital Implementations|Game|Versions & Editions|Misc):/;
-  const smoothIdf = (counts, nDocs, keep = () => true) =>
-    Array.from(counts, (x, t) => (x >= 2 && keep(t) ? Math.log((nDocs + 1) / (x + 1)) + 1 : 0));
-  const famIdf = (() => {
-    const n = new Float64Array(D.dict.fam.length);
-    N.forEach((g) => g.f.forEach((t) => n[t]++));
-    return smoothIdf(n, N.length, (t) => !FAM_SKIP.test(D.dict.fam[t]));
-  })();
-  const ATTRS = {
-    m: { label: "Mécaniques", short: "Méca.", dict: D.dict.mech, terms: (g) => g.m, idf: D.idf.mech, npmi: D.npmi.mech },
-    c: { label: "Thème", short: "Thème", dict: D.dict.cat, terms: (g) => g.c, idf: D.idf.cat, npmi: D.npmi.cat },
-    f: { label: "Familles fines", short: "Familles", dict: D.dict.fam, terms: (g) => g.f.filter((t) => famIdf[t] > 0),
-      idf: famIdf, npmi: D.npmi.fam },
-    // Description : les poids TF-IDF sont déjà dans dv (pas d'IDF supplémentaire) ; pas de matrice S (cosinus souple → cosinus).
-    d: { label: "Description", short: "Descr.", dict: D.words, terms: (g) => g.dv.map((x) => x[0]), weights: (g) => g.dv, npmi: null },
-  };
-  const ATTR_KEYS = Object.keys(ATTRS);
-  for (const [key, A] of Object.entries(ATTRS)) {
-    const nT = A.dict.length;
-    A.vec = new Array(N.length);   // vecteur pondéré normalisé L2 : Map(t -> w)
-    A.set = new Array(N.length);   // ensemble brut des étiquettes
-    A.post = Array.from({ length: nT }, () => []); // liste inversée : t -> [[i, w]]
-    N.forEach((g, i) => {
-      const ts = A.terms(g);
-      A.set[i] = new Set(ts);
-      const pairs = A.weights ? A.weights(g) : ts.filter((t) => A.idf[t] > 0).map((t) => [t, A.idf[t]]);
-      const norm = Math.hypot(...pairs.map((x) => x[1])) || 1;
-      A.vec[i] = new Map(pairs.map(([t, w]) => [t, w / norm]));
-      for (const t of A.set[i]) A.post[t].push(i);
-    });
-    // Cosinus souple : S = I + max(0, NPMI) ; ‖x‖_S = √(xᵀ S x) précalculée par jeu.
-    if (A.npmi) {
-      A.sTimes = (x) => {
-        const out = new Float64Array(nT);
-        for (const [t, w] of x) {
-          out[t] += w;
-          for (const [t2, sv] of A.npmi[t]) out[t2] += sv * w;
-        }
-        return out;
-      };
-      A.snorm = A.vec.map((x) => {
-        if (!x.size) return 0;
-        const sx = A.sTimes(x);
-        let q = 0;
-        for (const [t, w] of x) q += w * sx[t];
-        return Math.sqrt(q);
-      });
-    }
-  }
-  const franchise = N.map((g) => new Set(g.f.filter((t) => D.dict.fam[t].startsWith("Game:"))));
+  const { ATTRS, ATTR_KEYS, franchise } = buildAttrs(D);
 
   // --- Émojis (web/emoji.js) : un par thème, un par famille de mécaniques --------------------------
   const EMO = window.BGG_EMOJI || { themes: {}, families: {} };
-  const famOfMech = {};
-  for (const [k, f] of Object.entries(EMO.families)) for (const m of f.mechanics) famOfMech[m] = k;
-  const MECH_FAM = D.dict.mech.map((m) => famOfMech[m] || null);
-  {
-    const missM = D.dict.mech.filter((m) => !famOfMech[m]), missC = D.dict.cat.filter((c) => !EMO.themes[c]);
-    if (missM.length || missC.length) console.warn("emoji.js : sans émoji", { mecaniques: missM, themes: missC });
-  }
-  // Émoji d'une étiquette (mécaniques et thèmes seulement) ; « · » si absente du dictionnaire.
-  function emo(key, t) {
-    if (key === "m") return (EMO.families[MECH_FAM[t]] || {}).emoji || "·";
-    if (key === "c") return EMO.themes[D.dict.cat[t]] || "·";
-    return "";
-  }
+  const EI = buildEmojiIndex(D, EMO);
+  const { emo, DOM_EMO, NON_THEMATIC } = EI;
+  if (EI.missing.mecaniques.length || EI.missing.themes.length) console.warn("emoji.js : sans émoji", EI.missing);
   const emoTag = (key, t) => { const e = emo(key, t); return e ? `<span class="emo">${e}</span>` : ""; };
-  // Thème dominant d'un jeu : sa catégorie thématique la plus spécifique (IDF maximal, hors catégories de format
-  // ou de licence listées dans emoji.js) ; sans catégorie, la famille
-  // de sa mécanique la plus spécifique.
-  const NON_THEMATIC = new Set((EMO.nonThematic || []).map((n) => D.dict.cat.indexOf(n)).filter((t) => t >= 0));
-  const DOM_EMO = N.map((g) => {
-    const best = (ts, idf) => ts.reduce((b, t) => (b === null || idf[t] > idf[b] ? t : b), null);
-    const thematic = g.c.filter((t) => !NON_THEMATIC.has(t));
-    const c = best(thematic.length ? thematic : g.c, D.idf.cat);
-    if (c !== null) return emo("c", c);
-    const m = best(g.m, D.idf.mech);
-    return m !== null ? emo("m", m) : "";
-  });
 
-  // --- Métriques (appliquées à chaque attribut) ---------------------------------------------------
-  const METRICS = {
-    cos: { label: "Cosinus IDF", short: "Cos IDF",
-      help: "Cosinus entre vecteurs d'étiquettes pondérés par l'IDF (TF-IDF pour la description) : une étiquette rare partagée compte beaucoup, une banale peu. Métrique de référence." },
-    jac: { label: "Jaccard", short: "Jaccard",
-      help: "|A∩B| / |A∪B| : part des étiquettes communes. Toutes les étiquettes pèsent pareil, banales comme rares." },
-    ovl: { label: "Recouvrement", short: "Recouv.",
-      help: "|A∩B| / min(|A|,|B|) : vaut 1 si les étiquettes d'un jeu sont toutes dans l'autre. Trouve les versions simplifiées ou enrichies ; favorise les jeux à peu d'étiquettes." },
-    soft: { label: "Cosinus souple", short: "Souple",
-      help: "Cosinus IDF où deux étiquettes différentes mais souvent associées sur BGG (NPMI > 0) comptent en partie comme communes : xᵀSy / (‖x‖_S‖y‖_S). Mécaniques, thème, familles ; la description retombe sur le cosinus." },
-  };
-  const METRIC_KEYS = Object.keys(METRICS);
+  // --- Métriques (web/lib/metrics.js) ---------------------------------------------------------------
+  const attrPair = (key, metric, u, v, ctx) => attrPairL(ATTRS, key, metric, u, v, ctx);
 
-  // Ressemblance d'un attribut pour une paire, avec une métrique.
-  // ctx (facultatif) : S·x_u déjà calculé pour le cosinus souple.
-  function attrPair(key, metric, u, v, ctx) {
-    const A = ATTRS[key];
-    if (metric === "jac" || metric === "ovl") {
-      const a = A.set[u], b = A.set[v];
-      if (!a.size || !b.size) return 0;
-      let inter = 0;
-      for (const t of a) if (b.has(t)) inter++;
-      return metric === "jac" ? inter / (a.size + b.size - inter) : inter / Math.min(a.size, b.size);
-    }
-    if (metric === "soft" && A.npmi) {
-      if (!A.snorm[u] || !A.snorm[v]) return 0;
-      const su = (ctx && ctx[key]) || A.sTimes(A.vec[u]);
-      let d = 0;
-      for (const [t, w] of A.vec[v]) d += su[t] * w;
-      return d / (A.snorm[u] * A.snorm[v]);
-    }
-    let s = 0; // cosinus (et repli du souple)
-    const x = A.vec[v];
-    for (const [t, w] of A.vec[u]) s += w * (x.get(t) || 0);
-    return s;
-  }
-
-  // --- Signaux par jeu : convoitise et revente ------------------------------------------------------
-  // Log-ratios lissés (+1) des collections BGG, par jeu : convoitise = ln((souhaits+1)/(possédés+1)),
-  // revente = ln((à échanger+1)/(possédés+1)). Chaque jeu reçoit son centile (0–100) parmi les jeux de l'interface ;
-  // l'utilisateur choisit un intervalle de centiles par signal.
-  // (La comparaison entre jeux par ces indicateurs, les « modulateurs », est notée dans Joplin, non appliquée.)
-  const BEH = {};
-  for (const [key, f] of [["wish", (g) => Math.log((g.wi + 1) / (g.ow + 1))], ["trade", (g) => Math.log((g.tr + 1) / (g.ow + 1))]]) {
-    const x = Float64Array.from(N, f);
-    const q = Float64Array.from(x).sort();
-    const at = (p) => q[Math.floor(p * (q.length - 1))];
-    BEH[key] = { x, median: at(0.5), at, rank: (v) => d3.bisectLeft(q, v) / (q.length - 1) };
-  }
-  // Seuils réglables (centiles, curseur double) : un jeu est « élevé » si sa valeur atteint le centile choisi.
-  // Intervalle de centiles [bas, haut] par signal ; [0, 100] = signal inactif (ni marquage ni filtre).
-  for (const key of ["wish", "trade"]) BEH[key].pct = Float64Array.from(BEH[key].x, (v) => 100 * BEH[key].rank(v));
-  // Par défaut : préréglage « Convoité, gardé » (convoitise c80 → c100, revente c0 → c30), case « Filtrer » cochée.
-  const sigInt = { wish: [80, 100], trade: [0, 30] };
-  const sigActive = (k) => sigInt[k][0] > 0 || sigInt[k][1] < 100;
-  const inInt = (k, i) => BEH[k].pct[i] >= sigInt[k][0] && BEH[k].pct[i] <= sigInt[k][1];
+  // --- Signaux par jeu : convoitise et revente (web/lib/signals.js) -------------------------------------
+  const BEH = buildSignals(N);
+  // Intervalle de centiles [bas, haut] par signal ; [0, 100] = inactif. Par défaut : « Convoité, gardé » (filtre coché).
+  const sigInt = { wish: [...SIG_DEFAULT.wish], trade: [...SIG_DEFAULT.trade] };
+  const sigActive = (k) => sigActiveL(sigInt, k);
+  const inInt = (k, i) => inIntL(BEH, sigInt, k, i);
   // Marquage : point vert (convoitise) / contour rouge (revente) pour les jeux dans l'intervalle actif.
   const markWish = (i) => sigActive("wish") && inInt("wish", i);
   const markTrade = (i) => sigActive("trade") && inInt("trade", i);
-
 
   // --- État ---------------------------------------------------------------------------------
   const state = {
     center: -1, selected: -1, k: 5, depth: 2, cross: false, tau: 0, showRating: false, colorRating: false,
     // Pondération : un curseur v_k ∈ [0, 100] par attribut, normalisé w_k = v_k / Σ v (au moins un v_k > 0).
     wRaw: { m: 100, c: 0, f: 0, d: 0 },
-    metric: "cos", signals: true, emoji: false, sigFilter: true, // signaux filtrés par défaut (« Convoité, gardé »)
-    gems: true, gemBeta: 2, // « Pépites cachées » actif par défaut, intensité β = 2,0 view: "graph", mapSel: "auto", famView: false, famOpen: null, famCenter: "mean",
-    noFranchise: false, noReimpl: false, noExpLine: false, tags: { f: new Set(), d: new Set(), ar: new Set(), pu: new Set() },
-    req: { m: new Set(), c: new Set(), f: new Set(), d: new Set() }, // étiquettes indispensables (ET logique)
-    ban: { m: new Set(), c: new Set(), f: new Set(), d: new Set() }, // étiquettes interdites
+    metric: "cos", signals: true, emoji: false,
+    gems: true, gemBeta: 2, // « Pépites cachées » actif par défaut, intensité β = 2,0
+    view: "graph", mapSel: "auto", famView: false, famOpen: null, famCenter: "mean",
   };
-  function attrWeights() {
-    const tot = ATTR_KEYS.reduce((a, k) => a + state.wRaw[k], 0) || 1;
-    return Object.fromEntries(ATTR_KEYS.map((k) => [k, state.wRaw[k] / tot]));
-  }
-  // Configuration du calcul : métrique, poids par attribut, modulateurs.
+  // Filtres (web/lib/filters.js) : état unique ; signaux filtrés par défaut (« Convoité, gardé »).
+  const FS = createFilterState({ reqKeys: ATTR_KEYS, notTagKeys: [], sigFilter: true });
+  const attrWeights = () => attrWeightsL(ATTR_KEYS, state.wRaw);
+  // Configuration du calcul : métrique, poids par attribut.
   const currentCfg = () => ({ metric: state.metric, w: attrWeights() });
-  const cfgKey = (c) => `${c.metric}|${ATTR_KEYS.map((k) => c.w[k].toFixed(3)).join(",")}`;
-
   // Ressemblance d'une paire pour une configuration (infobulles, détails) et sa décomposition par attribut.
-  function pairDetail(u, v, cfg = currentCfg()) {
-    const parts = {};
-    let s = 0;
-    for (const key of ATTR_KEYS) {
-      if (cfg.w[key] <= 0) continue;
-      parts[key] = attrPair(key, cfg.metric, u, v);
-      s += cfg.w[key] * parts[key];
-    }
-    return { s, parts };
-  }
+  const pairDetail = (u, v, cfg = currentCfg()) => pairDetailL(ATTRS, ATTR_KEYS, u, v, cfg);
 
   let pass = new Uint8Array(N.length).fill(1);
-  let nbCache = new Map();
-  const seen = new Uint8Array(N.length);
-
-  // Top-K_MAX voisins de u parmi les jeux qui passent les filtres (mis en cache tant que les réglages ne changent pas).
-  // Candidats : jeux partageant au moins une étiquette d'un attribut pondéré ; tous les jeux en cosinus souple
-  // (deux jeux sans étiquette commune peuvent y être proches).
-  function neighbors(u, cfg = currentCfg(), gems = state.gems) {
-    const ck = `${cfgKey(cfg)}|${gems ? 1 : 0}|${u}`;
-    if (nbCache.has(ck)) return nbCache.get(ck);
-    const active = ATTR_KEYS.filter((k) => cfg.w[k] > 0);
-    let cand;
-    if (cfg.metric === "soft") cand = N.map((_, i) => i);
-    else {
-      cand = [];
-      for (const key of active) {
-        for (const t of ATTRS[key].set[u]) for (const v of ATTRS[key].post[t]) if (!seen[v]) { seen[v] = 1; cand.push(v); }
-      }
-      cand.forEach((v) => { seen[v] = 0; });
-    }
-    const ctx = {};
-    if (cfg.metric === "soft") for (const key of active) if (ATTRS[key].npmi) ctx[key] = ATTRS[key].sTimes(ATTRS[key].vec[u]);
-    const fu = franchise[u], ru = N[u].ri;
-    const out = [];
-    for (const v of cand) {
-      if (v === u || !pass[v]) continue;
-      if (state.noFranchise && fu.size && [...franchise[v]].some((t) => fu.has(t))) continue;
-      if (state.noReimpl && ru >= 0 && N[v].ri === ru) continue;
-      if (state.noExpLine && N[u].xl >= 0 && N[v].xl === N[u].xl) continue;
-      let s = 0;
-      for (const key of active) s += cfg.w[key] * attrPair(key, cfg.metric, u, v, ctx);
-      if (s > 0) out.push([v, Math.min(s, 1)]);
-    }
-    let top;
-    if (gems) {
-      // Mode pépites : parmi les candidats assez similaires (s ≥ ρ·s_max), classement par s·q_v^β.
-      const sMax = out.reduce((m, x) => Math.max(m, x[1]), 0);
-      top = out.filter((x) => x[1] >= GEM_RHO * sMax)
-        .map(([v, s]) => [v, s, s * Math.pow(gemQ[v], state.gemBeta)])
-        .sort((a, b) => b[2] - a[2])
-        .slice(0, K_MAX);
-    } else {
-      out.sort((a, b) => b[1] - a[1] || N[b[0]].b - N[a[0]].b); // score, puis note bayésienne
-      top = out.slice(0, K_MAX);
-    }
-    nbCache.set(ck, top);
-    return top;
-  }
-
-  // Qualité « pépite » q_v = Q_v · O_v ∈ [0,1] :
-  //   Q_v = σ((note_v − 7) / 0,3)  (bien noté : 0,5 à 7, 0,97 à 8, 0,03 à 6)
-  //   O_v = 1 − rang centile du nombre d'avis  (peu connu → 1, très connu → 0)
-  const GEM_RHO = 0.6;
-  const gemQ = (() => {
-    const byR = N.map((_, i) => i).sort((a, b) => N[a].r - N[b].r);
-    const pct = new Float64Array(N.length);
-    byR.forEach((i, k) => { pct[i] = k / (N.length - 1); });
-    return N.map((g, i) => (1 / (1 + Math.exp(-(g.av - 7) / 0.3))) * (1 - pct[i]));
-  })();
+  const nbIndex = createNeighborIndex({ N, ATTRS, ATTR_KEYS, franchise, gemQ: buildGemQ(N) });
+  // Top-K_MAX voisins de u parmi les jeux qui passent les filtres (en cache tant que les réglages ne changent pas).
+  const neighbors = (u, cfg = currentCfg(), gems = state.gems) => nbIndex.neighbors(u, cfg,
+    { gems, gemBeta: state.gemBeta, noFranchise: FS.noFranchise, noReimpl: FS.noReimpl, noExpLine: FS.noExpLine }, pass);
 
   // --- Filtres -------------------------------------------------------------------------------
   const num = (id) => {
     const v = parseFloat($(id).value);
     return Number.isFinite(v) ? v : null;
   };
-  // Recherche par mots-clés (comme dans « Mes collections ») : texte normalisé (minuscules, sans accents) de
-  // chaque jeu, construit à la demande et mis en cache. Champs : nom, début de description, 40 mots-clés TF-IDF,
-  // mécaniques, catégories, familles, auteurs, illustrateurs, éditeurs, extensions, année.
-  // Tous les mots doivent y être (sous-chaînes) ; « -mot » exclut.
-  const kwNorm = (x) => String(x).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-  const kwCache = new Array(N.length);
-  function kwText(i) {
-    if (kwCache[i] === undefined) {
-      const g = N[i];
-      kwCache[i] = kwNorm([g.n, g.ds || "", g.y || "", ...(g.dv || []).map((x) => D.words[x[0]]),
-        ...g.m.map((t) => D.dict.mech[t]), ...g.c.map((t) => D.dict.cat[t]), ...g.f.map((t) => D.dict.fam[t]),
-        ...g.d.map((t) => D.dict.des[t]), ...g.ar.map((t) => D.dict.art[t]), ...g.pu.map((t) => D.dict.pub[t]),
-        ...(g.x || []).map((t) => D.dict.exp[t])].join(" | "));
-    }
-    return kwCache[i];
-  }
+  // Recherche par mots-clés, notes, signaux, étiquettes : voir web/lib/filters.js (état FS, prédicat unique).
+  const kwText = createKeywordText(D);
   function readFilters() {
-    return {
-      kw: kwNorm($("#f-kw").value).split(/\s+/).filter((w) => w && w !== "-"),
-      plMin: num("#pl-min"), plMax: num("#pl-max"), tMin: num("#t-min"), tMax: num("#t-max"),
-      ageMax: num("#age-max"), wMin: num("#w-min"), wMax: num("#w-max"),
-    };
+    setKeywords(FS, $("#f-kw").value);
+    Object.assign(FS.nums, { plMin: num("#pl-min"), plMax: num("#pl-max"), tMin: num("#t-min"), tMax: num("#t-max"),
+      ageMax: num("#age-max"), wMin: num("#w-min"), wMax: num("#w-max") });
+    return FS;
   }
-  // Filtres de note (curseurs à deux poignées) : intervalle [bas, haut] ; inactif s'il couvre toute la plage.
-  const RATE = {
-    av: { min: 2, max: 9, lo: 2, hi: 9 },
-    b: { min: 3.5, max: 8.6, lo: 3.5, hi: 8.6 },
-  };
-  const rateActive = (k) => RATE[k].lo > RATE[k].min || RATE[k].hi < RATE[k].max;
-  function passes(g, i, F) {
-    if (F.kw.length) {
-      const txt = kwText(i);
-      for (const w of F.kw) if (w.startsWith("-") ? txt.includes(w.slice(1)) : !txt.includes(w)) return false;
-    }
-    for (const k of ["av", "b"]) if (rateActive(k) && (g[k] < RATE[k].lo || g[k] > RATE[k].hi)) return false;
-    // Filtre par signaux : convoitise ET revente au moins au centile choisi (un curseur à 0 neutralise son critère).
-    // Filtre par signaux : chaque intervalle actif doit contenir le centile du jeu (signaux indépendants).
-    if (state.signals && state.sigFilter) for (const k of ["wish", "trade"]) if (sigActive(k) && !inInt(k, i)) return false;
-    for (const key of ATTR_KEYS) {
-      const set = ATTRS[key].set[i];
-      for (const t of state.req[key]) if (!set.has(t)) return false;
-      for (const t of state.ban[key]) if (set.has(t)) return false;
-    }
-    for (const key of Object.keys(TAG_KEYS)) {
-      const sel = state.tags[key];
-      if (sel.size && !g[key].some((t) => sel.has(t))) return false;
-    }
-    if (F.plMin !== null || F.plMax !== null) {
-      const [mn, mx] = g.p;
-      if (!mn || !mx) return false;
-      if (mn > (F.plMax ?? Infinity) || mx < (F.plMin ?? 0)) return false; // intersection d'intervalles non vide
-    }
-    if (F.tMin !== null || F.tMax !== null) {
-      if (!g.t || g.t < (F.tMin ?? 0) || g.t > (F.tMax ?? Infinity)) return false;
-    }
-    if (F.ageMax !== null && (!g.a || g.a > F.ageMax)) return false;
-    if (F.wMin !== null || F.wMax !== null) {
-      if (g.w === null || g.w < (F.wMin ?? 0) || g.w > (F.wMax ?? Infinity)) return false;
-    }
-    return true;
-  }
+  const rateActive = (k) => rateActiveL(FS, k);
+  const passCtx = () => ({ kwText: (g) => kwText(g), terms: (g, i, key) => ATTRS[key].set[i],
+    signals: state.signals ? { active: sigActive, inInt } : null });
   function applyFilters() {
     const F = readFilters();
-    pass = Uint8Array.from(N, (g, i) => (passes(g, i, F) ? 1 : 0));
-    const active = (F.kw.length ? 1 : 0) + Object.values(state.tags).filter((s) => s.size).length
-      + [F.plMin ?? F.plMax, F.tMin ?? F.tMax, F.ageMax, F.wMin ?? F.wMax].filter((x) => x !== null).length
-      + (state.noFranchise ? 1 : 0) + (state.noReimpl ? 1 : 0) + (state.noExpLine ? 1 : 0) + (state.signals && state.sigFilter && (sigActive("wish") || sigActive("trade")) ? 1 : 0)
-      + (rateActive("av") ? 1 : 0) + (rateActive("b") ? 1 : 0);
-    $("#filter-count").textContent = active || "";
-    const nReq = ATTR_KEYS.reduce((n, k) => n + state.req[k].size + state.ban[k].size, 0);
-    $("#req-count").textContent = nReq || "";
+    pass = computePass(N, F, passCtx());
+    $("#filter-count").textContent = filterCount(F, { sigOn: state.signals, sigActive: sigActive("wish") || sigActive("trade") }) || "";
+    $("#req-count").textContent = reqBanCount(F) || "";
     if (!$("#filter-pop").hidden) drawFilterPop();
     invalidate();
   }
@@ -347,7 +108,7 @@
   //   clic sur la pastille : neutre <-> indispensable (✓, le voisin doit l'avoir) ; une interdite redevient neutre
   //   clic sur la croix (visible au survol, à droite) : interdite (✕, le voisin ne doit pas l'avoir) <-> neutre
   // Une étiquette active absente du nouveau jeu central reste affichée (« extra ») pour pouvoir la retirer.
-  const clearReqBan = () => { for (const k of ATTR_KEYS) { state.req[k].clear(); state.ban[k].clear(); } };
+  const clearReqBan = () => clearReqBanL(FS);
   const REQ_SHOW = { m: Infinity, c: Infinity, f: 16, d: 14 }; // nombre de pastilles proposées (familles et mots : les plus informatives)
   function drawRequired() {
     if (state.center < 0) return;
@@ -359,12 +120,12 @@
       // Familles et description : les étiquettes les plus caractéristiques (poids décroissant) ; sinon toutes.
       const ranked = [...A.vec[ci]].sort((a, b) => b[1] - a[1]).map((x) => x[0]);
       const base = key === "m" || key === "c" ? [...own] : ranked.slice(0, REQ_SHOW[key]);
-      const items = [...new Set([...base, ...state.req[key], ...state.ban[key]])]
+      const items = [...new Set([...base, ...FS.req[key], ...FS.ban[key]])]
         .map((t) => [t, A.dict[t]])
         .sort((a, b) => a[1].localeCompare(b[1]));
       const box = $(`#req-${key}`);
       box.innerHTML = items.map(([t, name]) => {
-        const st = state.req[key].has(t) ? "on" : state.ban[key].has(t) ? "ban" : "";
+        const st = FS.req[key].has(t) ? "on" : FS.ban[key].has(t) ? "ban" : "";
         const extra = st && !own.has(t);
         const help = st === "on" ? "Indispensable : chaque voisin doit l'avoir. Clic : revenir à neutre ; croix : l'interdire."
           : st === "ban" ? "Interdite : aucun voisin ne doit l'avoir. Clic ou croix : revenir à neutre."
@@ -379,16 +140,16 @@
         const done = () => { hideHelp(); drawRequired(); applyFilters(); };
         // Pastille : neutre <-> indispensable ; une interdite redevient neutre.
         const toggleReq = () => {
-          if (state.ban[key].delete(t)) return done();
-          if (!state.req[key].delete(t)) state.req[key].add(t);
+          if (FS.ban[key].delete(t)) return done();
+          if (!FS.req[key].delete(t)) FS.req[key].add(t);
           done();
         };
         // Croix : interdite <-> neutre (une indispensable devient directement interdite).
         const toggleBan = () => {
-          if (!state.ban[key].delete(t)) {
-            state.req[key].delete(t);
-            if (key === "f" && state.tags.f.delete(t)) drawTagChips("f"); // la même famille ne reste pas choisie sous Famille
-            state.ban[key].add(t);
+          if (!FS.ban[key].delete(t)) {
+            FS.req[key].delete(t);
+            if (key === "f" && FS.tags.f.delete(t)) drawTagChips("f"); // la même famille ne reste pas choisie sous Famille
+            FS.ban[key].add(t);
           }
           done();
         };
@@ -401,18 +162,15 @@
     }
   }
   function invalidate() {
-    nbCache = new Map();
+    nbIndex.invalidate();
     if (state.center >= 0) render();
   }
 
   // Champs d'étiquettes (famille, auteur, illustrateur, éditeur) : liste de suggestions et pastilles.
-  const tagIndex = {};
+  const tagIndex = ds.tagIndex;
   for (const [key, dname] of Object.entries(TAG_KEYS)) {
     const labels = D.dict[dname];
-    tagIndex[key] = new Map(labels.map((l, i) => [l.toLowerCase(), i]));
-    const freq = new Array(labels.length).fill(0);
-    N.forEach((g) => g[key].forEach((t) => freq[t]++));
-    const order = labels.map((_, i) => i).sort((a, b) => freq[b] - freq[a]);
+    const freq = ds.tagFreq[key], order = ds.tagOrder[key];
     $(`#dl-${key}`).innerHTML = order.map((i) => `<option value="${escapeHtml(labels[i])}">${freq[i]} jeux</option>`).join("");
     const input = $(`#tf-${key}`);
     const tryAdd = () => {
@@ -425,18 +183,18 @@
     input.addEventListener("keydown", (e) => { if (e.key === "Enter") tryAdd(); });
   }
   function addTag(key, i) {
-    if (key === "f") state.ban.f.delete(i); // jamais sélectionnée et barrée à la fois
-    state.tags[key].add(i);
+    if (key === "f") FS.ban.f.delete(i); // jamais sélectionnée et barrée à la fois
+    FS.tags[key].add(i);
     drawTagChips(key);
     applyFilters();
   }
   function drawTagChips(key) {
     const box = document.querySelector(`.tagfilter[data-key="${key}"] .chips`);
-    box.innerHTML = [...state.tags[key]]
+    box.innerHTML = [...FS.tags[key]]
       .map((i) => `<span class="chip removable" data-i="${i}" data-help="Clic : retirer ce filtre.">${escapeHtml(D.dict[TAG_KEYS[key]][i])}</span>`)
       .join("");
     box.querySelectorAll(".chip").forEach((c) => c.addEventListener("click", () => {
-      state.tags[key].delete(+c.dataset.i);
+      FS.tags[key].delete(+c.dataset.i);
       drawTagChips(key);
       applyFilters();
     }));
@@ -450,66 +208,15 @@
   }
 
   // --- Recherche du jeu -----------------------------------------------------------------------
-  const label = (i) => `${N[i].n}${N[i].y ? ` (${N[i].y})` : ""}`;
+  const { label, resolve } = ds;
   const byLabel = new Map(N.map((_, i) => [label(i).toLowerCase(), i]));
   // N est déjà trié par nombre d'avis décroissant (export_web.py).
   $("#games").innerHTML = N.map((_, i) => `<option value="${escapeHtml(label(i))}">`).join("");
-  function resolve(q) {
-    q = q.trim().toLowerCase();
-    if (!q) return -1;
-    if (byLabel.has(q)) return byLabel.get(q);
-    const exact = N.findIndex((g) => g.n.toLowerCase() === q);
-    if (exact >= 0) return exact;
-    return N.findIndex((g) => g.n.toLowerCase().includes(q));
-  }
 
   // --- BFS ------------------------------------------------------------------------------------
   const key = (a, b) => (a < b ? `${a}-${b}` : `${b}-${a}`);
-  function expand() {
-    const { center, k, depth, cross, tau } = state;
-    const level = new Map([[center, 0]]);
-    const parent = new Map();
-    const links = [];
-    let frontier = [center];
-    let truncated = false;
-    let pruned = 0;
-    // k plus proches voisins de u, puis seuil τ sur la similarité.
-    const nbk = (u) => {
-      const top = neighbors(u).slice(0, k);
-      const kept = top.filter(([, s]) => s >= tau);
-      return [kept, top.length - kept.length];
-    };
-    for (let d = 0; d < depth && frontier.length && !truncated; d++) {
-      const next = [];
-      for (const u of frontier) {
-        const [kept, cut] = nbk(u);
-        pruned += cut;
-        for (const [v, s] of kept) {
-          if (level.has(v)) continue;
-          if (level.size >= MAX_NODES) { truncated = true; break; }
-          level.set(v, d + 1);
-          parent.set(v, [u, s]);
-          links.push({ source: u, target: v, s, cross: false });
-          next.push(v);
-        }
-        if (truncated) break;
-      }
-      frontier = next;
-    }
-    if (cross) {
-      // 12 voisins au plus par jeu : à k grand, presque toutes les paires seraient reliées (et le calcul long).
-      const kc = Math.min(k, 12);
-      const seen = new Set(links.map((l) => key(l.source, l.target)));
-      for (const u of level.keys()) {
-        for (const [v, s] of neighbors(u).slice(0, kc).filter(([, x]) => x >= tau)) {
-          if (!level.has(v) || seen.has(key(u, v))) continue;
-          seen.add(key(u, v));
-          links.push({ source: u, target: v, s, cross: true });
-        }
-      }
-    }
-    return { level, parent, links, truncated, pruned };
-  }
+  // Parcours en largeur : web/lib/bfs.js (voisins calculés avec les réglages courants).
+  const expand = () => expandL(state, (u) => neighbors(u));
 
   // --- Rendu SVG ----------------------------------------------------------------------------
   const svg = d3.select("#graph");
@@ -773,106 +480,10 @@
   // catégorie, avec un poids w = (nb de ses catégories thématiques dans le groupe) / (nb total de ses catégories
   // thématiques) : un jeu mono-thème pèse plus qu'un jeu à cinq thèmes. Centre = moyenne pondérée ou pic
   // d'enrichissement, calculé une fois par carte (une par attribut) et mis en cache.
-  const GROUPS = {};
-  const GROUP_OF_CAT = D.dict.cat.map((name, t) => {
-    if (NON_THEMATIC.has(t)) return null;
-    const e = EMO.themes[name];
-    if (!e) return null;
-    (GROUPS[e] = GROUPS[e] || { emoji: e, cats: [] }).cats.push(name);
-    return e;
-  });
-  for (const G of Object.values(GROUPS)) G.label = G.cats.length > 2 ? `${G.cats[0]}, ${G.cats[1]}… (${G.cats.length})` : G.cats.join(", ");
-  const FAM_KEYS = Object.keys(GROUPS);
-  const GAME_FAMS = N.map((g) => {
-    const c = new Map();
-    const th = g.c.filter((t) => GROUP_OF_CAT[t]);
-    for (const t of th) c.set(GROUP_OF_CAT[t], (c.get(GROUP_OF_CAT[t]) || 0) + 1);
-    for (const [f, n] of c) c.set(f, n / th.length);
-    return c;
-  });
-  const FAM_MEMBERS = Object.fromEntries(FAM_KEYS.map((f) => [f, onMap.filter((i) => GAME_FAMS[i].has(f))]));
-  const centCache = new Map();
-  // Deux définitions du centre d'une famille (bouton « Centre ») :
-  //   moyenne : centroïde pondéré (demandé) ; les grandes familles, présentes partout, retombent au milieu ;
-  //   pic     : cellule où la famille est la plus sur-représentée. Grille G×G, densités lissées (gaussienne
-  //             σ = 1,5 cellule) de la famille (F, pondérée par w) et de tous les jeux (A) ; enrichissement
-  //             E = (F/ΣF) / (A/ΣA), maximisé parmi les cellules où F ≥ 20 % de son maximum.
-  function centers(mi) {
-    return state.famCenter === "peak" ? peaks(mi) : centroids(mi);
-  }
-  const peakCache = new Map();
-  function peaks(mi) {
-    if (peakCache.has(mi)) return peakCache.get(mi);
-    const G = 64;
-    const xs = onMap.map((i) => N[i].xy[mi][0]).sort((a, b) => a - b);
-    const ys = onMap.map((i) => N[i].xy[mi][1]).sort((a, b) => a - b);
-    const q = (a, p) => a[Math.floor(p * (a.length - 1))];
-    const x0 = q(xs, 0.01), x1 = q(xs, 0.99), y0 = q(ys, 0.01), y1 = q(ys, 0.99);
-    const cell = (i) => {
-      const [x, y] = N[i].xy[mi];
-      const cx = Math.min(G - 1, Math.max(0, Math.floor(((x - x0) / (x1 - x0)) * G)));
-      const cy = Math.min(G - 1, Math.max(0, Math.floor(((y - y0) / (y1 - y0)) * G)));
-      return cy * G + cx;
-    };
-    const cellOf = onMap.map(cell);
-    const kern = [-3, -2, -1, 0, 1, 2, 3].map((d) => Math.exp(-(d * d) / (2 * 1.5 * 1.5)));
-    const blur = (h) => { // flou gaussien séparable
-      const tmp = new Float64Array(G * G), out = new Float64Array(G * G);
-      for (let y = 0; y < G; y++) for (let x = 0; x < G; x++) {
-        let v = 0;
-        for (let k = -3; k <= 3; k++) { const xx = x + k; if (xx >= 0 && xx < G) v += kern[k + 3] * h[y * G + xx]; }
-        tmp[y * G + x] = v;
-      }
-      for (let y = 0; y < G; y++) for (let x = 0; x < G; x++) {
-        let v = 0;
-        for (let k = -3; k <= 3; k++) { const yy = y + k; if (yy >= 0 && yy < G) v += kern[k + 3] * tmp[yy * G + x]; }
-        out[y * G + x] = v;
-      }
-      return out;
-    };
-    const A = new Float64Array(G * G);
-    onMap.forEach((i, k) => { A[cellOf[k]]++; });
-    const Ab = blur(A), sA = Ab.reduce((a, b) => a + b, 0);
-    const pos = new Map(onMap.map((i, k) => [i, cellOf[k]]));
-    const out = {}, base = centroids(mi);
-    for (const f of FAM_KEYS) {
-      if (!base[f]) continue;
-      const F = new Float64Array(G * G);
-      for (const i of FAM_MEMBERS[f]) F[pos.get(i)] += GAME_FAMS[i].get(f);
-      const Fb = blur(F), sF = Fb.reduce((a, b) => a + b, 0), fMax = Math.max(...Fb);
-      let best = -1, bestE = -1;
-      for (let c = 0; c < G * G; c++) {
-        if (Fb[c] < 0.2 * fMax || Ab[c] <= 0) continue;
-        const E = (Fb[c] / sF) / (Ab[c] / sA);
-        if (E > bestE) { bestE = E; best = c; }
-      }
-      const cx = best % G, cy = Math.floor(best / G);
-      out[f] = { ...base[f], x: x0 + ((cx + 0.5) / G) * (x1 - x0), y: y0 + ((cy + 0.5) / G) * (y1 - y0), lift: bestE };
-    }
-    peakCache.set(mi, out);
-    return out;
-  }
-  function centroids(mi) {
-    if (centCache.has(mi)) return centCache.get(mi);
-    const out = {};
-    for (const f of FAM_KEYS) {
-      let sw = 0, sx = 0, sy = 0;
-      for (const i of FAM_MEMBERS[f]) {
-        const w = GAME_FAMS[i].get(f), [x, y] = N[i].xy[mi];
-        sw += w; sx += w * x; sy += w * y;
-      }
-      if (!sw) continue;
-      const cx = sx / sw, cy = sy / sw;
-      let v = 0; // dispersion : écart quadratique moyen pondéré au centroïde
-      for (const i of FAM_MEMBERS[f]) {
-        const w = GAME_FAMS[i].get(f), [x, y] = N[i].xy[mi];
-        v += w * ((x - cx) ** 2 + (y - cy) ** 2);
-      }
-      out[f] = { f, x: cx, y: cy, n: FAM_MEMBERS[f].length, spread: Math.sqrt(v / sw) };
-    }
-    centCache.set(mi, out);
-    return out;
-  }
+  const CT = createCenters({ D, EMO, NON_THEMATIC });
+  const { GROUPS, FAM_KEYS, GAME_FAMS, FAM_MEMBERS, centroids } = CT;
+  // Deux définitions du centre d'une famille (bouton « Centre ») : moyenne pondérée ou pic d'enrichissement.
+  const centers = (mi) => CT.centers(mi, state.famCenter);
 
   function mapScales() {
     const { width, height } = msvg.node().getBoundingClientRect();
@@ -1075,8 +686,8 @@
     //   champs Auteur / Illustrateur / Éditeur / Famille. Étiquette filtrée : pleine avec ✓ ; interdite : rouge barrée ;
     //   sinon, commune avec le jeu central : orange et marron (« shared »).
     const fChip = (key, t, name, shared, kind) => {
-      const on = kind === "req" ? state.req[key].has(t) : state.tags[key].has(t);
-      const ban = kind === "req" ? state.ban[key].has(t) : key === "f" && state.ban.f.has(t);
+      const on = kind === "req" ? FS.req[key].has(t) : FS.tags[key].has(t);
+      const ban = kind === "req" ? FS.ban[key].has(t) : key === "f" && FS.ban.f.has(t);
       const cls = on ? " f-on" : ban ? " f-ban" : shared ? " shared" : "";
       const help = on ? "Filtre actif (à gauche aussi). Clic : le retirer des deux côtés."
         : ban ? "Interdite dans « Garder / exclure ». Clic : la rendre indispensable."
@@ -1093,7 +704,7 @@
     const addableChips = (key, max = 8) => {
       const items = g[key];
       // Étiquettes filtrées toujours visibles, même au-delà de la limite.
-      const shownT = [...items.slice(0, max), ...items.slice(max).filter((t) => state.tags[key].has(t))];
+      const shownT = [...items.slice(0, max), ...items.slice(max).filter((t) => FS.tags[key].has(t))];
       const shown = shownT.map((t) => fChip(key, t, D.dict[TAG_KEYS[key]][t], false, "tag")).join("");
       const hidden = items.length - shownT.length;
       return (shown || `<span class="hint">aucun</span>`) + (hidden > 0 ? `<span class="hint"> +${hidden}</span>` : "");
@@ -1154,10 +765,10 @@
         const k = ch.dataset.fk, t = +ch.dataset.ft;
         hideHelp();
         if (ch.dataset.kind === "req") {
-          if (!state.req[k].delete(t)) { state.ban[k].delete(t); state.req[k].add(t); }
+          if (!FS.req[k].delete(t)) { FS.ban[k].delete(t); FS.req[k].add(t); }
           drawRequired();
         } else {
-          if (!state.tags[k].delete(t)) { if (k === "f") state.ban.f.delete(t); state.tags[k].add(t); }
+          if (!FS.tags[k].delete(t)) { if (k === "f") FS.ban.f.delete(t); FS.tags[k].add(t); }
           drawRequired();
           drawTagChips(k);
         }
@@ -1325,9 +936,6 @@
   // --- Voisins ↔ profondeur : budget W(k, d) = k + k² + … + k^d ≤ 300 (pire cas : chaque niveau entièrement nouveau) ---
   // Les deux curseurs sont indépendants tant que le budget tient ; au-delà, celui qu'on bouge pousse l'autre
   // (« butée ») : monter k fait descendre la profondeur, monter la profondeur fait descendre k.
-  const worst = (k, d) => { let t = 0, p = 1; for (let j = 1; j <= d; j++) { p *= k; t += p; } return t; };
-  const maxDepth = (k) => { let d = 1; while (d < D_MAX && worst(k, d + 1) <= BUDGET) d++; return d; };
-  const maxK = (d) => KS.filter((k) => worst(k, d) <= BUDGET).pop();
   function drawKD(pushed) {
     $("#k").value = KS.indexOf(state.k);
     $("#depth").value = state.depth;
@@ -1424,7 +1032,7 @@
   const sigChanged = () => {
     drawSig();
     clearTimeout(sgt);
-    sgt = setTimeout(() => { if (state.sigFilter) applyFilters(); else if (state.center >= 0) render(); }, 120);
+    sgt = setTimeout(() => { if (FS.sigFilter) applyFilters(); else if (state.center >= 0) render(); }, 120);
   };
   for (const k of ["wish", "trade"]) {
     $(`#${k}-lo`).addEventListener("input", (e) => { sigInt[k][0] = Math.min(+e.target.value, sigInt[k][1]); sigChanged(); });
@@ -1436,12 +1044,12 @@
     hideHelp();
     sigChanged();
   }));
-  $("#sig-filter").addEventListener("change", (e) => { state.sigFilter = e.target.checked; applyFilters(); });
+  $("#sig-filter").addEventListener("change", (e) => { FS.sigFilter = e.target.checked; applyFilters(); });
   drawSig();
 
   // Curseurs de note : pas de 0,1 (valeurs ×10 dans les <input range>).
   function drawRate(k) {
-    const R = RATE[k], box = $(`#${k}-int`);
+    const R = FS.rate[k], box = $(`#${k}-int`);
     $(`#${k}-lo`).value = Math.round(R.lo * 10); $(`#${k}-hi`).value = Math.round(R.hi * 10);
     $(`#${k}-lo`).style.zIndex = R.lo > (R.min + R.max) / 2 ? 3 : 1;
     const pos = (v) => `${(100 * (v - R.min)) / (R.max - R.min)}%`;
@@ -1451,7 +1059,7 @@
   }
   let rtm;
   for (const k of ["av", "b"]) {
-    const R = RATE[k];
+    const R = FS.rate[k];
     for (const end of ["lo", "hi"]) {
       const el = $(`#${k}-${end}`);
       el.min = Math.round(R.min * 10); el.max = Math.round(R.max * 10); el.step = 1;
@@ -1501,8 +1109,8 @@
       set: (lo, hi) => { sigInt[k] = [lo, hi]; sigChanged(); } });
   }
   for (const k of ["av", "b"]) {
-    bandDrag($(`#${k}-int`), { min: RATE[k].min, max: RATE[k].max, step: 0.1, get: () => [RATE[k].lo, RATE[k].hi],
-      set: (lo, hi) => { RATE[k].lo = lo; RATE[k].hi = hi; drawRate(k); clearTimeout(rtm); rtm = setTimeout(applyFilters, 150); } });
+    bandDrag($(`#${k}-int`), { min: FS.rate[k].min, max: FS.rate[k].max, step: 0.1, get: () => [FS.rate[k].lo, FS.rate[k].hi],
+      set: (lo, hi) => { FS.rate[k].lo = lo; FS.rate[k].hi = hi; drawRate(k); clearTimeout(rtm); rtm = setTimeout(applyFilters, 150); } });
   }
 
   document.querySelectorAll(".view-btn[data-view]").forEach((b) => b.addEventListener("click", () => setView(b.dataset.view)));
@@ -1590,12 +1198,12 @@
   }
   $("#reset").addEventListener("click", () => {
     for (const id of ["f-kw", "pl-min", "pl-max", "t-min", "t-max", "age-max", "w-min", "w-max"]) $(`#${id}`).value = "";
-    for (const k of Object.keys(TAG_KEYS)) { state.tags[k].clear(); drawTagChips(k); }
+    for (const k of Object.keys(TAG_KEYS)) { FS.tags[k].clear(); drawTagChips(k); }
     setOpt("noFranchise", "no-franchise", false);
     setOpt("noReimpl", "no-reimpl", false);
     setOpt("noExpLine", "no-expline", false);
-    $("#sig-filter").checked = state.sigFilter = false;
-    for (const k of ["av", "b"]) { RATE[k].lo = RATE[k].min; RATE[k].hi = RATE[k].max; drawRate(k); }
+    $("#sig-filter").checked = FS.sigFilter = false;
+    for (const k of ["av", "b"]) { FS.rate[k].lo = FS.rate[k].min; FS.rate[k].hi = FS.rate[k].max; drawRate(k); }
     // « Garder / exclure » n'est pas touché : il a son propre bouton « Effacer ».
     applyFilters();
   });
@@ -1623,35 +1231,35 @@
     const out = [];
     const add = (group, text, clear, cls = "") => out.push({ group, text, clear, cls });
     const TAG_NAMES = { f: "Famille", d: "Auteur", ar: "Illustrateur", pu: "Éditeur" };
-    for (const key of Object.keys(TAG_KEYS)) for (const t of state.tags[key]) {
-      add("Filtres", `${TAG_NAMES[key]} : ${D.dict[TAG_KEYS[key]][t]}`, () => { state.tags[key].delete(t); drawTagChips(key); });
+    for (const key of Object.keys(TAG_KEYS)) for (const t of FS.tags[key]) {
+      add("Filtres", `${TAG_NAMES[key]} : ${D.dict[TAG_KEYS[key]][t]}`, () => { FS.tags[key].delete(t); drawTagChips(key); });
     }
     const F = readFilters();
     if (F.kw.length) add("Filtres", `Mots-clés : « ${$("#f-kw").value.trim()} »`, () => { $("#f-kw").value = ""; });
     const span = (lo, hi, unit = "") => (lo !== null && hi !== null ? `${fr(lo)} à ${fr(hi)}${unit}`
       : lo !== null ? `≥ ${fr(lo)}${unit}` : `≤ ${fr(hi)}${unit}`);
     const clearIds = (...ids) => () => ids.forEach((id) => { $(`#${id}`).value = ""; });
-    if (F.plMin !== null || F.plMax !== null) add("Filtres", `Joueurs : ${span(F.plMin, F.plMax)}`, clearIds("pl-min", "pl-max"));
-    if (F.tMin !== null || F.tMax !== null) add("Filtres", `Durée : ${span(F.tMin, F.tMax, " min")}`, clearIds("t-min", "t-max"));
-    if (F.ageMax !== null) add("Filtres", `Âge ≤ ${F.ageMax} ans`, clearIds("age-max"));
-    if (F.wMin !== null || F.wMax !== null) add("Filtres", `Poids : ${span(F.wMin, F.wMax)}`, clearIds("w-min", "w-max"));
+    if (F.nums.plMin !== null || F.nums.plMax !== null) add("Filtres", `Joueurs : ${span(F.nums.plMin, F.nums.plMax)}`, clearIds("pl-min", "pl-max"));
+    if (F.nums.tMin !== null || F.nums.tMax !== null) add("Filtres", `Durée : ${span(F.nums.tMin, F.nums.tMax, " min")}`, clearIds("t-min", "t-max"));
+    if (F.nums.ageMax !== null) add("Filtres", `Âge ≤ ${F.nums.ageMax} ans`, clearIds("age-max"));
+    if (F.nums.wMin !== null || F.nums.wMax !== null) add("Filtres", `Poids : ${span(F.nums.wMin, F.nums.wMax)}`, clearIds("w-min", "w-max"));
     for (const [k, name] of [["av", "Note BGG"], ["b", "Note bayésienne"]]) {
-      if (rateActive(k)) add("Filtres", `${name} : ${fr(RATE[k].lo.toFixed(1))} à ${fr(RATE[k].hi.toFixed(1))}`,
-        () => { RATE[k].lo = RATE[k].min; RATE[k].hi = RATE[k].max; drawRate(k); });
+      if (rateActive(k)) add("Filtres", `${name} : ${fr(FS.rate[k].lo.toFixed(1))} à ${fr(FS.rate[k].hi.toFixed(1))}`,
+        () => { FS.rate[k].lo = FS.rate[k].min; FS.rate[k].hi = FS.rate[k].max; drawRate(k); });
     }
-    if (state.noFranchise) add("Filtres", "Sans franchise", () => setOpt("noFranchise", "no-franchise", false));
-    if (state.noReimpl) add("Filtres", "Sans réimplémentation", () => setOpt("noReimpl", "no-reimpl", false));
-    if (state.noExpLine) add("Filtres", "Sans extension (même gamme)", () => setOpt("noExpLine", "no-expline", false));
-    if (state.signals && state.sigFilter && (sigActive("wish") || sigActive("trade"))) {
+    if (FS.noFranchise) add("Filtres", "Sans franchise", () => setOpt("noFranchise", "no-franchise", false));
+    if (FS.noReimpl) add("Filtres", "Sans réimplémentation", () => setOpt("noReimpl", "no-reimpl", false));
+    if (FS.noExpLine) add("Filtres", "Sans extension (même gamme)", () => setOpt("noExpLine", "no-expline", false));
+    if (state.signals && FS.sigFilter && (sigActive("wish") || sigActive("trade"))) {
       const iv = (k) => `c${sigInt[k][0]}–c${sigInt[k][1]}`;
       const parts = [sigActive("wish") ? `convoitise ${iv("wish")}` : null, sigActive("trade") ? `revente ${iv("trade")}` : null];
-      add("Filtres", `Signaux : ${parts.filter(Boolean).join(", ")}`, () => { $("#sig-filter").checked = state.sigFilter = false; });
+      add("Filtres", `Signaux : ${parts.filter(Boolean).join(", ")}`, () => { $("#sig-filter").checked = FS.sigFilter = false; });
     }
     for (const key of ATTR_KEYS) {
-      for (const t of state.req[key]) add("Garder / exclure", `✓ ${ATTRS[key].dict[t]} (${ATTRS[key].short})`,
-        () => { state.req[key].delete(t); drawRequired(); });
-      for (const t of state.ban[key]) add("Garder / exclure", `✕ ${ATTRS[key].dict[t]} (${ATTRS[key].short})`,
-        () => { state.ban[key].delete(t); drawRequired(); }, "ban");
+      for (const t of FS.req[key]) add("Garder / exclure", `✓ ${ATTRS[key].dict[t]} (${ATTRS[key].short})`,
+        () => { FS.req[key].delete(t); drawRequired(); });
+      for (const t of FS.ban[key]) add("Garder / exclure", `✕ ${ATTRS[key].dict[t]} (${ATTRS[key].short})`,
+        () => { FS.ban[key].delete(t); drawRequired(); }, "ban");
     }
     return out;
   }
@@ -1736,23 +1344,10 @@
     if (state.center < 0 || box.closest("details").open === false) return;
     const u = state.center, k = Math.min(state.k, 30), base = currentCfg(); // top 30 au plus : matrices lisibles
     const top = (cfg) => neighbors(u, cfg, false).slice(0, k).map((x) => x[0]);
-    const mConfs = METRIC_KEYS.map((m) => ({ id: m, short: METRICS[m].short, label: METRICS[m].label,
-      help: `${METRICS[m].label} : ${METRICS[m].help}`, top: top({ ...base, metric: m }) }));
-    const aConfs = ATTR_KEYS.map((key) => ({ id: key, short: ATTRS[key].short, label: ATTRS[key].label,
-      help: `${ATTRS[key].label} seul, avec la métrique ${METRICS[state.metric].label}.`,
-      top: top({ ...base, w: Object.fromEntries(ATTR_KEYS.map((x) => [x, x === key ? 1 : 0])) }) }));
+    const { mConfs, aConfs } = agreementConfigs({ ATTRS, ATTR_KEYS, base, top });
     const w = attrWeights();
     const curAttr = ATTR_KEYS.find((x) => w[x] === 1);
-    const all = mConfs.map((c) => ({ ...c, name: c.label })).concat(aConfs.map((c) => ({ ...c, name: c.label + " seul" })));
-    const count = new Map();
-    all.forEach((c) => c.top.forEach((v, r) => {
-      const x = count.get(v) || { n: 0, rk: 0, ms: [] };
-      x.n++; x.rk += r + 1; x.ms.push(c.name);
-      count.set(v, x);
-    }));
-    const half = Math.ceil(all.length / 2);
-    const cons = [...count].filter(([, c]) => c.n >= half)
-      .sort((x, y) => y[1].n - x[1].n || x[1].rk / x[1].n - y[1].rk / y[1].n);
+    const { all, half, cons } = consensus(mConfs, aConfs);
     box.innerHTML = `
       <h3 data-help="Les 4 métriques avec la pondération courante des attributs.">Métriques</h3>
       ${agreementTable(mConfs, state.metric, { help: (a) => `Clic : utiliser la métrique « ${a.label} ».` }, k)}
