@@ -15,3 +15,9 @@ __pycache__/
 
 # Journal de travail local (non publié)
 CLAUDE.md
+
+# Outillage de développement (npm) et tests navigateur
+node_modules/
+playwright-report/
+test-results/
+tests/e2e/__screenshots__/*-real-*

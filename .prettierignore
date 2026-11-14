@@ -1,0 +1,20 @@
+# Données générées
+web/data/
+data/
+node_modules/
+playwright-report/
+test-results/
+package-lock.json
+
+# Fichiers hérités, en cours de découpage (étapes 1 à 8) : non reformatés pour garder les diffs lisibles.
+web/app.js
+web/collections.js
+web/collection-store.js
+web/emoji.js
+web/default-collections.js
+web/style.css
+web/index.html
+web/collections.html
+tests/fixtures/games.small.js
+tests/fixtures/games.small.json
+tests/e2e/__screenshots__/

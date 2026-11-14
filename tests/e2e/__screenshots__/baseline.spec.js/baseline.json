@@ -1,0 +1,58 @@
+{
+ "defaults": {
+  "kd": "23 / 30 jeux affichés (max 300), 23 liens d'arbre · 459 / 4672 jeux passent les filtres",
+  "filterCount": "1",
+  "sigCount": "459 jeux dans les intervalles actifs",
+  "weights": "Mécaniques 100 %Thème 0 %Familles fines 0 %Description 0 %",
+  "details": "Terraforming Mars",
+  "neighbours": [
+   "Ark Nova (2021)0.680",
+   "Wild Space (2020)0.447",
+   "Alma Mater (2020)0.557",
+   "Saint Petersburg (Second Edition) (2014)0.416",
+   "Cascadia (2021)0.448"
+  ]
+ },
+ "gemsOff": {
+  "kd": "20 / 30 jeux affichés (max 300), 20 liens d'arbre · 459 / 4672 jeux passent les filtres",
+  "filterCount": "1",
+  "sigCount": "459 jeux dans les intervalles actifs",
+  "weights": "Mécaniques 100 %Thème 0 %Familles fines 0 %Description 0 %",
+  "details": "Terraforming Mars",
+  "neighbours": [
+   "Ark Nova (2021)0.680",
+   "It's a Wonderful World (2019)0.616",
+   "Alma Mater (2020)0.557",
+   "Everdell (2018)0.515",
+   "On Mars (2020)0.499"
+  ]
+ },
+ "soft": {
+  "kd": "16 / 30 jeux affichés (max 300), 16 liens d'arbre · 459 / 4672 jeux passent les filtres",
+  "filterCount": "1",
+  "sigCount": "459 jeux dans les intervalles actifs",
+  "weights": "Mécaniques 100 %Thème 0 %Familles fines 0 %Description 0 %",
+  "details": "Terraforming Mars",
+  "neighbours": [
+   "Ark Nova (2021)0.899",
+   "Everdell (2018)0.844",
+   "It's a Wonderful World (2019)0.838",
+   "Alma Mater (2020)0.819",
+   "The Magnificent (2019)0.818"
+  ]
+ },
+ "pandemic": {
+  "kd": "14 / 30 jeux affichés (max 300), 14 liens d'arbre · 459 / 4672 jeux passent les filtres",
+  "filterCount": "1",
+  "sigCount": "459 jeux dans les intervalles actifs",
+  "weights": "Mécaniques 100 %Thème 0 %Familles fines 0 %Description 0 %",
+  "details": "Pandemic",
+  "neighbours": [
+   "World of Warcraft: Wrath of the Lich King (2021)1.000",
+   "Pandemic Legacy: Season 0 (2020)0.647",
+   "ALIEN: Fate of the Nostromo (2021)0.644",
+   "Cthulhu: Death May Die (2019)0.605",
+   "Star Trek: Ascendancy (2016)0.604"
+  ]
+ }
+}

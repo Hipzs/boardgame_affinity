@@ -21,7 +21,7 @@ python3 src/export_web.py          # attributs, NPMI, descriptions -> web/data/g
 ## Lancer l'interface
 
 ```bash
-python3 -m http.server 8765 --directory web
+python3 web/serve.py 8765        # ou : npm run serve (sans cache navigateur)
 ```
 
 Puis ouvrir http://localhost:8765. La bibliothèque d3 est chargée depuis cdnjs (connexion internet nécessaire).
