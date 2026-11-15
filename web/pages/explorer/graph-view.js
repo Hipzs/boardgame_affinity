@@ -237,7 +237,8 @@ export function install(app) {
       .join((enter) => {
         const g = enter.append("g");
         g.append("circle").attr("class", "bubble");
-        g.append("circle").attr("class", "wish-dot");
+        g.append("text").attr("class", "sig-plus").attr("dy", "0.35em");
+        g.append("text").attr("class", "sig-minus").attr("dy", "0.35em");
         g.append("text").attr("class", "rating").attr("dy", "0.35em");
         g.append("text").attr("class", "label").attr("dy", "0.32em");
         return g;
@@ -250,18 +251,23 @@ export function install(app) {
       );
     const R = (n) => radius(n.i) + (n.d === 0 ? 3 : 0);
     const fill = (n) => (state.colorRating ? ratingColor(N[n.i].av) : depthColor(n.d));
-    // Signaux par jeu : revente élevée → contour rouge ; convoitise élevée → point vert intérieur.
-    node
-      .select("circle.bubble")
-      .attr("r", R)
-      .attr("fill", fill)
-      .style("stroke", (n) => (state.signals && markTrade(n.i) ? "var(--sig-trade)" : null))
-      .style("stroke-width", (n) => (state.signals && markTrade(n.i) ? "3px" : null));
-    // Point vert : en haut de la bulle si la note y est écrite, sinon au centre.
-    node
-      .select("circle.wish-dot")
-      .attr("r", (n) => (state.signals && markWish(n.i) ? Math.max(2.5, R(n) * (state.showRating ? 0.22 : 0.32)) : 0))
-      .attr("cy", (n) => (state.showRating ? -R(n) * 0.6 : 0));
+    // Signaux par jeu : « + » verts (convoitise) au-dessus de la note, « − » rouges (revente) en dessous ;
+    // « + » : 1 en bas de l'intervalle, 3 en haut ; « − » : l'inverse (3 en bas, 1 en haut).
+    const sigLevel = (k, i) => {
+      const [lo, hi] = app.sigInt[k];
+      const t = hi > lo ? Math.max(0, (BEH[k].pct[i] - lo) / (hi - lo)) : 1;
+      // revente : bas de l'intervalle (jeu gardé) = 3 « − », haut = 1
+      return Math.min(3, 1 + Math.floor(3 * (k === "trade" ? 1 - t : t)));
+    };
+    const sigText = (sel, mark, k, ch, sign) =>
+      node
+        .select(sel)
+        .text((n) => (state.signals && mark(n.i) ? ch.repeat(sigLevel(k, n.i)) : ""))
+        .attr("y", (n) => sign * R(n) * (state.showRating ? 0.62 : 0.3))
+        .style("font-size", (n) => `${Math.max(8, Math.min(13, R(n) * 0.6)).toFixed(1)}px`);
+    node.select("circle.bubble").attr("r", R).attr("fill", fill);
+    sigText("text.sig-plus", markWish, "wish", "+", -1);
+    sigText("text.sig-minus", markTrade, "trade", "−", 1);
     node
       .select("text.rating")
       .text((n) => (state.showRating ? N[n.i].av.toFixed(1) : ""))

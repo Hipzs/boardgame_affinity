@@ -88,23 +88,35 @@ button:disabled {
   cursor: default;
 }
 
-/* --- Signaux par jeu : revente (contour rouge), convoitise (point vert) --- */
-#graph .node circle.wish-dot {
-  fill: var(--sig-wish);
-  stroke: var(--surface);
-  stroke-width: 1px;
+/* --- Signaux par jeu : revente (− rouges), convoitise (+ verts) --- */
+#graph .node text.sig-plus,
+#graph .node text.sig-minus {
+  text-anchor: middle;
+  font-weight: 800;
   pointer-events: none;
+  paint-order: stroke;
+  stroke: var(--surface);
+  stroke-width: 2px;
+}
+#graph .node text.sig-plus {
+  fill: var(--sig-wish);
+}
+#graph .node text.sig-minus {
+  fill: var(--sig-trade);
 }
 #legend-signals {
   margin-top: 6px;
 }
-.legend .dot.sig-ring {
-  background: transparent;
-  border: 2.5px solid var(--sig-trade);
-  box-sizing: border-box;
+.legend .sig-sym {
+  display: inline-block;
+  min-width: 2.2em;
+  font-weight: 800;
 }
-.legend .dot.sig-dot {
-  background: var(--sig-wish);
+.legend .sig-sym.plus {
+  color: var(--sig-wish);
+}
+.legend .sig-sym.minus {
+  color: var(--sig-trade);
 }
 .sig {
   font-size: 0.72rem;
