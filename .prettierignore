@@ -7,7 +7,6 @@ test-results/
 package-lock.json
 
 # Fichiers hérités, en cours de découpage (étapes 1 à 8) : non reformatés pour garder les diffs lisibles.
-web/app.js
 web/collections.js
 web/collection-store.js
 web/emoji.js
