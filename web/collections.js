@@ -11,7 +11,7 @@ import { createKeywordText } from "./lib/keywords.js";
 import { createFilterState, passes as passesL, filterCount as filterCountL, reqBanCount, rateActive as rateActiveL, setKeywords, includeTag, excludeTag, isIncluded as isIncludedL, isExcluded as isExcludedL } from "./lib/filters.js";
 import { escapeHtml as esc } from "./ui/html.js";
 import { installHelp } from "./ui/help-tooltip.js";
-import { createBandDrag } from "./ui/dual-range.js";
+import { createFilterPanel } from "./ui/filter-panel/filter-panel.js";
 import { serializeUI, deserializeUI, UI_KEY } from "./lib/ui-persistence.js";
 
 (() => {
@@ -58,18 +58,34 @@ import { serializeUI, deserializeUI, UI_KEY } from "./lib/ui-persistence.js";
   const rateActive = (k) => rateActiveL(FS, k);
   const NUM_IDS = ["pl-min", "pl-max", "t-min", "t-max", "age-max", "w-min", "w-max"]; // champs numériques (même ordre que FS.nums)
   const NUM_STATE = ["plMin", "plMax", "tMin", "tMax", "ageMax", "wMin", "wMax"];
-  const num = (id) => { const v = parseFloat($(`#${id}`).value); return Number.isFinite(v) ? v : null; };
   const mine = () => COLL.list().map((x) => byId.get(x.id)).filter(Boolean);
+  // Panneau Filtres : web/ui/filter-panel/ (balisage, curseurs de note, champs d'étiquettes, saisie anti-rebond).
+  // « ＋ Collection avec ces jeux » s'insère sous la recherche par mots-clés.
+  const F_SAVE_HTML = `
+      <div id="f-save" class="f-save">
+        <button type="button" id="f-save-btn" class="secondary" data-help="Crée une nouvelle collection avec tous tes jeux qui passent les filtres actifs (nouveaux jeux et collections confondus). Les jeux restent aussi là où ils sont.">＋ Collection avec ces jeux</button>
+        <form id="f-save-form" class="new-coll" hidden>
+          <input id="f-save-name" maxlength="60" autocomplete="off" aria-label="Nom de la nouvelle collection">
+          <button type="submit">Créer</button>
+        </form>
+      </div>
+`;
+  const panel = createFilterPanel($("#filter-panel"), { mode: "collections", D, F: FS, hideHelp, debounce: 200,
+    onChange: () => draw(), afterKeywords: F_SAVE_HTML,
+    suggestions: (k) => {
+      const freq = new Map();
+      mine().forEach((g) => g[k].forEach((t) => freq.set(t, (freq.get(t) || 0) + 1)));
+      return [...freq].sort((a, b) => b[1] - a[1]);
+    } });
   const reqTerms = (g, k) => (k === "f" ? g.f.filter((t) => !FAM_SKIP_F.test(D.dict.fam[t])) : g[k]);
 
   // Recherche par mots-clés (web/lib/keywords.js) ; prédicat unique web/lib/filters.js.
   const kwText = createKeywordText(D);
   const passCtx = { kwText: (g) => kwText(g), terms: (g, i, key) => new Set(g[key]) };
   function readF() {
-    setKeywords(FS, $("#f-kw").value);
-    NUM_IDS.forEach((id, j) => { FS.nums[NUM_STATE[j]] = num(id); });
+    panel.readInputs();
     const F = { kw: FS.kw };
-    for (const id of NUM_IDS) F[id] = num(id);
+    NUM_IDS.forEach((id, j) => { F[id] = FS.nums[NUM_STATE[j]]; });
     return F;
   }
   const passes = (g, F) => (g ? passesL(g, 0, FS, passCtx) : !F.active); // jeu absent des données : visible seulement sans filtre
@@ -165,76 +181,13 @@ import { serializeUI, deserializeUI, UI_KEY } from "./lib/ui-persistence.js";
   }
 
   // Champs d'étiquettes (famille, auteur, illustrateur, éditeur) : suggestions = étiquettes de mes jeux.
-  function drawTagFilters() {
-    const G = mine();
-    for (const [k, dn] of Object.entries(TAG_KEYS)) {
-      const freq = new Map();
-      G.forEach((g) => g[k].forEach((t) => freq.set(t, (freq.get(t) || 0) + 1)));
-      $(`#dl-${k}`).innerHTML = [...freq].sort((a, b) => b[1] - a[1])
-        .map(([t, n]) => `<option value="${esc(D.dict[dn][t])}">${n} jeu${n > 1 ? "x" : ""}</option>`).join("");
-      const box = document.querySelector(`.tagfilter[data-key="${k}"] .chips`);
-      box.innerHTML = [...tags[k]].map((t) => `<span class="chip removable" data-i="${t}" data-help="Clic : retirer ce filtre.">${esc(D.dict[dn][t])}</span>`).join("") +
-        [...(notTags[k] || [])].map((t) => `<span class="chip removable notag" data-n="${t}" data-help="Exclu : aucun jeu affiché ne doit l'avoir. Clic : retirer ce filtre.">✕ ${esc(D.dict[dn][t])}</span>`).join("");
-      box.querySelectorAll(".chip[data-i]").forEach((c) => c.addEventListener("click", () => { tags[k].delete(+c.dataset.i); hideHelp(); draw(); }));
-      box.querySelectorAll(".chip[data-n]").forEach((c) => c.addEventListener("click", () => { notTags[k].delete(+c.dataset.n); hideHelp(); draw(); }));
-    }
-  }
-  for (const [k, dn] of Object.entries(TAG_KEYS)) {
-    const inp = $(`#tf-${k}`);
-    const idx = new Map(D.dict[dn].map((x, i) => [x.toLowerCase(), i]));
-    const tryAdd = () => {
-      const t = idx.get(inp.value.trim().toLowerCase());
-      if (t === undefined) return;
-      inp.value = "";
-      notTags[k]?.delete(t); if (k === "f") ban.f.delete(t);
-      tags[k].add(t);
-      draw();
-    };
-    inp.addEventListener("change", tryAdd);
-    inp.addEventListener("keydown", (e) => { if (e.key === "Enter") tryAdd(); });
-  }
-  let fdeb;
-  $("#f-kw").addEventListener("input", () => { clearTimeout(fdeb); fdeb = setTimeout(draw, 200); });
-  NUM_IDS.forEach((id) => $(`#${id}`).addEventListener("input", () => { clearTimeout(fdeb); fdeb = setTimeout(draw, 200); }));
-  if (!D.meta.has_weight) { // pas de poids dans le dump : champ désactivé, comme dans l'explorateur
-    $("#w-min").disabled = $("#w-max").disabled = true;
-    $("#weight-row").dataset.help = "Poids BGG (complexité, 1–5) : absent du dump actuel, filtre désactivé.";
-  }
-
-  // Curseurs de note (pas de 0,1 : valeurs ×10 dans les <input range>) ; la bande entre les poignées se glisse.
-  function drawRate(k) {
-    const R = RATE[k], box = $(`#${k}-int`);
-    $(`#${k}-lo`).value = Math.round(R.lo * 10); $(`#${k}-hi`).value = Math.round(R.hi * 10);
-    $(`#${k}-lo`).style.zIndex = R.lo > (R.min + R.max) / 2 ? 3 : 1;
-    const pos = (v) => `${(100 * (v - R.min)) / (R.max - R.min)}%`;
-    box.style.setProperty("--lo", pos(R.lo)); box.style.setProperty("--hi", pos(R.hi));
-    box.classList.toggle("inactive", !rateActive(k));
-    $(`#${k}-out`).textContent = rateActive(k) ? `${R.lo.toFixed(1)} → ${R.hi.toFixed(1)}` : "toutes";
-  }
-  let rtm;
-  const rateChanged = (k) => { drawRate(k); clearTimeout(rtm); rtm = setTimeout(draw, 150); };
-  for (const k of ["av", "b"]) {
-    const R = RATE[k];
-    for (const end of ["lo", "hi"]) {
-      const el = $(`#${k}-${end}`);
-      el.min = Math.round(R.min * 10); el.max = Math.round(R.max * 10); el.step = 1;
-      el.addEventListener("input", (e) => {
-        const v = e.target.value / 10;
-        if (end === "lo") R.lo = Math.min(v, R.hi); else R.hi = Math.max(v, R.lo);
-        rateChanged(k);
-      });
-    }
-    // Glisser la bande entre les poignées : déplace tout l'intervalle (largeur conservée, butée aux bords).
-    createBandDrag($(`#${k}-int`), { min: R.min, max: R.max, step: 0.1, onStart: hideHelp, get: () => [R.lo, R.hi],
-      set: (lo, hi) => { R.lo = lo; R.hi = hi; rateChanged(k); } });
-    drawRate(k);
-  }
+  function drawTagFilters() { panel.tags.drawSuggestions(); panel.tags.drawAllChips(); }
   $("#reset").addEventListener("click", () => {
     NUM_IDS.forEach((id) => { $(`#${id}`).value = ""; });
     $("#f-kw").value = "";
     Object.values(tags).forEach((x) => x.clear());
     Object.values(notTags).forEach((x) => x.clear());
-    for (const k of ["av", "b"]) { RATE[k].lo = RATE[k].min; RATE[k].hi = RATE[k].max; drawRate(k); }
+    for (const k of ["av", "b"]) { RATE[k].lo = RATE[k].min; RATE[k].hi = RATE[k].max; panel.rates.draw(k); }
     draw(); // « Garder / exclure » n'est pas touché : bouton « Effacer »
   });
 
@@ -250,7 +203,7 @@ import { serializeUI, deserializeUI, UI_KEY } from "./lib/ui-persistence.js";
     }
     for (const [k, name] of [["av", "Note BGG"], ["b", "Note bayésienne"]]) {
       if (rateActive(k)) add("Filtres", `${name} : ${fr(RATE[k].lo.toFixed(1))} à ${fr(RATE[k].hi.toFixed(1))}`,
-        () => { RATE[k].lo = RATE[k].min; RATE[k].hi = RATE[k].max; drawRate(k); });
+        () => { RATE[k].lo = RATE[k].min; RATE[k].hi = RATE[k].max; panel.rates.draw(k); });
     }
     const span = (lo, hi, unit = "") => (lo !== null && hi !== null ? `${fr(lo)} à ${fr(hi)}${unit}` : lo !== null ? `≥ ${fr(lo)}${unit}` : `≤ ${fr(hi)}${unit}`);
     const clearIds = (...ids) => () => ids.forEach((id) => { $(`#${id}`).value = ""; });
@@ -711,7 +664,7 @@ import { serializeUI, deserializeUI, UI_KEY } from "./lib/ui-persistence.js";
     try { st = JSON.parse(localStorage.getItem(UI_KEY) || "null"); } catch (_) { st = null; }
     const r = deserializeUI(FS, st, { sorts: Object.keys(SORTS), has: (id) => COLL.has(id) });
     if (!r) return;
-    for (const k of ["av", "b"]) drawRate(k);
+    for (const k of ["av", "b"]) panel.rates.draw(k);
     NUM_IDS.forEach((id, j) => { $(`#${id}`).value = FS.nums[NUM_STATE[j]] ?? ""; });
     $("#f-kw").value = FS.kwText;
     Object.assign(expanded, r.expanded);

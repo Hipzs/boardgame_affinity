@@ -19,6 +19,7 @@ import { agreementConfigs, consensus } from "./lib/agreement.js";
 import { escapeHtml, fr } from "./ui/html.js";
 import { installHelp } from "./ui/help-tooltip.js";
 import { createBandDrag } from "./ui/dual-range.js";
+import { createFilterPanel } from "./ui/filter-panel/filter-panel.js";
 
 (() => {
   "use strict";
@@ -71,6 +72,9 @@ import { createBandDrag } from "./ui/dual-range.js";
   };
   // Filtres (web/lib/filters.js) : état unique ; signaux filtrés par défaut (« Convoité, gardé »).
   const FS = createFilterState({ reqKeys: ATTR_KEYS, notTagKeys: [], sigFilter: true });
+  // Panneau Filtres : web/ui/filter-panel/ (balisage, curseurs de note, champs d'étiquettes, saisie anti-rebond).
+  const panel = createFilterPanel($("#filter-panel"), { mode: "explorer", D, F: FS, hideHelp, debounce: 250,
+    onChange: () => applyFilters(), suggestions: (key) => ds.tagOrder[key].map((t) => [t, ds.tagFreq[key][t]]) });
   const attrWeights = () => attrWeightsL(ATTR_KEYS, state.wRaw);
   // Configuration du calcul : métrique, poids par attribut.
   const currentCfg = () => ({ metric: state.metric, w: attrWeights() });
@@ -84,18 +88,9 @@ import { createBandDrag } from "./ui/dual-range.js";
     { gems, gemBeta: state.gemBeta, noFranchise: FS.noFranchise, noReimpl: FS.noReimpl, noExpLine: FS.noExpLine }, pass);
 
   // --- Filtres -------------------------------------------------------------------------------
-  const num = (id) => {
-    const v = parseFloat($(id).value);
-    return Number.isFinite(v) ? v : null;
-  };
   // Recherche par mots-clés, notes, signaux, étiquettes : voir web/lib/filters.js (état FS, prédicat unique).
   const kwText = createKeywordText(D);
-  function readFilters() {
-    setKeywords(FS, $("#f-kw").value);
-    Object.assign(FS.nums, { plMin: num("#pl-min"), plMax: num("#pl-max"), tMin: num("#t-min"), tMax: num("#t-max"),
-      ageMax: num("#age-max"), wMin: num("#w-min"), wMax: num("#w-max") });
-    return FS;
-  }
+  const readFilters = () => panel.readInputs();
   const rateActive = (k) => rateActiveL(FS, k);
   const passCtx = () => ({ kwText: (g) => kwText(g), terms: (g, i, key) => ATTRS[key].set[i],
     signals: state.signals ? { active: sigActive, inInt } : null });
@@ -152,7 +147,7 @@ import { createBandDrag } from "./ui/dual-range.js";
         const toggleBan = () => {
           if (!FS.ban[key].delete(t)) {
             FS.req[key].delete(t);
-            if (key === "f" && FS.tags.f.delete(t)) drawTagChips("f"); // la même famille ne reste pas choisie sous Famille
+            if (key === "f" && FS.tags.f.delete(t)) panel.tags.drawChips("f"); // la même famille ne reste pas choisie sous Famille
             FS.ban[key].add(t);
           }
           done();
@@ -168,47 +163,6 @@ import { createBandDrag } from "./ui/dual-range.js";
   function invalidate() {
     nbIndex.invalidate();
     if (state.center >= 0) render();
-  }
-
-  // Champs d'étiquettes (famille, auteur, illustrateur, éditeur) : liste de suggestions et pastilles.
-  const tagIndex = ds.tagIndex;
-  for (const [key, dname] of Object.entries(TAG_KEYS)) {
-    const labels = D.dict[dname];
-    const freq = ds.tagFreq[key], order = ds.tagOrder[key];
-    $(`#dl-${key}`).innerHTML = order.map((i) => `<option value="${escapeHtml(labels[i])}">${freq[i]} jeux</option>`).join("");
-    const input = $(`#tf-${key}`);
-    const tryAdd = () => {
-      const i = tagIndex[key].get(input.value.trim().toLowerCase());
-      if (i === undefined) return;
-      input.value = "";
-      addTag(key, i);
-    };
-    input.addEventListener("change", tryAdd);
-    input.addEventListener("keydown", (e) => { if (e.key === "Enter") tryAdd(); });
-  }
-  function addTag(key, i) {
-    if (key === "f") FS.ban.f.delete(i); // jamais sélectionnée et barrée à la fois
-    FS.tags[key].add(i);
-    drawTagChips(key);
-    applyFilters();
-  }
-  function drawTagChips(key) {
-    const box = document.querySelector(`.tagfilter[data-key="${key}"] .chips`);
-    box.innerHTML = [...FS.tags[key]]
-      .map((i) => `<span class="chip removable" data-i="${i}" data-help="Clic : retirer ce filtre.">${escapeHtml(D.dict[TAG_KEYS[key]][i])}</span>`)
-      .join("");
-    box.querySelectorAll(".chip").forEach((c) => c.addEventListener("click", () => {
-      FS.tags[key].delete(+c.dataset.i);
-      drawTagChips(key);
-      applyFilters();
-    }));
-  }
-
-  // Poids : désactivé si absent des données.
-  if (!D.meta.has_weight) {
-    $("#w-min").disabled = $("#w-max").disabled = true;
-    $("#weight-row").dataset.help = "Poids BGG (complexité, 1–5) : absent du dump actuel, filtre désactivé. " +
-      "Il faut data/raw/weights.csv (API BGG ou autre source), puis relancer src/export_web.py.";
   }
 
   // --- Recherche du jeu -----------------------------------------------------------------------
@@ -774,7 +728,7 @@ import { createBandDrag } from "./ui/dual-range.js";
         } else {
           if (!FS.tags[k].delete(t)) { if (k === "f") FS.ban.f.delete(t); FS.tags[k].add(t); }
           drawRequired();
-          drawTagChips(k);
+          panel.tags.drawChips(k);
         }
         applyFilters(); // redessine le graphe et ce panneau
       };
@@ -1051,44 +1005,10 @@ import { createBandDrag } from "./ui/dual-range.js";
   $("#sig-filter").addEventListener("change", (e) => { FS.sigFilter = e.target.checked; applyFilters(); });
   drawSig();
 
-  // Curseurs de note : pas de 0,1 (valeurs ×10 dans les <input range>).
-  function drawRate(k) {
-    const R = FS.rate[k], box = $(`#${k}-int`);
-    $(`#${k}-lo`).value = Math.round(R.lo * 10); $(`#${k}-hi`).value = Math.round(R.hi * 10);
-    $(`#${k}-lo`).style.zIndex = R.lo > (R.min + R.max) / 2 ? 3 : 1;
-    const pos = (v) => `${(100 * (v - R.min)) / (R.max - R.min)}%`;
-    box.style.setProperty("--lo", pos(R.lo)); box.style.setProperty("--hi", pos(R.hi));
-    box.classList.toggle("inactive", !rateActive(k));
-    $(`#${k}-out`).textContent = rateActive(k) ? `${R.lo.toFixed(1)} → ${R.hi.toFixed(1)}` : "toutes";
-  }
-  let rtm;
-  for (const k of ["av", "b"]) {
-    const R = FS.rate[k];
-    for (const end of ["lo", "hi"]) {
-      const el = $(`#${k}-${end}`);
-      el.min = Math.round(R.min * 10); el.max = Math.round(R.max * 10); el.step = 1;
-      el.addEventListener("input", (e) => {
-        const v = e.target.value / 10;
-        if (end === "lo") R.lo = Math.min(v, R.hi); else R.hi = Math.max(v, R.lo);
-        drawRate(k);
-        clearTimeout(rtm);
-        rtm = setTimeout(applyFilters, 150);
-      });
-    }
-    drawRate(k);
-  }
-  // --- Curseurs doubles : glisser la bande entre les deux poignées déplace tout l'intervalle ---------------
-  // Largeur (haut − bas) conservée ; l'intervalle bute sur les bords. Les poignées gardent leur rôle habituel
-  // (web/ui/dual-range.js)
   for (const k of ["wish", "trade"]) {
     createBandDrag($(`#${k}-int`), { onStart: hideHelp, min: 0, max: 100, step: 1, get: () => [...sigInt[k]],
       set: (lo, hi) => { sigInt[k] = [lo, hi]; sigChanged(); } });
   }
-  for (const k of ["av", "b"]) {
-    createBandDrag($(`#${k}-int`), { onStart: hideHelp, min: FS.rate[k].min, max: FS.rate[k].max, step: 0.1, get: () => [FS.rate[k].lo, FS.rate[k].hi],
-      set: (lo, hi) => { FS.rate[k].lo = lo; FS.rate[k].hi = hi; drawRate(k); clearTimeout(rtm); rtm = setTimeout(applyFilters, 150); } });
-  }
-
   document.querySelectorAll(".view-btn[data-view]").forEach((b) => b.addEventListener("click", () => setView(b.dataset.view)));
   $("#fam-center").addEventListener("click", () => {
     state.famCenter = state.famCenter === "peak" ? "mean" : "peak";
@@ -1168,18 +1088,14 @@ import { createBandDrag } from "./ui/dual-range.js";
     if (state.center >= 0) render();
   });
 
-  let ft;
-  for (const id of ["f-kw", "pl-min", "pl-max", "t-min", "t-max", "age-max", "w-min", "w-max"]) {
-    $(`#${id}`).addEventListener("input", () => { clearTimeout(ft); ft = setTimeout(applyFilters, 250); });
-  }
   $("#reset").addEventListener("click", () => {
     for (const id of ["f-kw", "pl-min", "pl-max", "t-min", "t-max", "age-max", "w-min", "w-max"]) $(`#${id}`).value = "";
-    for (const k of Object.keys(TAG_KEYS)) { FS.tags[k].clear(); drawTagChips(k); }
+    for (const k of Object.keys(TAG_KEYS)) { FS.tags[k].clear(); panel.tags.drawChips(k); }
     setOpt("noFranchise", "no-franchise", false);
     setOpt("noReimpl", "no-reimpl", false);
     setOpt("noExpLine", "no-expline", false);
     $("#sig-filter").checked = FS.sigFilter = false;
-    for (const k of ["av", "b"]) { FS.rate[k].lo = FS.rate[k].min; FS.rate[k].hi = FS.rate[k].max; drawRate(k); }
+    for (const k of ["av", "b"]) { FS.rate[k].lo = FS.rate[k].min; FS.rate[k].hi = FS.rate[k].max; panel.rates.draw(k); }
     // « Garder / exclure » n'est pas touché : il a son propre bouton « Effacer ».
     applyFilters();
   });
@@ -1207,7 +1123,7 @@ import { createBandDrag } from "./ui/dual-range.js";
     const add = (group, text, clear, cls = "") => out.push({ group, text, clear, cls });
     const TAG_NAMES = { f: "Famille", d: "Auteur", ar: "Illustrateur", pu: "Éditeur" };
     for (const key of Object.keys(TAG_KEYS)) for (const t of FS.tags[key]) {
-      add("Filtres", `${TAG_NAMES[key]} : ${D.dict[TAG_KEYS[key]][t]}`, () => { FS.tags[key].delete(t); drawTagChips(key); });
+      add("Filtres", `${TAG_NAMES[key]} : ${D.dict[TAG_KEYS[key]][t]}`, () => { FS.tags[key].delete(t); panel.tags.drawChips(key); });
     }
     const F = readFilters();
     if (F.kw.length) add("Filtres", `Mots-clés : « ${$("#f-kw").value.trim()} »`, () => { $("#f-kw").value = ""; });
@@ -1220,7 +1136,7 @@ import { createBandDrag } from "./ui/dual-range.js";
     if (F.nums.wMin !== null || F.nums.wMax !== null) add("Filtres", `Poids : ${span(F.nums.wMin, F.nums.wMax)}`, clearIds("w-min", "w-max"));
     for (const [k, name] of [["av", "Note BGG"], ["b", "Note bayésienne"]]) {
       if (rateActive(k)) add("Filtres", `${name} : ${fr(FS.rate[k].lo.toFixed(1))} à ${fr(FS.rate[k].hi.toFixed(1))}`,
-        () => { FS.rate[k].lo = FS.rate[k].min; FS.rate[k].hi = FS.rate[k].max; drawRate(k); });
+        () => { FS.rate[k].lo = FS.rate[k].min; FS.rate[k].hi = FS.rate[k].max; panel.rates.draw(k); });
     }
     if (FS.noFranchise) add("Filtres", "Sans franchise", () => setOpt("noFranchise", "no-franchise", false));
     if (FS.noReimpl) add("Filtres", "Sans réimplémentation", () => setOpt("noReimpl", "no-reimpl", false));

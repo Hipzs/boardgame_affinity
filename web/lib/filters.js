@@ -194,5 +194,6 @@ export function excludeTag(F, key, t) {
 /** Ajout depuis un champ (Famille, Auteur…) : la même famille ne reste pas interdite. */
 export function addTag(F, key, t) {
   if (key === "f") F.ban.f?.delete(t);
+  F.notTags[key]?.delete(t);
   F.tags[key].add(t);
 }
