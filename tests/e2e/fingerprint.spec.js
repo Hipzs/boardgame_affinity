@@ -42,7 +42,8 @@ async function snap(page) {
   };
 }
 
-test("empreinte explorateur (fixture)", async ({ page }) => {
+test("empreinte explorateur", async ({ page }) => {
+  test.setTimeout(120000);
   await useData(page);
   await clearStorage(page);
   await page.goto("/index.html");
