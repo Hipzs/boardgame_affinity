@@ -1,7 +1,7 @@
 # Données : téléchargées ou régénérées par le pipeline (voir README.md)
+# web/data/games.js est versionné : GitHub Pages le sert tel quel.
 data/raw/
 data/processed/
-web/data/
 
 # Python
 __pycache__/

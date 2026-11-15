@@ -7,9 +7,13 @@ Interface web d'exploration de jeux de société par ressemblance : graphe des p
 - **Filtres** : garder / exclure des étiquettes, famille, auteur, illustrateur, éditeur, joueurs, durée, âge, notes, franchise, réimplémentations, convoitise et revente (intervalles de centiles).
 - **Vues** : graphe (parcours en largeur des k plus proches voisins), une carte t-SNE par attribut seul (mécaniques, thème, familles, description), comparateur d'accord entre métriques et attributs, mode « pépites cachées ».
 
+## Essayer en ligne
+
+L'interface est publiée sur GitHub Pages : https://hipzs.github.io/boardgame_affinity/ (le workflow `.github/workflows/pages.yml` publie `web/` à chaque push sur `main`). Les collections sont enregistrées dans le navigateur de chaque visiteur.
+
 ## Installation et données
 
-Python 3 avec `pandas`, `numpy`, `scipy`, `scikit-learn`. Les données ne sont pas versionnées : elles se téléchargent puis se régénèrent.
+Python 3 avec `pandas`, `numpy`, `scipy`, `scikit-learn`. Les données brutes ne sont pas versionnées : elles se téléchargent puis se régénèrent. Seul l'export final `web/data/games.js` est versionné, pour GitHub Pages : le commiter après chaque nouvel export.
 
 ```bash
 bash src/download_data.sh          # dump BGG (TidyTuesday 2022-01-25) -> data/raw/
