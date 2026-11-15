@@ -1,0 +1,281 @@
+/* Page « Mes collections » : fiches, collections, glisser-déposer, overlays, étiquettes synchronisées, export du graphe.
+ * Les fichiers sont dans l'ordre de la cascade : ne pas les réordonner (une règle plus bas l'emporte à spécificité égale). */
+
+/* Mes collections : étiquettes du détail (surbrillance + croix d'exclusion) et exclusions d'auteur / éditeur */
+#gdetail .chip.toggle.ban {
+  color: #d03030;
+}
+.tagfilter .chip.notag {
+  border-color: #d03030;
+  color: #d03030;
+  background: transparent;
+}
+/* Étiquette sélectionnée à droite (surbrillance), reflétée dans « Garder / exclure » */
+.filt-panel .chip.toggle.hl-on {
+  box-shadow: 0 0 0 2px var(--accent);
+  background: var(--shared);
+}
+.filt-panel .chip.toggle.hl-on.on {
+  background: var(--accent);
+}
+/* Mes collections : titre « Filtres » fixe (non repliable), étiquettes absentes des jeux affichés estompées */
+.filters-title {
+  margin: 0 0 6px;
+  font-size: 1rem;
+  cursor: default;
+}
+.filt-panel .chip.toggle.zero:not(.on):not(.ban):not(.hl-on) {
+  opacity: 0.45;
+}
+
+/* Explorateur : sélection des nodes à exporter */
+.export-pop .xp-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.export-pop .xp-head p {
+  flex: 1;
+}
+.xp-pick {
+  flex: none;
+  padding: 3px 8px;
+  font-size: 0.76rem;
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+}
+.xp-pick:hover {
+  background: var(--accent);
+  color: #fff;
+}
+.pick-bar {
+  position: absolute;
+  z-index: 7;
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: calc(100% - 24px);
+  padding: 6px 10px;
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: 9px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  font-size: 0.84rem;
+}
+.pick-bar button {
+  padding: 3px 10px;
+  font-size: 0.8rem;
+}
+.pick-bar .ghost {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+  font-weight: 500;
+}
+#graph-wrap.picking #graph .node {
+  cursor: pointer;
+}
+#graph .node.pick-on circle.bubble {
+  stroke: var(--accent) !important;
+  stroke-width: 4px !important;
+}
+#graph .node.pick-off {
+  opacity: 0.28;
+}
+#graph .node.pick-off:hover {
+  opacity: 0.6;
+}
+
+/* Mes collections : réordonner les cadres (glisser l'en-tête) */
+.coll-head {
+  cursor: grab;
+}
+.coll-head:active {
+  cursor: grabbing;
+}
+.cgrip {
+  color: var(--muted);
+  font-size: 0.8rem;
+  margin-right: -2px;
+  user-select: none;
+}
+.coll-head:hover .cgrip {
+  color: var(--accent);
+}
+.coll-box.dragging {
+  opacity: 0.4;
+}
+body.is-dragging-coll .coll-box {
+  transition: box-shadow 0.1s;
+}
+.coll-box.drop-before {
+  box-shadow: -4px 0 0 0 var(--accent);
+}
+.coll-box.drop-after {
+  box-shadow: 4px 0 0 0 var(--accent);
+}
+.coll-box.vert.drop-before {
+  box-shadow: 0 -4px 0 0 var(--accent);
+}
+.coll-box.vert.drop-after {
+  box-shadow: 0 4px 0 0 var(--accent);
+}
+
+/* Mes collections : nouvelle collection à partir des filtres */
+.f-save {
+  margin-top: 6px;
+}
+.f-save #f-save-btn {
+  margin: 0;
+  padding: 4px 10px;
+  font-size: 0.82rem;
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.f-save #f-save-btn:hover {
+  background: var(--accent);
+  color: #fff;
+}
+.f-save .new-coll {
+  margin-top: 6px;
+  justify-content: flex-start;
+}
+.f-save .new-coll input {
+  flex: 1;
+}
+.filt-panel > * {
+  flex-shrink: 0;
+} /* le panneau défile : ses éléments ne doivent pas être écrasés */
+
+/* Mes collections : bouton « Collection avec ces jeux » en tête du panneau ; petites étiquettes ET / OU */
+.filt-panel > .f-save {
+  margin: 0 0 8px;
+}
+.mode-tag {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 4px;
+  vertical-align: 1px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: 0.02em;
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--muted);
+  border-radius: 3px;
+}
+.mode-tag:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.mode-tag.and {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.tagfilter > label {
+  display: flex;
+  align-items: center;
+}
+
+/* Mes collections : recherche par mots-clés (tout en haut) ; auteur / éditeur sélectionné à droite */
+.kw-search {
+  margin: 0 0 8px;
+}
+.kw-search #f-kw {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.88rem;
+}
+.kw-search #f-kw:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.tagfilter .chip.hl-mirror {
+  box-shadow: 0 0 0 2px var(--accent);
+  background: var(--shared);
+}
+/* Étiquette du jeu affiché qui correspond à un filtre ✓ de gauche : pleine, avec ✓ (style .chip.toggle.on) */
+#gdetail .chip.toggle.on.hl-on {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* Étiquettes du jeu affiché (explorateur) : clic = filtre ; filtrée = orange plein avec ✓ (comme à gauche) ;
+   commune avec le jeu central = orange et marron (.shared) ; interdite = rouge barrée */
+.chip.fchip {
+  cursor: pointer;
+  user-select: none;
+}
+.chip.fchip:hover {
+  border-color: var(--accent);
+}
+.chip.f-on {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+.chip.f-on::before {
+  content: "✓ ";
+}
+.chip.f-ban {
+  border-color: #d03030;
+  color: #d03030;
+  text-decoration: line-through;
+}
+/* Filtres choisis sous Famille / Auteur / Illustrateur / Éditeur (les deux pages) : orange plein */
+.tagfilter .chip.removable:not(.notag) {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.tagfilter .chip.removable:not(.notag)::after {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Une étiquette sélectionnée (✓) ne propose pas la croix : sélectionnée OU barrée, jamais les deux.
+   (Clic : elle redevient neutre ; la croix réapparaît alors au survol.) */
+.chip.toggle.on .ban-x {
+  display: none !important;
+}
+.chip.toggle.on {
+  padding-right: 8px;
+}
+.chip.toggle.on > .emo {
+  margin-left: 2px;
+}
+/* Explorateur : recherche par mots-clés en tête du panneau Filtres */
+.filters > .kw-search {
+  margin: 8px 0 4px;
+}
+
+/* Titre « Garder / exclure » retiré (mots seulement) : il ne reste que le compteur, masqué s'il est vide */
+.req-title {
+  margin: 0 0 2px;
+}
+.req-title:has(.badge:empty) {
+  display: none;
+}
+/* Réinitialiser tout en haut des filtres (deux pages) */
+.filters > #reset {
+  margin: 8px 0 2px;
+}
+.filt-panel > #reset {
+  margin: 0 0 8px;
+  align-self: flex-start;
+  padding: 4px 10px;
+  font-size: 0.82rem;
+}

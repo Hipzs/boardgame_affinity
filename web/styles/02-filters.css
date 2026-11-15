@@ -1,0 +1,157 @@
+/* Mode de similarité et panneau Filtres de l'explorateur ; réglages de la fenêtre étroite.
+ * Les fichiers sont dans l'ordre de la cascade : ne pas les réordonner (une règle plus bas l'emporte à spécificité égale). */
+/* --- Mode de similarité et filtres --- */
+.mode {
+  border: 0;
+  padding: 0;
+  margin: 12px 0 0;
+}
+.mode legend {
+  font-weight: 600;
+  font-size: 0.88rem;
+  margin-bottom: 4px;
+  padding: 0;
+}
+.mode label {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  font-weight: 400;
+  margin-right: 12px;
+}
+.mode input {
+  accent-color: var(--accent);
+}
+.hint {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+.hint-inline {
+  color: var(--muted);
+  font-size: 0.78rem;
+  flex-basis: 100%;
+}
+
+.side > details.filters {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px 12px;
+}
+.filters summary {
+  font-weight: 700;
+  cursor: pointer;
+}
+.badge {
+  display: inline-block;
+  min-width: 1.4em;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.75rem;
+  text-align: center;
+}
+.badge:empty {
+  display: none;
+}
+.tagfilter {
+  margin-top: 10px;
+}
+.tagfilter input {
+  width: 100%;
+}
+.tagfilter .chips {
+  margin: 4px 0 0;
+}
+.chip.removable {
+  cursor: pointer;
+  background: var(--shared);
+  border-color: var(--accent);
+}
+.chip.removable::after {
+  content: " ×";
+  color: var(--muted);
+}
+.chip.addable {
+  cursor: pointer;
+}
+.chip.addable:hover {
+  border-color: var(--accent);
+}
+.range {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  margin-top: 10px;
+}
+.range .rl {
+  font-weight: 600;
+  font-size: 0.88rem;
+  min-width: 7.5em;
+}
+.range input {
+  width: 4.6em;
+}
+input[type="number"],
+.tagfilter input {
+  padding: 5px 7px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.88rem;
+}
+input:disabled {
+  opacity: 0.45;
+}
+button.secondary {
+  margin-top: 12px;
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+  font-weight: 500;
+}
+.details dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 10px;
+  margin: 0 0 8px;
+  font-size: 0.86rem;
+}
+.details dt {
+  color: var(--muted);
+}
+.details dd {
+  margin: 0;
+}
+.details h3 {
+  margin: 8px 0 2px;
+  font-size: 0.88rem;
+}
+#graph .node.filtered-out circle.bubble {
+  stroke-dasharray: 2 2;
+  stroke: var(--text);
+}
+
+@media (max-width: 820px) {
+  main {
+    grid-template-columns: 1fr;
+    padding: 8px 16px 12px;
+  }
+  header,
+  footer {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .side {
+    max-height: none;
+    overflow: visible;
+  }
+  #graph-wrap {
+    height: 70vh;
+  }
+}

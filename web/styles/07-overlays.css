@@ -1,0 +1,301 @@
+/* Infobulle, émojis, centres des thèmes, overlay des filtres actifs, voisins / profondeur, Garder / exclure, options.
+ * Les fichiers sont dans l'ordre de la cascade : ne pas les réordonner (une règle plus bas l'emporte à spécificité égale). */
+/* Infobulle : lignes de critères compactes */
+.tip .tl {
+  display: block;
+  font-size: 0.76rem;
+  line-height: 1.35;
+  white-space: normal;
+}
+.tip .tl .w {
+  color: var(--tip-wish);
+  font-weight: 600;
+}
+.tip .tl .t {
+  color: var(--tip-trade);
+  font-weight: 600;
+}
+
+/* --- Émojis --- */
+.emo {
+  margin-right: 4px;
+  font-family: "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
+  font-style: normal;
+}
+.emo-legend {
+  margin: 6px 0 8px;
+}
+.emo-legend summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+.emo-legend h3 {
+  margin: 8px 0 2px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.emo-grid {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2px 8px;
+  font-size: 0.78rem;
+}
+.emo-grid li {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* --- Centroïdes des familles de mécaniques (vue carte) --- */
+.fam-toggle {
+  padding: 3px 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+.fam-toggle[aria-pressed="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+#map .fam circle {
+  fill: var(--surface);
+  stroke: var(--accent);
+  opacity: 0.92;
+  cursor: pointer;
+}
+#map .fam text {
+  pointer-events: none;
+  font-family: "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
+}
+#map .fam.open circle {
+  stroke: var(--text);
+  fill: var(--shared);
+}
+#map .fam.dim {
+  opacity: 0.35;
+}
+#map .fam-link {
+  stroke: var(--accent);
+  stroke-opacity: 0.55;
+  pointer-events: none;
+}
+#map .fam-link.all {
+  stroke-opacity: 0.18;
+}
+#map .fam-link.open:not(.all) {
+  stroke-opacity: 0.9;
+}
+
+/* --- Overlay des filtres actifs (survol du mot « Filtres ») --- */
+#filter-pop {
+  position: fixed;
+  z-index: 40;
+  width: 300px;
+  max-height: 60vh;
+  overflow-y: auto;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  padding: 8px 10px;
+  font-size: 0.82rem;
+}
+#filter-pop h4 {
+  margin: 6px 0 2px;
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+#filter-pop h4:first-child {
+  margin-top: 0;
+}
+#filter-pop ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+#filter-pop li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+#filter-pop li:hover {
+  background: var(--bg);
+}
+#filter-pop li button {
+  padding: 0 6px;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 400;
+}
+#filter-pop li button:hover {
+  color: var(--accent);
+}
+#filter-pop .ban {
+  color: var(--sig-trade);
+}
+#filter-pop p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+
+/* Fenêtre moyenne : colonnes latérales plus étroites ; étroite : tout en une colonne (règle plus haut) */
+@media (max-width: 1280px) and (min-width: 821px) {
+  main {
+    grid-template-columns: 280px minmax(0, 1fr) 290px;
+    gap: 10px;
+    padding: 8px 12px 12px;
+  }
+}
+
+/* Métrique sur la ligne des pondérations ; curseurs Voisins / Profondeur dans la barre centrale */
+.metric-inline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.metric-inline label {
+  margin: 0;
+  white-space: nowrap;
+}
+.metric-inline #metric {
+  width: auto;
+  padding: 3px 6px;
+  font-size: 0.82rem;
+}
+#toolbar .tool.slider {
+  margin-top: 0;
+}
+
+/* Voisins ↔ profondeur : deux curseurs côte à côte et la ligne de budget ; la valeur poussée clignote */
+.kd {
+  grid-column: span 2;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 18px;
+}
+.kd .kd-msg {
+  grid-column: 1 / -1;
+  margin: 2px 0 0;
+  font-size: 0.76rem;
+}
+@keyframes pushed {
+  0% {
+    background: var(--accent);
+    color: #fff;
+  }
+  100% {
+    background: transparent;
+  }
+}
+output.pushed {
+  animation: pushed 0.9s ease-out;
+  border-radius: 4px;
+  padding: 0 3px;
+}
+@media (max-width: 1100px) {
+  .kd {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Bande entre les deux poignées : saisissable (glisser = déplacer tout l'intervalle) */
+.range2.dragging::after {
+  height: 6px;
+}
+
+/* Panneau « Options » (haut de la colonne droite) */
+.opt-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+/* Liste des extensions BGG dans les détails */
+.exp-list {
+  font-size: 0.8rem;
+  margin: 2px 0 6px;
+}
+.exp-list summary {
+  cursor: pointer;
+  color: var(--muted);
+}
+.exp-list ul {
+  margin: 4px 0 0;
+  padding-left: 18px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+/* « Garder / exclure » en tête du panneau Filtres, au-dessus d'un séparateur */
+.required.in-filters {
+  margin: 10px 0 4px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.required.in-filters h2 {
+  font-size: 0.9rem;
+}
+
+/* « Options » en bas du panneau Filtres, sous un séparateur */
+.options.in-filters {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+.options.in-filters h2 {
+  font-size: 0.9rem;
+}
+.options.in-filters .fam-toggle {
+  background: transparent;
+}
+.options.in-filters .fam-toggle[aria-pressed="true"] {
+  background: var(--accent);
+}
+
+/* Garder / exclure : croix à droite de chaque pastille, visible au survol (ou au focus), clic = interdire */
+.chip.toggle {
+  position: relative;
+  padding-right: 20px;
+}
+.chip.toggle .ban-x {
+  position: absolute;
+  right: 3px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 15px;
+  height: 15px;
+  line-height: 15px;
+  text-align: center;
+  border-radius: 50%;
+  font-size: 0.66rem;
+  text-decoration: none;
+  opacity: 0;
+  transition: opacity 0.12s;
+  color: #d03030;
+  background: var(--surface);
+}
+.chip.toggle:hover .ban-x,
+.chip.toggle:focus-visible .ban-x {
+  opacity: 1;
+}
+.chip.toggle .ban-x:hover {
+  background: #d03030;
+  color: #fff;
+}
+.chip.toggle.ban .ban-x {
+  display: none;
+}
+.chip.toggle.ban:hover .ban-x {
+  display: block;
+}

@@ -1,0 +1,70 @@
+/* Aide au survol (data-help), cases compactes, pastille interdite, choix de la carte.
+ * Les fichiers sont dans l'ordre de la cascade : ne pas les réordonner (une règle plus bas l'emporte à spécificité égale). */
+/* --- Aide au survol (data-help) --- */
+#help {
+  position: fixed;
+  z-index: 50;
+  max-width: 300px;
+  padding: 7px 10px;
+  border-radius: 7px;
+  background: var(--text);
+  color: var(--surface);
+  font-size: 0.8rem;
+  line-height: 1.4;
+  pointer-events: none;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+[data-help] {
+  cursor: help;
+}
+button[data-help],
+.chip[data-help],
+label[data-help],
+li[data-help],
+summary[data-help] {
+  cursor: pointer;
+}
+input[type="range"] {
+  cursor: pointer;
+}
+
+/* Cases à cocher compactes sur une ligne */
+.checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin-top: 10px;
+}
+.checks .check {
+  margin-top: 0;
+}
+
+/* Pastille interdite (2e clic) */
+.chip.toggle.ban {
+  background: transparent;
+  border-color: #d03030;
+  color: #d03030;
+  text-decoration: line-through;
+}
+.chip.toggle.ban::before {
+  content: "✕ ";
+  text-decoration: none;
+  display: inline-block;
+}
+.chip.toggle.ban.extra {
+  opacity: 0.75;
+}
+
+/* Choix de la carte (α) */
+.map-alpha {
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+.map-alpha .view-btn {
+  padding: 2px 8px;
+  font-size: 0.76rem;
+  font-weight: 500;
+}
+.map-alpha .view-btn:not(:first-child) {
+  border-left: 0;
+}

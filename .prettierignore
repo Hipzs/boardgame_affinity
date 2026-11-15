@@ -10,7 +10,6 @@ package-lock.json
 web/collection-store.js
 web/emoji.js
 web/default-collections.js
-web/style.css
 web/index.html
 web/collections.html
 tests/fixtures/games.small.js

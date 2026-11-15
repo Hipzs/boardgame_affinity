@@ -1,0 +1,304 @@
+/* Page « Mes collections » : fiches, collections, glisser-déposer, overlays, étiquettes synchronisées, export du graphe.
+ * Les fichiers sont dans l'ordre de la cascade : ne pas les réordonner (une règle plus bas l'emporte à spécificité égale). */
+
+/* --- Page « Mes collections » : nouveaux jeux à gauche, collections à droite, glisser-déposer --- */
+main.colls-main {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1.15fr) minmax(0, 1fr) 300px;
+  gap: 12px;
+  padding: 8px 20px 8px;
+  flex: 1;
+  min-height: 0;
+}
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+.panel-head h2 {
+  margin: 0;
+}
+.inbox-tools {
+  display: flex;
+  gap: 6px;
+}
+.inbox-tools input,
+.inbox-tools select,
+.new-coll input,
+.cname-edit {
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.86rem;
+}
+.inbox-tools input {
+  flex: 1;
+  min-width: 0;
+}
+.inbox-panel .check {
+  margin: 8px 0 4px;
+  font-size: 0.84rem;
+}
+.new-coll {
+  display: flex;
+  gap: 6px;
+  flex: 1;
+  justify-content: flex-end;
+}
+.new-coll input {
+  flex: 0 1 280px;
+  min-width: 0;
+}
+.new-coll button {
+  padding: 5px 12px;
+  font-size: 0.86rem;
+}
+.gamelist {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  overflow-y: auto;
+}
+#inbox {
+  flex: 1;
+  min-height: 120px;
+  padding: 4px;
+  margin: 0 -4px;
+  border-radius: 8px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: start;
+  gap: 5px;
+}
+#inbox > .hint.empty {
+  grid-column: 1 / -1;
+}
+.colls-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr));
+  gap: 10px;
+  overflow-y: auto;
+  align-content: start;
+}
+.coll-box {
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 8px 10px 10px;
+  background: var(--bg);
+  min-height: 110px;
+  display: flex;
+  flex-direction: column;
+}
+.coll-box .gamelist {
+  max-height: 340px;
+}
+.coll-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.coll-head .cname {
+  margin: 0;
+  font-size: 0.95rem;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: text;
+}
+.cname-edit {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+}
+.cbtn {
+  padding: 1px 6px;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 400;
+  font-size: 0.85rem;
+}
+.cbtn:hover {
+  color: var(--accent);
+}
+/* Fiche de jeu déplaçable */
+.gcard {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: center;
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--surface);
+  cursor: grab;
+  user-select: none;
+  font-size: 0.84rem;
+}
+.gcard:hover {
+  border-color: var(--accent);
+}
+.gcard:active {
+  cursor: grabbing;
+}
+.gcard.dragging {
+  opacity: 0.4;
+}
+.gcard .gname {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.gcard .yr {
+  color: var(--muted);
+  font-weight: 400;
+  font-size: 0.78rem;
+}
+.gcard .gmeta {
+  grid-column: 1;
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+.gcard .ctags {
+  grid-column: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: 2px;
+}
+.ctag {
+  font-size: 0.68rem;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--shared);
+}
+/* Boutons de la fiche : posés par-dessus, en haut à droite, au survol (le nom garde toute la largeur) */
+.gcard .gact {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  display: flex;
+  gap: 2px;
+  align-items: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s;
+  background: var(--surface);
+  border-radius: 5px;
+  box-shadow: 0 0 6px 4px var(--surface);
+}
+.gcard:hover .gact,
+.gcard:focus-within .gact {
+  pointer-events: auto;
+}
+.gcard:hover .gact,
+.gcard:focus-within .gact {
+  opacity: 1;
+}
+.gact a,
+.gact .grm {
+  padding: 1px 5px;
+  font-size: 0.74rem;
+  color: var(--muted);
+  text-decoration: none;
+  background: transparent;
+  font-weight: 600;
+  border-radius: 4px;
+}
+.gact a:hover {
+  color: var(--accent);
+}
+.gact .grm:hover {
+  color: #fff;
+  background: #d03030;
+}
+.gcard.missing {
+  opacity: 0.6;
+}
+/* Zones de dépôt */
+body.is-dragging .dropzone {
+  outline: 2px dashed var(--border);
+  outline-offset: 2px;
+}
+.dropzone.over {
+  outline: 2px dashed var(--accent) !important;
+  background: var(--shared);
+}
+.hint.empty {
+  margin: 8px 2px;
+}
+.coll-foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 20px;
+  flex-wrap: wrap;
+}
+.coll-foot .msg {
+  margin: 0;
+}
+.coll-spacer {
+  flex: 1;
+}
+.coll-foot .secondary {
+  margin: 0;
+  padding: 5px 11px;
+  font-size: 0.84rem;
+}
+label.file-btn {
+  display: inline-block;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  cursor: pointer;
+  font-weight: 500;
+}
+label.file-btn:hover {
+  border-color: var(--accent);
+}
+body.coll-page {
+  height: 100vh;
+}
+@media (max-width: 820px) {
+  main.colls-main {
+    grid-template-columns: 1fr;
+    padding: 8px 16px;
+  }
+  body.coll-page {
+    height: auto;
+  }
+  .coll-foot {
+    padding: 0 16px;
+  }
+}
+.coll-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.coll-in {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+.coll-in .hint {
+  margin: 0;
+}

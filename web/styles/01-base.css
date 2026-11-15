@@ -1,0 +1,495 @@
+/* Variables (clair / sombre), typographie, boutons, mise en page générale, panneaux latéraux.
+ * Les fichiers sont dans l'ordre de la cascade : ne pas les réordonner (une règle plus bas l'emporte à spécificité égale). */
+:root {
+  --bg: #f7f6f3;
+  --surface: #ffffff;
+  --text: #1f2328;
+  --muted: #646a73;
+  --border: #dcdad5;
+  --accent: #c2410c;
+  --link: rgba(60, 64, 72, 0.35);
+  --link-cross: rgba(60, 64, 72, 0.12);
+  --d0: #c2410c;
+  --d1: #1d6fd1;
+  --d2: #2b8a3e;
+  --d3: #9c36b5;
+  --d4: #868e96;
+  --shared: #fde7d9;
+  --sig-trade: #d62828;
+  --sig-wish: #2fb344;
+  --tip-wish: #5fe07a; /* infobulle sombre en thème clair */
+  --tip-trade: #ff7b7b;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #15171a;
+    --surface: #1e2126;
+    --text: #e6e7e9;
+    --muted: #9aa0a8;
+    --border: #33373e;
+    --accent: #fb8c4a;
+    --link: rgba(220, 224, 230, 0.35);
+    --link-cross: rgba(220, 224, 230, 0.12);
+    --d0: #fb8c4a;
+    --d1: #5aa2f5;
+    --d2: #5cc06f;
+    --d3: #cf7ae0;
+    --d4: #9aa0a8;
+    --shared: #4a2a17;
+    --sig-trade: #ff5252;
+    --sig-wish: #4cd964;
+    --tip-wish: #1a7f37; /* infobulle claire en thème sombre */
+    --tip-trade: #c62828;
+    color-scheme: dark;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+[hidden] {
+  display: none !important;
+}
+html,
+body {
+  margin: 0;
+  height: 100%;
+}
+body {
+  background: var(--bg);
+  color: var(--text);
+  font:
+    15px/1.45 system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+header {
+  padding: 14px 20px 6px;
+}
+h1 {
+  margin: 0;
+  font-size: 1.3rem;
+}
+h2 {
+  margin: 0 0 6px;
+  font-size: 0.95rem;
+}
+.sub {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+main {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr) 340px;
+  gap: 12px;
+  padding: 8px 20px 12px;
+  min-height: 0;
+}
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  max-height: calc(100vh - 110px);
+}
+.side > section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+label {
+  display: block;
+  font-weight: 600;
+  font-size: 0.88rem;
+  margin-bottom: 4px;
+}
+.search-row {
+  display: flex;
+  gap: 6px;
+}
+input[type="text"],
+input:not([type]),
+#search {
+  flex: 1;
+  min-width: 0;
+  padding: 7px 9px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+}
+button {
+  padding: 7px 12px;
+  border: 0;
+  border-radius: 7px;
+  background: var(--accent);
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+button:hover {
+  filter: brightness(1.08);
+}
+.slider {
+  margin-top: 12px;
+}
+.slider input {
+  width: 100%;
+  accent-color: var(--accent);
+}
+output {
+  float: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+}
+.check {
+  margin-top: 10px;
+  font-weight: 400;
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+}
+.check input {
+  accent-color: var(--accent);
+  margin-top: 3px;
+}
+.msg {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+  min-height: 1em;
+}
+.msg.err {
+  color: #d03030;
+}
+
+.details h2 {
+  font-size: 1.05rem;
+}
+.details .kv {
+  color: var(--muted);
+  font-size: 0.86rem;
+  margin: 0 0 8px;
+}
+.details a {
+  color: var(--accent);
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 6px 0 10px;
+}
+.chip {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 1px 8px;
+  font-size: 0.8rem;
+}
+.chip.shared {
+  background: var(--shared);
+  border-color: var(--accent);
+}
+.nb-list {
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+  font-size: 0.86rem;
+}
+.nb-list li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  padding: 3px 4px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.nb-list li:hover {
+  background: var(--bg);
+}
+.nb-list .score {
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+
+.legend ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  font-size: 0.85rem;
+}
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.legend .dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.legend p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+#graph-wrap {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  min-height: 420px;
+}
+#graph-wrap {
+  display: flex;
+  flex-direction: column;
+}
+#toolbar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 8px 24px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.tool label {
+  margin-bottom: 2px;
+}
+.tool .ends {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+.tool .ends input {
+  flex: 1;
+  min-width: 0;
+  accent-color: var(--accent);
+}
+.presets {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+button.preset {
+  padding: 2px 9px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+button.preset.on {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.nb-list li.below {
+  opacity: 0.4;
+}
+#graph .node text.rating {
+  font-weight: 700;
+  stroke: none;
+  text-anchor: middle;
+  font-variant-numeric: tabular-nums;
+}
+#legend-rating {
+  margin: 0 0 8px;
+}
+#legend-rating .gradient {
+  height: 10px;
+  border-radius: 5px;
+}
+#legend-rating .ticks {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+#legend-rating p {
+  margin: 2px 0 0;
+}
+.required h3 {
+  margin: 8px 0 2px;
+  font-size: 0.85rem;
+}
+.required button.secondary {
+  margin-top: 8px;
+  padding: 4px 10px;
+  font-size: 0.82rem;
+}
+.chip.toggle {
+  cursor: pointer;
+  user-select: none;
+}
+.chip.toggle:hover {
+  border-color: var(--accent);
+}
+.chip.toggle.on {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.chip.toggle.on.extra {
+  opacity: 0.75;
+}
+.chip.toggle.on::before {
+  content: "✓ ";
+}
+#graph,
+#map {
+  display: block;
+  cursor: grab;
+}
+#map[hidden],
+#graph[hidden] {
+  display: none;
+}
+.tool-title {
+  display: block;
+  font-weight: 600;
+  font-size: 0.88rem;
+  margin-bottom: 2px;
+}
+#gems-btn,
+.view-btn {
+  padding: 3px 11px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+#gems-btn[aria-pressed="true"],
+.view-btn.on {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.seg {
+  gap: 0;
+}
+.seg .view-btn {
+  border-radius: 0;
+}
+.seg .view-btn:first-child {
+  border-radius: 7px 0 0 7px;
+}
+.seg .view-btn:last-child {
+  border-radius: 0 7px 7px 0;
+  border-left: 0;
+}
+#gem-row output {
+  min-width: 2.6em;
+  text-align: right;
+}
+#graph .hit {
+  stroke: transparent;
+  stroke-width: 9px;
+  cursor: help;
+}
+#graph .link.hover {
+  stroke: var(--accent);
+}
+#map .pt {
+  stroke: none;
+  cursor: pointer;
+}
+#map .pt.out {
+  opacity: 0.12;
+}
+#map .pt.in {
+  stroke: var(--surface);
+}
+#map .edge {
+  stroke: var(--text);
+  stroke-opacity: 0.5;
+}
+#map text {
+  /* font-size et stroke-width posés en style inline (divisés par le zoom) */
+  fill: var(--text);
+  paint-order: stroke;
+  stroke: var(--surface);
+  pointer-events: none;
+}
+.tip .ds {
+  display: block;
+  margin-top: 4px;
+  opacity: 0.85;
+  font-size: 0.76rem;
+  line-height: 1.35;
+}
+.tip .tg {
+  display: block;
+  margin-top: 3px;
+  font-size: 0.76rem;
+}
+#graph:active {
+  cursor: grabbing;
+}
+#graph .node circle {
+  stroke: var(--surface);
+  stroke-width: 1.5px;
+  cursor: pointer;
+}
+#graph .node.selected circle.bubble {
+  stroke: var(--text) !important;
+  stroke-width: 3px !important;
+}
+#graph .node text {
+  font-size: 11px;
+  fill: var(--text);
+  paint-order: stroke;
+  stroke: var(--surface);
+  stroke-width: 3px;
+  pointer-events: none;
+}
+#graph .node.d0 text {
+  font-size: 13px;
+  font-weight: 700;
+}
+#graph .link {
+  stroke: var(--link);
+}
+#graph .link.cross {
+  stroke: var(--link-cross);
+  stroke-dasharray: 3 3;
+}
+#graph .dim {
+  opacity: 0.15;
+}
+
+.tip {
+  position: absolute;
+  pointer-events: none;
+  z-index: 6;
+  background: var(--text);
+  color: var(--surface);
+  padding: 5px 8px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  max-width: 340px;
+}
+
+footer {
+  padding: 4px 20px 12px;
+  color: var(--muted);
+  font-size: 0.78rem;
+}

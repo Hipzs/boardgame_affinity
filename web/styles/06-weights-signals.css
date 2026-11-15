@@ -1,0 +1,306 @@
+/* Pondération des attributs, signaux, curseurs doubles, intervalles de centiles, notes.
+ * Les fichiers sont dans l'ordre de la cascade : ne pas les réordonner (une règle plus bas l'emporte à spécificité égale). */
+/* --- Pondération des attributs (deux groupes activables) --- */
+.grp-btn,
+.mod-btn {
+  padding: 3px 10px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+.grp-btn[aria-pressed="true"],
+.mod-btn[aria-pressed="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.sub-title {
+  margin-top: 6px;
+  font-size: 0.8rem;
+}
+#mods {
+  flex-wrap: wrap;
+}
+.mod-btn {
+  font-size: 0.76rem;
+  padding: 2px 8px;
+  font-weight: 500;
+}
+.weights {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.weights b {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.weights .zero {
+  opacity: 0.45;
+}
+.weights .wchip {
+  cursor: pointer;
+}
+.weights .wchip:hover {
+  color: var(--accent);
+}
+/* Ligne des pourcentages + case « Curseurs », puis les 4 curseurs (pleine largeur de la barre d'outils) */
+.wbox {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 14px;
+  flex-wrap: wrap;
+}
+.wbox .weights {
+  flex: 1;
+}
+.wbox .check {
+  margin: 0;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+.wsliders {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 4px 18px;
+}
+.wsliders[hidden] {
+  display: none;
+}
+.wslider label {
+  font-size: 0.8rem;
+  margin: 0;
+}
+.wslider input {
+  width: 100%;
+  accent-color: var(--accent);
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* --- Signaux par jeu : revente (contour rouge), convoitise (point vert) --- */
+#graph .node circle.wish-dot {
+  fill: var(--sig-wish);
+  stroke: var(--surface);
+  stroke-width: 1px;
+  pointer-events: none;
+}
+#legend-signals {
+  margin-top: 6px;
+}
+.legend .dot.sig-ring {
+  background: transparent;
+  border: 2.5px solid var(--sig-trade);
+  box-sizing: border-box;
+}
+.legend .dot.sig-dot {
+  background: var(--sig-wish);
+}
+.sig {
+  font-size: 0.72rem;
+  padding: 0 6px;
+  border-radius: 999px;
+  color: #fff;
+}
+.sig.wish {
+  background: var(--sig-wish);
+}
+.sig.trade {
+  background: var(--sig-trade);
+}
+
+/* --- Curseur double des seuils de signaux (deux <input range> superposés, seules les poignées sont cliquables) --- */
+.sig-row {
+  margin-top: 10px;
+}
+.sig-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+.sig-head .check {
+  margin: 0;
+  font-weight: 400;
+}
+#sig-out {
+  float: none;
+  color: var(--muted);
+  font-weight: 400;
+  margin-left: 4px;
+}
+#sig-out .w {
+  color: var(--sig-wish);
+}
+#sig-out .t {
+  color: var(--sig-trade);
+}
+.dual {
+  position: relative;
+  height: 22px;
+  margin-top: 4px;
+}
+.dual::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 4px;
+  transform: translateY(-50%);
+  border-radius: 2px;
+  background: linear-gradient(to right, var(--border), var(--muted));
+}
+.dual input[type="range"] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  margin: 0;
+  background: none;
+  pointer-events: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.dual input[type="range"]::-webkit-slider-runnable-track {
+  background: none;
+  height: 22px;
+}
+.dual input[type="range"]::-moz-range-track {
+  background: none;
+}
+.dual input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  pointer-events: auto;
+  width: 14px;
+  height: 14px;
+  margin-top: 4px;
+  border-radius: 50%;
+  border: 2px solid var(--surface);
+  cursor: pointer;
+}
+.dual input[type="range"]::-moz-range-thumb {
+  pointer-events: auto;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--surface);
+  cursor: pointer;
+}
+.dual .thumb-wish::-webkit-slider-thumb {
+  background: var(--sig-wish);
+}
+.dual .thumb-wish::-moz-range-thumb {
+  background: var(--sig-wish);
+}
+.dual .thumb-trade::-webkit-slider-thumb {
+  background: var(--sig-trade);
+}
+.dual .thumb-trade::-moz-range-thumb {
+  background: var(--sig-trade);
+}
+
+/* --- Intervalles de centiles par signal : barre colorée entre les deux poignées --- */
+.sig-line {
+  display: grid;
+  grid-template-columns: 76px 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 8px;
+  margin-top: 6px;
+  font-size: 0.8rem;
+}
+.sig-line .sig-name {
+  font-weight: 600;
+}
+.sig-line .sig-name.w {
+  color: var(--sig-wish);
+}
+.sig-line .sig-name.t {
+  color: var(--sig-trade);
+}
+.sig-line output {
+  float: none;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.sig-line .dual {
+  grid-column: 1 / -1;
+}
+.range2::before {
+  background: var(--border);
+}
+.range2::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  height: 4px;
+  transform: translateY(-50%);
+  left: var(--lo, 0%);
+  right: calc(100% - var(--hi, 100%));
+  border-radius: 2px;
+}
+.range2.wish::after {
+  background: var(--sig-wish);
+}
+.range2.trade::after {
+  background: var(--sig-trade);
+}
+.range2.inactive::after {
+  opacity: 0.25;
+}
+.range2 input {
+  z-index: 1;
+}
+.range2.wish input::-webkit-slider-thumb {
+  background: var(--sig-wish);
+}
+.range2.wish input::-moz-range-thumb {
+  background: var(--sig-wish);
+}
+.range2.trade input::-webkit-slider-thumb {
+  background: var(--sig-trade);
+}
+.range2.trade input::-moz-range-thumb {
+  background: var(--sig-trade);
+}
+.sig-presets {
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.sig-presets .preset {
+  font-size: 0.74rem;
+  padding: 2px 7px;
+}
+.preset.on {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Filtres de note : même curseur à deux poignées, couleur d'accent */
+.rate-line {
+  margin-top: 10px;
+  font-size: 0.86rem;
+}
+.rate-line .sig-name {
+  color: var(--text);
+}
+.range2.rate::after {
+  background: var(--accent);
+}
+.range2.rate input::-webkit-slider-thumb {
+  background: var(--accent);
+}
+.range2.rate input::-moz-range-thumb {
+  background: var(--accent);
+}

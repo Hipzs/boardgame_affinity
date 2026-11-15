@@ -1,0 +1,62 @@
+/* Zone du graphe : bascule Graphe / Carte, boutons d'affichage.
+ * Les fichiers sont dans l'ordre de la cascade : ne pas les réordonner (une règle plus bas l'emporte à spécificité égale). */
+/* --- Zone du graphe : bascule Graphe/Carte posée en haut à droite, sur le graphe --- */
+#stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+#stage > svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+#view-switch {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+/* Boutons d'affichage (note BGG, couleur = note), en haut à gauche */
+#view-opts {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 5;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+#view-opts [hidden] {
+  display: none;
+}
+#view-switch .view-btn {
+  background: var(--surface);
+}
+#view-switch .view-btn.on {
+  background: var(--accent);
+}
+#view-switch .msg {
+  margin: 0;
+  background: var(--surface);
+  padding: 2px 6px;
+  border-radius: 5px;
+}
+#view-switch .msg:empty {
+  display: none;
+}
+.inline-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.inline-row .ends {
+  flex: 1;
+  min-width: 140px;
+}
