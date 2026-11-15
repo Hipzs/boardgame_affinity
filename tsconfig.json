@@ -15,5 +15,5 @@
     "resolveJsonModule": true
   },
   "include": ["web/**/*.js", "web/**/*.mjs", "web/*.d.ts", "tests/**/*.js", "tests/**/*.mjs"],
-  "exclude": ["web/data", "node_modules", "web/collections.js"]
+  "exclude": ["web/data", "node_modules"]
 }

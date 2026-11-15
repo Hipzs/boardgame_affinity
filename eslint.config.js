@@ -11,7 +11,6 @@ export default [
       "playwright-report/**",
       "test-results/**",
       // Fichiers hérités, en cours de découpage (étapes 1 à 7) : non lintés jusqu'à leur suppression.
-      "web/collections.js",
       "web/collection-store.js",
       "web/emoji.js",
       "web/default-collections.js",
