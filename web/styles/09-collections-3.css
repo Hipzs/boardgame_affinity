@@ -279,3 +279,46 @@ body.is-dragging-coll .coll-box {
   padding: 4px 10px;
   font-size: 0.82rem;
 }
+
+/* --- Suggestions d'une collection (colonne de droite) --- */
+.sugg-list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+}
+.sugg-row {
+  display: grid;
+  grid-template-columns: 2.2em 1fr auto auto;
+  grid-template-areas: "score name add open" "score meta add open";
+  align-items: center;
+  column-gap: 8px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border);
+}
+.sugg-score {
+  grid-area: score;
+  font-weight: 700;
+  color: var(--accent);
+  text-align: right;
+}
+.sugg-name {
+  grid-area: name;
+  font-weight: 600;
+  color: inherit;
+  text-decoration: none;
+}
+.sugg-name:hover {
+  color: var(--accent);
+}
+.sugg-row .gmeta {
+  grid-area: meta;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.sugg-add {
+  grid-area: add;
+  padding: 1px 8px;
+}
+.sugg-row > a[title] {
+  grid-area: open;
+}

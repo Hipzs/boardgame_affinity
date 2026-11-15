@@ -6,6 +6,7 @@ import { createApp } from "./core.js";
 import { install as installFilters } from "./filters.js";
 import { install as installCards } from "./cards.js";
 import { install as installDetail } from "./detail.js";
+import { install as installSuggestions } from "./suggestions.js";
 import { install as installCardActions } from "./card-actions.js";
 import { install as installPopover } from "./collection-popover.js";
 import { install as installSections } from "./sections.js";
@@ -27,6 +28,7 @@ export function startCollections() {
     installFilters,
     installCards,
     installDetail,
+    installSuggestions,
     installCardActions,
     installPopover,
     installSections,

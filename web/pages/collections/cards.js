@@ -107,6 +107,7 @@ export function install(app) {
           <span class="cgrip" aria-hidden="true">⠿</span>
           <h3 class="cname" data-cid="${c.cid}" title="Double-clic : renommer ou changer la couleur">${c.color ? '<span class="cdot"></span>' : ""}${esc(c.name)}</h3>
           <span class="badge">${F.active && ids.length !== c.games.length ? `${ids.length} / ${c.games.length}` : c.games.length || ""}</span>
+          <button type="button" class="cbtn" data-sugg="${c.cid}" title="Suggestions : jeux proches du profil de cette collection">💡</button>
           <button type="button" class="cbtn" data-ren="${c.cid}" title="Renommer, couleur">✎</button>
           <button type="button" class="cbtn" data-del="${c.cid}" title="Supprimer la collection">🗑</button>
         </div>

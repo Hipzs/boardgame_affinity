@@ -107,3 +107,18 @@ test("curseur de note : glisser la bande déplace l'intervalle en gardant sa lar
   expect(+(hi - lo).toFixed(1)).toBe(2);
   expect(lo).toBeGreaterThan(4.5);
 });
+
+test("💡 Suggestions : liste des jeux proches du profil, ajout à la collection", async ({ page }) => {
+  await page.locator('[data-sugg="c1"]').click();
+  await expect(page.locator("#gdetail h2")).toContainText("Suggestions");
+  const rows = page.locator(".sugg-row");
+  expect(await rows.count()).toBeGreaterThan(0);
+  expect(await page.locator(`.sugg-row[data-id="${IDS.pandemic}"]`).count()).toBe(0); // déjà dans la collection
+  const first = rows.first();
+  const id = Number(await first.getAttribute("data-id"));
+  await first.locator("[data-add]").click();
+  await expect(page.locator(`.sugg-row[data-id="${id}"]`)).toHaveCount(0);
+  expect((await readStore(page)).collections[0].games).toContain(id);
+  await page.locator("[data-sugg-close]").click();
+  await expect(page.locator("#gdetail")).toContainText("Clique sur un jeu");
+});

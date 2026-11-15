@@ -33,6 +33,7 @@ export function install(app) {
     Object.entries(app.HL_NAMES).map(([k, [dn]]) => [k, new Map(D.dict[dn].map((x, i) => [x, i]))]),
   );
   function drawDetail() {
+    if (app.sugg) return app.drawSuggestions(); // panneau « Suggestions » d'une collection
     document
       .querySelectorAll(".gcard")
       .forEach((c) => c.classList.toggle("sel", Number(/** @type {HTMLElement} */ (c).dataset.id) === app.selected));
@@ -123,6 +124,7 @@ export function install(app) {
     const card = /** @type {Element} */ (e.target).closest(".gcard");
     if (!card || /** @type {Element} */ (e.target).closest("a, button")) return;
     app.selected = Number(/** @type {HTMLElement} */ (card).dataset.id);
+    app.sugg = null;
     hideHelp();
     drawDetail();
   });
