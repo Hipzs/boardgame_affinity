@@ -59,6 +59,12 @@ tests/
   unit/ e2e/ fixtures/              node:test, Playwright, petite fixture de données
 ```
 
+## Licence
+
+Le **code** (`src/`, `web/` hors `web/data/`, `tests/`) est sous licence [MIT](LICENSE).
+
+Les **données** (`web/data/games.js` et tout ce qui dérive du dump BGG) ne sont **pas** couvertes par la licence MIT : elles restent soumises aux conditions de BoardGameGeek (ci-dessous).
+
 ## Source et licence des données
 
 Données BoardGameGeek via [TidyTuesday 2022-01-25](https://github.com/rfordatascience/tidytuesday/tree/master/data/2022/2022-01-25). Usage non commercial ; BoardGameGeek doit être cité comme source.

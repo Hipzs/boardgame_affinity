@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "description": "Explorateur de jeux de société par ressemblance (données BoardGameGeek) : interface web statique + pipeline Python.",
+  "license": "MIT",
   "type": "module",
   "engines": {
     "node": ">=22"
