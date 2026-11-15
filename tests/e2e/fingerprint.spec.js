@@ -2,7 +2,7 @@
 // refactor ne change rien de visible. Données de la fixture ; les positions (non déterministes) ne sont pas relevées.
 // Régénérer volontairement : npx playwright test tests/e2e/fingerprint.spec.js --update-snapshots
 import { test, expect } from "@playwright/test";
-import { useData, clearStorage, waitExplorer } from "./helpers.js";
+import { useData, clearStorage, waitExplorer, REAL } from "./helpers.js";
 
 const clean = (t) => (t ?? "").replace(/\s+/g, " ").trim();
 const txt = (page, sel) =>
@@ -110,5 +110,5 @@ test("empreinte explorateur (fixture)", async ({ page }) => {
   out.exportPop = await txt(page, "#export-pop");
   await page.keyboard.press("Escape");
 
-  expect(JSON.stringify(out, null, 1)).toMatchSnapshot("fingerprint.json");
+  expect(JSON.stringify(out, null, 1)).toMatchSnapshot(REAL ? "fingerprint-real.json" : "fingerprint.json");
 });

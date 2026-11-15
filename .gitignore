@@ -21,3 +21,4 @@ node_modules/
 playwright-report/
 test-results/
 tests/e2e/__screenshots__/*-real-*
+tests/e2e/__screenshots__/**/*-real.json
