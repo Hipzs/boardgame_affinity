@@ -10,6 +10,7 @@ export function install(app) {
     cold: { wish: [0, 20], trade: [0, 100] },
     all: { wish: [0, 100], trade: [0, 100] },
   };
+  Object.assign(app, { drawSig });
   function drawSig() {
     const fmt = (k) => (sigActive(k) ? `c${sigInt[k][0]} → c${sigInt[k][1]}` : "tous");
     for (const k of ["wish", "trade"]) {

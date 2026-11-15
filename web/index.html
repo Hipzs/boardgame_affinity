@@ -16,6 +16,7 @@
     <nav class="tabs" aria-label="Pages">
       <a href="index.html" class="tab on" aria-current="page">Explorateur</a>
       <a href="collections.html" class="tab" target="bga-collection" data-help="Ouvre tes collections dans un autre onglet (le même à chaque clic). Ajoute un jeu : clic sur le jeu, puis « Ajouter à mes collections » dans la colonne de droite ; range-le ensuite par glisser-déposer.">Mes collections <span id="coll-count" class="badge"></span></a>
+      <a href="mechanics.html" class="tab" target="bga-mechanics" data-help="Ouvre la carte des mécaniques (le même onglet à chaque clic).">Mécaniques</a>
     </nav>
   </header>
 
@@ -32,21 +33,21 @@
         <p id="search-msg" class="msg" aria-live="polite"></p>
 
         <div class="checks">
-          <label class="check" data-help="Signaux par jeu, calculés sur les collections BGG : point vert si la convoitise (souhaits / possédés) est dans l'intervalle choisi, contour rouge si la revente (à échanger / possédés) l'est. Chaque signal a son intervalle de centiles, indépendant de l'autre."><input id="signals" type="checkbox" checked> Convoit./revente</label>
+          <label class="check" data-help="Signaux par jeu, calculés sur les collections BGG : + verts si la convoitise (souhaits / possédés) est dans l'intervalle choisi, − rouges si la revente (à échanger / possédés) l'est. Chaque signal a son intervalle de centiles, indépendant de l'autre."><input id="signals" type="checkbox" checked> Convoit./revente</label>
         </div>
         <div id="sig-row" class="sig-row">
           <div class="sig-head">
             <span data-help="Choisis, pour chaque signal, l'intervalle de centiles à retenir (0 = le plus bas des 4672 jeux, 100 = le plus haut). Glisser la barre colorée entre les deux poignées déplace tout l'intervalle, sans changer sa largeur. Un signal laissé sur [0, 100] est inactif. Les jeux dans l'intervalle sont marqués (point vert, contour rouge).">Signaux</span>
             <label class="check" data-help="Ne garde que les jeux dont chaque signal actif est dans son intervalle. Un signal sur [0, 100] ne filtre rien. Le jeu choisi reste affiché."><input id="sig-filter" type="checkbox" checked> Filtrer</label>
           </div>
-          <div class="sig-line" data-help="Convoitise = souhaits / possédés. Haut = très désiré par ceux qui ne l'ont pas. Point vert dans la bulle si le jeu est dans l'intervalle.">
+          <div class="sig-line" data-help="Convoitise = souhaits / possédés. Haut = très désiré par ceux qui ne l'ont pas. + verts dans la bulle (1 à 3) si le jeu est dans l'intervalle.">
             <span class="sig-name w">Convoitise</span><output id="wish-out"></output>
             <div class="dual range2 wish" id="wish-int">
               <input id="wish-lo" type="range" min="0" max="100" value="80" aria-label="Convoitise, centile minimal">
               <input id="wish-hi" type="range" min="0" max="100" value="100" aria-label="Convoitise, centile maximal">
             </div>
           </div>
-          <div class="sig-line" data-help="Revente = à échanger / possédés. Haut = souvent mis en vente ou échange ; bas = gardé par ses propriétaires. Contour rouge si le jeu est dans l'intervalle.">
+          <div class="sig-line" data-help="Revente = à échanger / possédés. Haut = souvent mis en vente ou échange ; bas = gardé par ses propriétaires. − rouges sous la note (1 à 3) si le jeu est dans l'intervalle.">
             <span class="sig-name t">Revente</span><output id="trade-out"></output>
             <div class="dual range2 trade" id="trade-int">
               <input id="trade-lo" type="range" min="0" max="100" value="0" aria-label="Revente, centile minimal">
@@ -75,8 +76,8 @@
           <p>Remplissage : note moyenne BGG.</p>
         </div>
         <ul id="legend-signals">
-          <li><span class="dot sig-ring"></span>revente dans l'intervalle</li>
-          <li><span class="dot sig-dot"></span>convoitise dans l'intervalle</li>
+          <li><span class="sig-sym minus">−−−</span>revente : 3 en bas de l'intervalle, 1 en haut</li>
+          <li><span class="sig-sym plus">+++</span>convoitise : 1 à 3 selon la position dans l'intervalle</li>
         </ul>
         <details class="emo-legend">
           <summary data-help="Code émoji utilisé devant les mécaniques (par famille) et les thèmes. Survole une entrée pour voir ce qu'elle regroupe. Dictionnaire éditable : web/emoji.js.">Émojis</summary>
@@ -136,6 +137,7 @@
           <button type="button" class="fam-toggle" id="show-rating" aria-pressed="false" data-help="Écrit dans chaque bulle la note BGG moyenne des joueurs (sur 10). Les bulles grossissent pour que le chiffre tienne.">Note BGG</button>
           <button type="button" class="fam-toggle" id="color-rating" aria-pressed="false" data-help="Remplit les bulles selon la note BGG (viridis, de 5,5 à 8,5) à la place de la couleur de niveau. S'applique aussi à la carte.">Couleur = note</button>
           <button type="button" class="fam-toggle" id="cross" aria-pressed="false" data-help="Ajoute en pointillés les liens k-NN entre jeux déjà visibles (pas seulement ceux de l'arbre) : fait apparaître les grappes.">Liens croisés</button>
+          <button type="button" class="fam-toggle" id="share-btn" data-help="Copie un lien vers cette vue exacte : jeu, voisins, profondeur, métrique, pondération, signaux, filtres, vue graphe ou carte. Ouvre-le dans un autre onglet ou envoie-le.">Lien 🔗</button>
           <button type="button" class="fam-toggle" id="export-btn" aria-haspopup="dialog" data-help="Exporte tous les jeux du graphe affiché (jeu choisi et voisins) vers Mes collections : nouveaux jeux, collection existante ou nouvelle collection.">Exporter ⇪</button>
         </div>
         <div id="view-switch">

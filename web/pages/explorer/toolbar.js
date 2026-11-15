@@ -4,7 +4,7 @@ import { $, escapeHtml } from "../../ui/html.js";
 
 export function install(app) {
   const { D, N, EMO, state, label, resolve, byLabel } = app;
-  Object.assign(app, { setCenter, setOpt }); // fonctions : disponibles dès le début (hissées)
+  Object.assign(app, { setCenter, setOpt, drawKD }); // fonctions : disponibles dès le début (hissées)
   // --- Contrôles ------------------------------------------------------------------------------
   function setCenter(i) {
     if (app.pick) app.endPick();

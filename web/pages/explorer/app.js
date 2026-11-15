@@ -13,6 +13,7 @@ import { install as installSignals } from "./signals-ui.js";
 import { install as installWeights } from "./weights-ui.js";
 import { install as installActiveFilters } from "./active-filters-pop.js";
 import { install as installAgreement } from "./agreement-view.js";
+import { install as installShare } from "./share-link.js";
 import { install as installStart } from "./start.js";
 
 export function startExplorer() {
@@ -37,6 +38,7 @@ export function startExplorer() {
     installWeights,
     installActiveFilters,
     installAgreement,
+    installShare,
     installStart,
   ])
     install(app);

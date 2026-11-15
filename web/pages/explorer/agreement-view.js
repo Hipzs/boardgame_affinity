@@ -5,7 +5,7 @@ import { $, escapeHtml } from "../../ui/html.js";
 
 export function install(app) {
   const { hideHelp, N, ATTRS, ATTR_KEYS, state, attrWeights, currentCfg, neighbors, label } = app;
-  Object.assign(app, { soloAttr, drawAgreement }); // fonctions : disponibles dès le début (hissées)
+  Object.assign(app, { soloAttr, drawAgreement, setMetric }); // fonctions : disponibles dès le début (hissées)
   // --- Comparateur : accord entre métriques, puis entre attributs ---------------------------------------
   // Pour le jeu central : A[a][b] = |V_k^a ∩ V_k^b| / k (voisins communs, mêmes filtres, sans le mode pépites).
   //   métriques : les 4 métriques avec la pondération courante ; attributs : chaque attribut seul, métrique courante.

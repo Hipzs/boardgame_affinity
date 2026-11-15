@@ -15,9 +15,15 @@
     "",
     "",
     "",
+    "",
+    "+",
+    "+++",
     "A Feast for Odin",
     "Ark Nova",
-    "Terraforming Mars"
+    "Terraforming Mars",
+    "−",
+    "−−",
+    "−−−"
    ]
   },
   "map": {
@@ -29,7 +35,7 @@
   "agree": "Métriques Cos IDFJaccardRecouv.SoupleCos IDF80808080Jaccard80808080Recouv.80808080Souple80808080 Attributs Méca.ThèmeFamillesDescr.Méca.80406020Thème40402020Familles6020600Descr.2020020 Case = % de voisins communs (top 5) pour Terraforming Mars. Consensus (≥ 4/8) Ark Nova (2021)7/8A Feast for Odin (2016)7/8Frosthaven (2022)6/8Too Many Bones (2017)6/8",
   "legend": [
    "jeu choisiniveau 1niveau 2niveau 3niveau 4",
-   "revente dans l'intervalle convoitise dans l'intervalle",
+   "−−−revente : 3 en bas de l'intervalle, 1 en haut +++convoitise : 1 à 3 selon la position dans l'intervalle",
    "Familles de mécaniques🃏Cartes🎒Construction de deck / sac🎲Dés et hasard👷Placement d'ouvriers⚙️Sélection d'actions🔨Enchères💰Économie et marché🧩Placement et motifs🗺️Contrôle de territoire🚶Déplacement🛤️Réseaux et livraison🤝Coopération🎭Bluff et information cachée⚔️Conflit direct🗳️Négociation et vote📖Récit et campagne🦸Asymétrie🏆Score et fin de partie🔬Progression et simulation⏱️Temps réel, adresse, party🔄Ordre du tour👤SoloThèmes🃏Card Game🧙Fantasy💰Economic🥊Fighting🚀Science Fiction⚔️Wargame🎲Dice🎉Party Game🧭Adventure🐾Animals🏰Medieval🗺️Exploration🔍Deduction🎭Bluffing🗿Miniatures♟️Abstract Strategy🏙️City Building😂Humor🏛️Ancient👻Horror🧒Children's Game🧩Puzzle⏱️Real-time🚩Territory Building🎬Movies / TV / Radio theme⚓Nautical🤝Negotiation🤹Action / Dexterity🏺Civilization🗳️Political📖Novel-based🚚Transportation🏭Industry / Manufacturing🚂Trains🔱Mythology🎨Renaissance🌾Farming🪐Space Exploration🕵️Murder/Mystery🏁Racing🎮Video Game Theme🦜Pirates🖨️Print & Play🔤Word Game🎓Educational💎Collectible Components🌱Environmental⚽Sports💥Comic Book / Strip🕶️Spies/Secret Agents🧟Zombies🤠American West🧠Memory❓Trivia🧳Travel🦖Prehistoric🛩️Aviation / Flight🔢Number➗Math🙏Religious🌀Maze🔌Electronic🎩Mafia🩺Medical🐪Arabian🔞Mature / Adult🎵Music📚Book⚙️Game System➕Expansion for Base-game🪖World War I (+4)🎖️Napoleonic (+7)"
   ]
  },
@@ -49,9 +55,15 @@
     "",
     "",
     "",
+    "",
+    "+",
+    "+++",
     "A Feast for Odin",
     "Ark Nova",
-    "Terraforming Mars"
+    "Terraforming Mars",
+    "−",
+    "−−",
+    "−−−"
    ]
   },
   "map": {
@@ -63,7 +75,7 @@
   "agree": "Métriques Cos IDFJaccardRecouv.SoupleCos IDF80808080Jaccard80808080Recouv.80808080Souple80808080 Attributs Méca.ThèmeFamillesDescr.Méca.80406020Thème40402020Familles6020600Descr.2020020 Case = % de voisins communs (top 5) pour Terraforming Mars. Consensus (≥ 4/8) Ark Nova (2021)7/8A Feast for Odin (2016)7/8Frosthaven (2022)6/8Too Many Bones (2017)6/8",
   "legend": [
    "jeu choisiniveau 1niveau 2niveau 3niveau 4",
-   "revente dans l'intervalle convoitise dans l'intervalle",
+   "−−−revente : 3 en bas de l'intervalle, 1 en haut +++convoitise : 1 à 3 selon la position dans l'intervalle",
    "Familles de mécaniques🃏Cartes🎒Construction de deck / sac🎲Dés et hasard👷Placement d'ouvriers⚙️Sélection d'actions🔨Enchères💰Économie et marché🧩Placement et motifs🗺️Contrôle de territoire🚶Déplacement🛤️Réseaux et livraison🤝Coopération🎭Bluff et information cachée⚔️Conflit direct🗳️Négociation et vote📖Récit et campagne🦸Asymétrie🏆Score et fin de partie🔬Progression et simulation⏱️Temps réel, adresse, party🔄Ordre du tour👤SoloThèmes🃏Card Game🧙Fantasy💰Economic🥊Fighting🚀Science Fiction⚔️Wargame🎲Dice🎉Party Game🧭Adventure🐾Animals🏰Medieval🗺️Exploration🔍Deduction🎭Bluffing🗿Miniatures♟️Abstract Strategy🏙️City Building😂Humor🏛️Ancient👻Horror🧒Children's Game🧩Puzzle⏱️Real-time🚩Territory Building🎬Movies / TV / Radio theme⚓Nautical🤝Negotiation🤹Action / Dexterity🏺Civilization🗳️Political📖Novel-based🚚Transportation🏭Industry / Manufacturing🚂Trains🔱Mythology🎨Renaissance🌾Farming🪐Space Exploration🕵️Murder/Mystery🏁Racing🎮Video Game Theme🦜Pirates🖨️Print & Play🔤Word Game🎓Educational💎Collectible Components🌱Environmental⚽Sports💥Comic Book / Strip🕶️Spies/Secret Agents🧟Zombies🤠American West🧠Memory❓Trivia🧳Travel🦖Prehistoric🛩️Aviation / Flight🔢Number➗Math🙏Religious🌀Maze🔌Electronic🎩Mafia🩺Medical🐪Arabian🔞Mature / Adult🎵Music📚Book⚙️Game System➕Expansion for Base-game🪖World War I (+4)🎖️Napoleonic (+7)"
   ]
  },
@@ -83,6 +95,12 @@
     "",
     "",
     "",
+    "",
+    "+",
+    "+++",
+    "−",
+    "−−",
+    "−−−",
     "🌱 Ark Nova",
     "🌱 Terraforming Mars",
     "🏭 A Feast for Odin"
@@ -97,7 +115,7 @@
   "agree": "Métriques Cos IDFJaccardRecouv.SoupleCos IDF80808080Jaccard80808080Recouv.80808080Souple80808080 Attributs Méca.ThèmeFamillesDescr.Méca.80406020Thème40402020Familles6020600Descr.2020020 Case = % de voisins communs (top 5) pour Terraforming Mars. Consensus (≥ 4/8) Ark Nova (2021)7/8A Feast for Odin (2016)7/8Frosthaven (2022)6/8Too Many Bones (2017)6/8",
   "legend": [
    "jeu choisiniveau 1niveau 2niveau 3niveau 4",
-   "revente dans l'intervalle convoitise dans l'intervalle",
+   "−−−revente : 3 en bas de l'intervalle, 1 en haut +++convoitise : 1 à 3 selon la position dans l'intervalle",
    "Familles de mécaniques🃏Cartes🎒Construction de deck / sac🎲Dés et hasard👷Placement d'ouvriers⚙️Sélection d'actions🔨Enchères💰Économie et marché🧩Placement et motifs🗺️Contrôle de territoire🚶Déplacement🛤️Réseaux et livraison🤝Coopération🎭Bluff et information cachée⚔️Conflit direct🗳️Négociation et vote📖Récit et campagne🦸Asymétrie🏆Score et fin de partie🔬Progression et simulation⏱️Temps réel, adresse, party🔄Ordre du tour👤SoloThèmes🃏Card Game🧙Fantasy💰Economic🥊Fighting🚀Science Fiction⚔️Wargame🎲Dice🎉Party Game🧭Adventure🐾Animals🏰Medieval🗺️Exploration🔍Deduction🎭Bluffing🗿Miniatures♟️Abstract Strategy🏙️City Building😂Humor🏛️Ancient👻Horror🧒Children's Game🧩Puzzle⏱️Real-time🚩Territory Building🎬Movies / TV / Radio theme⚓Nautical🤝Negotiation🤹Action / Dexterity🏺Civilization🗳️Political📖Novel-based🚚Transportation🏭Industry / Manufacturing🚂Trains🔱Mythology🎨Renaissance🌾Farming🪐Space Exploration🕵️Murder/Mystery🏁Racing🎮Video Game Theme🦜Pirates🖨️Print & Play🔤Word Game🎓Educational💎Collectible Components🌱Environmental⚽Sports💥Comic Book / Strip🕶️Spies/Secret Agents🧟Zombies🤠American West🧠Memory❓Trivia🧳Travel🦖Prehistoric🛩️Aviation / Flight🔢Number➗Math🙏Religious🌀Maze🔌Electronic🎩Mafia🩺Medical🐪Arabian🔞Mature / Adult🎵Music📚Book⚙️Game System➕Expansion for Base-game🪖World War I (+4)🎖️Napoleonic (+7)"
   ]
  },
@@ -114,9 +132,15 @@
    "nodes": 3,
    "links": 4,
    "labels": [
+    "",
+    "+",
+    "+++",
     "8.2",
     "8.4",
     "8.7",
+    "−",
+    "−−",
+    "−−−",
     "🌱 Ark Nova",
     "🌱 Terraforming Mars",
     "🏭 A Feast for Odin"
@@ -131,7 +155,7 @@
   "agree": "Métriques Cos IDFJaccardRecouv.SoupleCos IDF80808080Jaccard80808080Recouv.80808080Souple80808080 Attributs Méca.ThèmeFamillesDescr.Méca.80406020Thème40402020Familles6020600Descr.2020020 Case = % de voisins communs (top 5) pour Terraforming Mars. Consensus (≥ 4/8) Ark Nova (2021)7/8A Feast for Odin (2016)7/8Frosthaven (2022)6/8Too Many Bones (2017)6/8",
   "legend": [
    "jeu choisiniveau 1niveau 2niveau 3niveau 4",
-   "revente dans l'intervalle convoitise dans l'intervalle",
+   "−−−revente : 3 en bas de l'intervalle, 1 en haut +++convoitise : 1 à 3 selon la position dans l'intervalle",
    "Familles de mécaniques🃏Cartes🎒Construction de deck / sac🎲Dés et hasard👷Placement d'ouvriers⚙️Sélection d'actions🔨Enchères💰Économie et marché🧩Placement et motifs🗺️Contrôle de territoire🚶Déplacement🛤️Réseaux et livraison🤝Coopération🎭Bluff et information cachée⚔️Conflit direct🗳️Négociation et vote📖Récit et campagne🦸Asymétrie🏆Score et fin de partie🔬Progression et simulation⏱️Temps réel, adresse, party🔄Ordre du tour👤SoloThèmes🃏Card Game🧙Fantasy💰Economic🥊Fighting🚀Science Fiction⚔️Wargame🎲Dice🎉Party Game🧭Adventure🐾Animals🏰Medieval🗺️Exploration🔍Deduction🎭Bluffing🗿Miniatures♟️Abstract Strategy🏙️City Building😂Humor🏛️Ancient👻Horror🧒Children's Game🧩Puzzle⏱️Real-time🚩Territory Building🎬Movies / TV / Radio theme⚓Nautical🤝Negotiation🤹Action / Dexterity🏺Civilization🗳️Political📖Novel-based🚚Transportation🏭Industry / Manufacturing🚂Trains🔱Mythology🎨Renaissance🌾Farming🪐Space Exploration🕵️Murder/Mystery🏁Racing🎮Video Game Theme🦜Pirates🖨️Print & Play🔤Word Game🎓Educational💎Collectible Components🌱Environmental⚽Sports💥Comic Book / Strip🕶️Spies/Secret Agents🧟Zombies🤠American West🧠Memory❓Trivia🧳Travel🦖Prehistoric🛩️Aviation / Flight🔢Number➗Math🙏Religious🌀Maze🔌Electronic🎩Mafia🩺Medical🐪Arabian🔞Mature / Adult🎵Music📚Book⚙️Game System➕Expansion for Base-game🪖World War I (+4)🎖️Napoleonic (+7)"
   ]
  },
@@ -153,11 +177,21 @@
     "",
     "",
     "",
+    "",
+    "+",
+    "++",
+    "+++",
+    "+++",
     "A Feast for Odin",
     "Ark Nova",
     "Frosthaven",
     "Terraforming Mars",
-    "Too Many Bones"
+    "Too Many Bones",
+    "−",
+    "−−",
+    "−−",
+    "−−−",
+    "−−−"
    ]
   },
   "map": {
@@ -169,7 +203,7 @@
   "agree": "Métriques Cos IDFJaccardRecouv.SoupleCos IDF80808080Jaccard80808080Recouv.80808080Souple80808080 Attributs Méca.ThèmeFamillesDescr.Méca.80406020Thème40402020Familles6020600Descr.2020020 Case = % de voisins communs (top 5) pour Terraforming Mars. Consensus (≥ 4/8) Ark Nova (2021)7/8A Feast for Odin (2016)7/8Frosthaven (2022)6/8Too Many Bones (2017)6/8",
   "legend": [
    "jeu choisiniveau 1niveau 2niveau 3niveau 4",
-   "revente dans l'intervalle convoitise dans l'intervalle",
+   "−−−revente : 3 en bas de l'intervalle, 1 en haut +++convoitise : 1 à 3 selon la position dans l'intervalle",
    "Familles de mécaniques🃏Cartes🎒Construction de deck / sac🎲Dés et hasard👷Placement d'ouvriers⚙️Sélection d'actions🔨Enchères💰Économie et marché🧩Placement et motifs🗺️Contrôle de territoire🚶Déplacement🛤️Réseaux et livraison🤝Coopération🎭Bluff et information cachée⚔️Conflit direct🗳️Négociation et vote📖Récit et campagne🦸Asymétrie🏆Score et fin de partie🔬Progression et simulation⏱️Temps réel, adresse, party🔄Ordre du tour👤SoloThèmes🃏Card Game🧙Fantasy💰Economic🥊Fighting🚀Science Fiction⚔️Wargame🎲Dice🎉Party Game🧭Adventure🐾Animals🏰Medieval🗺️Exploration🔍Deduction🎭Bluffing🗿Miniatures♟️Abstract Strategy🏙️City Building😂Humor🏛️Ancient👻Horror🧒Children's Game🧩Puzzle⏱️Real-time🚩Territory Building🎬Movies / TV / Radio theme⚓Nautical🤝Negotiation🤹Action / Dexterity🏺Civilization🗳️Political📖Novel-based🚚Transportation🏭Industry / Manufacturing🚂Trains🔱Mythology🎨Renaissance🌾Farming🪐Space Exploration🕵️Murder/Mystery🏁Racing🎮Video Game Theme🦜Pirates🖨️Print & Play🔤Word Game🎓Educational💎Collectible Components🌱Environmental⚽Sports💥Comic Book / Strip🕶️Spies/Secret Agents🧟Zombies🤠American West🧠Memory❓Trivia🧳Travel🦖Prehistoric🛩️Aviation / Flight🔢Number➗Math🙏Religious🌀Maze🔌Electronic🎩Mafia🩺Medical🐪Arabian🔞Mature / Adult🎵Music📚Book⚙️Game System➕Expansion for Base-game🪖World War I (+4)🎖️Napoleonic (+7)"
   ]
  },
@@ -189,9 +223,15 @@
     "",
     "",
     "",
+    "",
+    "+",
+    "+++",
     "A Feast for Odin",
     "Ark Nova",
-    "Terraforming Mars"
+    "Terraforming Mars",
+    "−",
+    "−−",
+    "−−−"
    ]
   },
   "map": {
@@ -203,7 +243,7 @@
   "agree": "Métriques Cos IDFJaccardRecouv.SoupleCos IDF40404040Jaccard40404040Recouv.40404040Souple40404080 Attributs Méca.ThèmeFamillesDescr.Méca.80406020Thème40402020Familles6020600Descr.2020020 Case = % de voisins communs (top 5) pour Terraforming Mars. Consensus (≥ 4/8) Ark Nova (2021)7/8A Feast for Odin (2016)7/8",
   "legend": [
    "jeu choisiniveau 1niveau 2niveau 3niveau 4",
-   "revente dans l'intervalle convoitise dans l'intervalle",
+   "−−−revente : 3 en bas de l'intervalle, 1 en haut +++convoitise : 1 à 3 selon la position dans l'intervalle",
    "Familles de mécaniques🃏Cartes🎒Construction de deck / sac🎲Dés et hasard👷Placement d'ouvriers⚙️Sélection d'actions🔨Enchères💰Économie et marché🧩Placement et motifs🗺️Contrôle de territoire🚶Déplacement🛤️Réseaux et livraison🤝Coopération🎭Bluff et information cachée⚔️Conflit direct🗳️Négociation et vote📖Récit et campagne🦸Asymétrie🏆Score et fin de partie🔬Progression et simulation⏱️Temps réel, adresse, party🔄Ordre du tour👤SoloThèmes🃏Card Game🧙Fantasy💰Economic🥊Fighting🚀Science Fiction⚔️Wargame🎲Dice🎉Party Game🧭Adventure🐾Animals🏰Medieval🗺️Exploration🔍Deduction🎭Bluffing🗿Miniatures♟️Abstract Strategy🏙️City Building😂Humor🏛️Ancient👻Horror🧒Children's Game🧩Puzzle⏱️Real-time🚩Territory Building🎬Movies / TV / Radio theme⚓Nautical🤝Negotiation🤹Action / Dexterity🏺Civilization🗳️Political📖Novel-based🚚Transportation🏭Industry / Manufacturing🚂Trains🔱Mythology🎨Renaissance🌾Farming🪐Space Exploration🕵️Murder/Mystery🏁Racing🎮Video Game Theme🦜Pirates🖨️Print & Play🔤Word Game🎓Educational💎Collectible Components🌱Environmental⚽Sports💥Comic Book / Strip🕶️Spies/Secret Agents🧟Zombies🤠American West🧠Memory❓Trivia🧳Travel🦖Prehistoric🛩️Aviation / Flight🔢Number➗Math🙏Religious🌀Maze🔌Electronic🎩Mafia🩺Medical🐪Arabian🔞Mature / Adult🎵Music📚Book⚙️Game System➕Expansion for Base-game🪖World War I (+4)🎖️Napoleonic (+7)"
   ]
  },
@@ -222,8 +262,12 @@
    "labels": [
     "",
     "",
+    "",
+    "+++",
     "Ark Nova",
-    "Terraforming Mars"
+    "Terraforming Mars",
+    "−−",
+    "−−−"
    ]
   },
   "map": {
@@ -235,7 +279,7 @@
   "agree": "Métriques Cos IDFJaccardRecouv.SoupleCos IDF80808080Jaccard80808080Recouv.80808080Souple80808080 Attributs Méca.ThèmeFamillesDescr.Méca.80406020Thème40402020Familles6020600Descr.2020020 Case = % de voisins communs (top 5) pour Terraforming Mars. Consensus (≥ 4/8) Ark Nova (2021)7/8A Feast for Odin (2016)7/8Frosthaven (2022)6/8Too Many Bones (2017)6/8",
   "legend": [
    "jeu choisiniveau 1niveau 2niveau 3niveau 4",
-   "revente dans l'intervalle convoitise dans l'intervalle",
+   "−−−revente : 3 en bas de l'intervalle, 1 en haut +++convoitise : 1 à 3 selon la position dans l'intervalle",
    "Familles de mécaniques🃏Cartes🎒Construction de deck / sac🎲Dés et hasard👷Placement d'ouvriers⚙️Sélection d'actions🔨Enchères💰Économie et marché🧩Placement et motifs🗺️Contrôle de territoire🚶Déplacement🛤️Réseaux et livraison🤝Coopération🎭Bluff et information cachée⚔️Conflit direct🗳️Négociation et vote📖Récit et campagne🦸Asymétrie🏆Score et fin de partie🔬Progression et simulation⏱️Temps réel, adresse, party🔄Ordre du tour👤SoloThèmes🃏Card Game🧙Fantasy💰Economic🥊Fighting🚀Science Fiction⚔️Wargame🎲Dice🎉Party Game🧭Adventure🐾Animals🏰Medieval🗺️Exploration🔍Deduction🎭Bluffing🗿Miniatures♟️Abstract Strategy🏙️City Building😂Humor🏛️Ancient👻Horror🧒Children's Game🧩Puzzle⏱️Real-time🚩Territory Building🎬Movies / TV / Radio theme⚓Nautical🤝Negotiation🤹Action / Dexterity🏺Civilization🗳️Political📖Novel-based🚚Transportation🏭Industry / Manufacturing🚂Trains🔱Mythology🎨Renaissance🌾Farming🪐Space Exploration🕵️Murder/Mystery🏁Racing🎮Video Game Theme🦜Pirates🖨️Print & Play🔤Word Game🎓Educational💎Collectible Components🌱Environmental⚽Sports💥Comic Book / Strip🕶️Spies/Secret Agents🧟Zombies🤠American West🧠Memory❓Trivia🧳Travel🦖Prehistoric🛩️Aviation / Flight🔢Number➗Math🙏Religious🌀Maze🔌Electronic🎩Mafia🩺Medical🐪Arabian🔞Mature / Adult🎵Music📚Book⚙️Game System➕Expansion for Base-game🪖World War I (+4)🎖️Napoleonic (+7)"
   ]
  },
@@ -254,8 +298,12 @@
    "labels": [
     "",
     "",
+    "",
+    "+++",
     "Ark Nova",
-    "Terraforming Mars"
+    "Terraforming Mars",
+    "−−",
+    "−−−"
    ]
   },
   "map": {
@@ -273,7 +321,7 @@
   "agree": "Métriques Cos IDFJaccardRecouv.SoupleCos IDF80808080Jaccard80808080Recouv.80808080Souple80808080 Attributs Méca.ThèmeFamillesDescr.Méca.80406020Thème40402020Familles6020600Descr.2020020 Case = % de voisins communs (top 5) pour Terraforming Mars. Consensus (≥ 4/8) Ark Nova (2021)7/8A Feast for Odin (2016)7/8Frosthaven (2022)6/8Too Many Bones (2017)6/8",
   "legend": [
    "jeu choisiniveau 1niveau 2niveau 3niveau 4",
-   "revente dans l'intervalle convoitise dans l'intervalle",
+   "−−−revente : 3 en bas de l'intervalle, 1 en haut +++convoitise : 1 à 3 selon la position dans l'intervalle",
    "Familles de mécaniques🃏Cartes🎒Construction de deck / sac🎲Dés et hasard👷Placement d'ouvriers⚙️Sélection d'actions🔨Enchères💰Économie et marché🧩Placement et motifs🗺️Contrôle de territoire🚶Déplacement🛤️Réseaux et livraison🤝Coopération🎭Bluff et information cachée⚔️Conflit direct🗳️Négociation et vote📖Récit et campagne🦸Asymétrie🏆Score et fin de partie🔬Progression et simulation⏱️Temps réel, adresse, party🔄Ordre du tour👤SoloThèmes🃏Card Game🧙Fantasy💰Economic🥊Fighting🚀Science Fiction⚔️Wargame🎲Dice🎉Party Game🧭Adventure🐾Animals🏰Medieval🗺️Exploration🔍Deduction🎭Bluffing🗿Miniatures♟️Abstract Strategy🏙️City Building😂Humor🏛️Ancient👻Horror🧒Children's Game🧩Puzzle⏱️Real-time🚩Territory Building🎬Movies / TV / Radio theme⚓Nautical🤝Negotiation🤹Action / Dexterity🏺Civilization🗳️Political📖Novel-based🚚Transportation🏭Industry / Manufacturing🚂Trains🔱Mythology🎨Renaissance🌾Farming🪐Space Exploration🕵️Murder/Mystery🏁Racing🎮Video Game Theme🦜Pirates🖨️Print & Play🔤Word Game🎓Educational💎Collectible Components🌱Environmental⚽Sports💥Comic Book / Strip🕶️Spies/Secret Agents🧟Zombies🤠American West🧠Memory❓Trivia🧳Travel🦖Prehistoric🛩️Aviation / Flight🔢Number➗Math🙏Religious🌀Maze🔌Electronic🎩Mafia🩺Medical🐪Arabian🔞Mature / Adult🎵Music📚Book⚙️Game System➕Expansion for Base-game🪖World War I (+4)🎖️Napoleonic (+7)"
   ]
  },
@@ -292,8 +340,12 @@
    "labels": [
     "",
     "",
+    "",
+    "+++",
     "Ark Nova",
-    "Terraforming Mars"
+    "Terraforming Mars",
+    "−−",
+    "−−−"
    ]
   },
   "map": {
@@ -311,7 +363,7 @@
   "agree": "Métriques Cos IDFJaccardRecouv.SoupleCos IDF80808080Jaccard80808080Recouv.80808080Souple80808080 Attributs Méca.ThèmeFamillesDescr.Méca.80406020Thème40402020Familles6020600Descr.2020020 Case = % de voisins communs (top 5) pour Terraforming Mars. Consensus (≥ 4/8) Ark Nova (2021)7/8A Feast for Odin (2016)7/8Frosthaven (2022)6/8Too Many Bones (2017)6/8",
   "legend": [
    "jeu choisiniveau 1niveau 2niveau 3niveau 4",
-   "revente dans l'intervalle convoitise dans l'intervalle",
+   "−−−revente : 3 en bas de l'intervalle, 1 en haut +++convoitise : 1 à 3 selon la position dans l'intervalle",
    "Familles de mécaniques🃏Cartes🎒Construction de deck / sac🎲Dés et hasard👷Placement d'ouvriers⚙️Sélection d'actions🔨Enchères💰Économie et marché🧩Placement et motifs🗺️Contrôle de territoire🚶Déplacement🛤️Réseaux et livraison🤝Coopération🎭Bluff et information cachée⚔️Conflit direct🗳️Négociation et vote📖Récit et campagne🦸Asymétrie🏆Score et fin de partie🔬Progression et simulation⏱️Temps réel, adresse, party🔄Ordre du tour👤SoloThèmes🃏Card Game🧙Fantasy💰Economic🥊Fighting🚀Science Fiction⚔️Wargame🎲Dice🎉Party Game🧭Adventure🐾Animals🏰Medieval🗺️Exploration🔍Deduction🎭Bluffing🗿Miniatures♟️Abstract Strategy🏙️City Building😂Humor🏛️Ancient👻Horror🧒Children's Game🧩Puzzle⏱️Real-time🚩Territory Building🎬Movies / TV / Radio theme⚓Nautical🤝Negotiation🤹Action / Dexterity🏺Civilization🗳️Political📖Novel-based🚚Transportation🏭Industry / Manufacturing🚂Trains🔱Mythology🎨Renaissance🌾Farming🪐Space Exploration🕵️Murder/Mystery🏁Racing🎮Video Game Theme🦜Pirates🖨️Print & Play🔤Word Game🎓Educational💎Collectible Components🌱Environmental⚽Sports💥Comic Book / Strip🕶️Spies/Secret Agents🧟Zombies🤠American West🧠Memory❓Trivia🧳Travel🦖Prehistoric🛩️Aviation / Flight🔢Number➗Math🙏Religious🌀Maze🔌Electronic🎩Mafia🩺Medical🐪Arabian🔞Mature / Adult🎵Music📚Book⚙️Game System➕Expansion for Base-game🪖World War I (+4)🎖️Napoleonic (+7)"
   ]
  },
@@ -330,8 +382,12 @@
    "labels": [
     "",
     "",
+    "",
+    "+++",
     "Ark Nova",
-    "Terraforming Mars"
+    "Terraforming Mars",
+    "−−",
+    "−−−"
    ]
   },
   "map": {
@@ -349,7 +405,7 @@
   "agree": "Métriques Cos IDFJaccardRecouv.SoupleCos IDF80808080Jaccard80808080Recouv.80808080Souple80808080 Attributs Méca.ThèmeFamillesDescr.Méca.80406020Thème40402020Familles6020600Descr.2020020 Case = % de voisins communs (top 5) pour Terraforming Mars. Consensus (≥ 4/8) Ark Nova (2021)7/8A Feast for Odin (2016)7/8Frosthaven (2022)6/8Too Many Bones (2017)6/8",
   "legend": [
    "jeu choisiniveau 1niveau 2niveau 3niveau 4",
-   "revente dans l'intervalle convoitise dans l'intervalle",
+   "−−−revente : 3 en bas de l'intervalle, 1 en haut +++convoitise : 1 à 3 selon la position dans l'intervalle",
    "Familles de mécaniques🃏Cartes🎒Construction de deck / sac🎲Dés et hasard👷Placement d'ouvriers⚙️Sélection d'actions🔨Enchères💰Économie et marché🧩Placement et motifs🗺️Contrôle de territoire🚶Déplacement🛤️Réseaux et livraison🤝Coopération🎭Bluff et information cachée⚔️Conflit direct🗳️Négociation et vote📖Récit et campagne🦸Asymétrie🏆Score et fin de partie🔬Progression et simulation⏱️Temps réel, adresse, party🔄Ordre du tour👤SoloThèmes🃏Card Game🧙Fantasy💰Economic🥊Fighting🚀Science Fiction⚔️Wargame🎲Dice🎉Party Game🧭Adventure🐾Animals🏰Medieval🗺️Exploration🔍Deduction🎭Bluffing🗿Miniatures♟️Abstract Strategy🏙️City Building😂Humor🏛️Ancient👻Horror🧒Children's Game🧩Puzzle⏱️Real-time🚩Territory Building🎬Movies / TV / Radio theme⚓Nautical🤝Negotiation🤹Action / Dexterity🏺Civilization🗳️Political📖Novel-based🚚Transportation🏭Industry / Manufacturing🚂Trains🔱Mythology🎨Renaissance🌾Farming🪐Space Exploration🕵️Murder/Mystery🏁Racing🎮Video Game Theme🦜Pirates🖨️Print & Play🔤Word Game🎓Educational💎Collectible Components🌱Environmental⚽Sports💥Comic Book / Strip🕶️Spies/Secret Agents🧟Zombies🤠American West🧠Memory❓Trivia🧳Travel🦖Prehistoric🛩️Aviation / Flight🔢Number➗Math🙏Religious🌀Maze🔌Electronic🎩Mafia🩺Medical🐪Arabian🔞Mature / Adult🎵Music📚Book⚙️Game System➕Expansion for Base-game🪖World War I (+4)🎖️Napoleonic (+7)"
   ]
  },
@@ -368,8 +424,12 @@
    "labels": [
     "",
     "",
+    "",
+    "+++",
     "Ark Nova",
-    "Terraforming Mars"
+    "Terraforming Mars",
+    "−−",
+    "−−−"
    ]
   },
   "map": {
@@ -387,7 +447,7 @@
   "agree": "Métriques Cos IDFJaccardRecouv.SoupleCos IDF80808080Jaccard80808080Recouv.80808080Souple80808080 Attributs Méca.ThèmeFamillesDescr.Méca.80406020Thème40402020Familles6020600Descr.2020020 Case = % de voisins communs (top 5) pour Terraforming Mars. Consensus (≥ 4/8) Ark Nova (2021)7/8A Feast for Odin (2016)7/8Frosthaven (2022)6/8Too Many Bones (2017)6/8",
   "legend": [
    "jeu choisiniveau 1niveau 2niveau 3niveau 4",
-   "revente dans l'intervalle convoitise dans l'intervalle",
+   "−−−revente : 3 en bas de l'intervalle, 1 en haut +++convoitise : 1 à 3 selon la position dans l'intervalle",
    "Familles de mécaniques🃏Cartes🎒Construction de deck / sac🎲Dés et hasard👷Placement d'ouvriers⚙️Sélection d'actions🔨Enchères💰Économie et marché🧩Placement et motifs🗺️Contrôle de territoire🚶Déplacement🛤️Réseaux et livraison🤝Coopération🎭Bluff et information cachée⚔️Conflit direct🗳️Négociation et vote📖Récit et campagne🦸Asymétrie🏆Score et fin de partie🔬Progression et simulation⏱️Temps réel, adresse, party🔄Ordre du tour👤SoloThèmes🃏Card Game🧙Fantasy💰Economic🥊Fighting🚀Science Fiction⚔️Wargame🎲Dice🎉Party Game🧭Adventure🐾Animals🏰Medieval🗺️Exploration🔍Deduction🎭Bluffing🗿Miniatures♟️Abstract Strategy🏙️City Building😂Humor🏛️Ancient👻Horror🧒Children's Game🧩Puzzle⏱️Real-time🚩Territory Building🎬Movies / TV / Radio theme⚓Nautical🤝Negotiation🤹Action / Dexterity🏺Civilization🗳️Political📖Novel-based🚚Transportation🏭Industry / Manufacturing🚂Trains🔱Mythology🎨Renaissance🌾Farming🪐Space Exploration🕵️Murder/Mystery🏁Racing🎮Video Game Theme🦜Pirates🖨️Print & Play🔤Word Game🎓Educational💎Collectible Components🌱Environmental⚽Sports💥Comic Book / Strip🕶️Spies/Secret Agents🧟Zombies🤠American West🧠Memory❓Trivia🧳Travel🦖Prehistoric🛩️Aviation / Flight🔢Number➗Math🙏Religious🌀Maze🔌Electronic🎩Mafia🩺Medical🐪Arabian🔞Mature / Adult🎵Music📚Book⚙️Game System➕Expansion for Base-game🪖World War I (+4)🎖️Napoleonic (+7)"
   ]
  },
@@ -406,8 +466,12 @@
    "labels": [
     "",
     "",
+    "",
+    "+++",
     "Ark Nova",
-    "Terraforming Mars"
+    "Terraforming Mars",
+    "−−",
+    "−−−"
    ]
   },
   "map": {
@@ -425,7 +489,7 @@
   "agree": "Métriques Cos IDFJaccardRecouv.SoupleCos IDF80808080Jaccard80808080Recouv.80808080Souple80808080 Attributs Méca.ThèmeFamillesDescr.Méca.80406020Thème40402020Familles6020600Descr.2020020 Case = % de voisins communs (top 5) pour Terraforming Mars. Consensus (≥ 4/8) Ark Nova (2021)7/8A Feast for Odin (2016)7/8Frosthaven (2022)6/8Too Many Bones (2017)6/8",
   "legend": [
    "jeu choisiniveau 1niveau 2niveau 3niveau 4",
-   "revente dans l'intervalle convoitise dans l'intervalle",
+   "−−−revente : 3 en bas de l'intervalle, 1 en haut +++convoitise : 1 à 3 selon la position dans l'intervalle",
    "Familles de mécaniques🃏Cartes🎒Construction de deck / sac🎲Dés et hasard👷Placement d'ouvriers⚙️Sélection d'actions🔨Enchères💰Économie et marché🧩Placement et motifs🗺️Contrôle de territoire🚶Déplacement🛤️Réseaux et livraison🤝Coopération🎭Bluff et information cachée⚔️Conflit direct🗳️Négociation et vote📖Récit et campagne🦸Asymétrie🏆Score et fin de partie🔬Progression et simulation⏱️Temps réel, adresse, party🔄Ordre du tour👤SoloThèmes🃏Card Game🧙Fantasy💰Economic🥊Fighting🚀Science Fiction⚔️Wargame🎲Dice🎉Party Game🧭Adventure🐾Animals🏰Medieval🗺️Exploration🔍Deduction🎭Bluffing🗿Miniatures♟️Abstract Strategy🏙️City Building😂Humor🏛️Ancient👻Horror🧒Children's Game🧩Puzzle⏱️Real-time🚩Territory Building🎬Movies / TV / Radio theme⚓Nautical🤝Negotiation🤹Action / Dexterity🏺Civilization🗳️Political📖Novel-based🚚Transportation🏭Industry / Manufacturing🚂Trains🔱Mythology🎨Renaissance🌾Farming🪐Space Exploration🕵️Murder/Mystery🏁Racing🎮Video Game Theme🦜Pirates🖨️Print & Play🔤Word Game🎓Educational💎Collectible Components🌱Environmental⚽Sports💥Comic Book / Strip🕶️Spies/Secret Agents🧟Zombies🤠American West🧠Memory❓Trivia🧳Travel🦖Prehistoric🛩️Aviation / Flight🔢Number➗Math🙏Religious🌀Maze🔌Electronic🎩Mafia🩺Medical🐪Arabian🔞Mature / Adult🎵Music📚Book⚙️Game System➕Expansion for Base-game🪖World War I (+4)🎖️Napoleonic (+7)"
   ]
  },
@@ -444,8 +508,12 @@
    "labels": [
     "",
     "",
+    "",
+    "+++",
     "Ark Nova",
-    "Terraforming Mars"
+    "Terraforming Mars",
+    "−−",
+    "−−−"
    ]
   },
   "map": {
@@ -463,7 +531,7 @@
   "agree": "Métriques Cos IDFJaccardRecouv.SoupleCos IDF80808080Jaccard80808080Recouv.80808080Souple80808080 Attributs Méca.ThèmeFamillesDescr.Méca.80406020Thème40402020Familles6020600Descr.2020020 Case = % de voisins communs (top 5) pour Terraforming Mars. Consensus (≥ 4/8) Ark Nova (2021)7/8A Feast for Odin (2016)7/8Frosthaven (2022)6/8Too Many Bones (2017)6/8",
   "legend": [
    "jeu choisiniveau 1niveau 2niveau 3niveau 4",
-   "revente dans l'intervalle convoitise dans l'intervalle",
+   "−−−revente : 3 en bas de l'intervalle, 1 en haut +++convoitise : 1 à 3 selon la position dans l'intervalle",
    "Familles de mécaniques🃏Cartes🎒Construction de deck / sac🎲Dés et hasard👷Placement d'ouvriers⚙️Sélection d'actions🔨Enchères💰Économie et marché🧩Placement et motifs🗺️Contrôle de territoire🚶Déplacement🛤️Réseaux et livraison🤝Coopération🎭Bluff et information cachée⚔️Conflit direct🗳️Négociation et vote📖Récit et campagne🦸Asymétrie🏆Score et fin de partie🔬Progression et simulation⏱️Temps réel, adresse, party🔄Ordre du tour👤SoloThèmes🃏Card Game🧙Fantasy💰Economic🥊Fighting🚀Science Fiction⚔️Wargame🎲Dice🎉Party Game🧭Adventure🐾Animals🏰Medieval🗺️Exploration🔍Deduction🎭Bluffing🗿Miniatures♟️Abstract Strategy🏙️City Building😂Humor🏛️Ancient👻Horror🧒Children's Game🧩Puzzle⏱️Real-time🚩Territory Building🎬Movies / TV / Radio theme⚓Nautical🤝Negotiation🤹Action / Dexterity🏺Civilization🗳️Political📖Novel-based🚚Transportation🏭Industry / Manufacturing🚂Trains🔱Mythology🎨Renaissance🌾Farming🪐Space Exploration🕵️Murder/Mystery🏁Racing🎮Video Game Theme🦜Pirates🖨️Print & Play🔤Word Game🎓Educational💎Collectible Components🌱Environmental⚽Sports💥Comic Book / Strip🕶️Spies/Secret Agents🧟Zombies🤠American West🧠Memory❓Trivia🧳Travel🦖Prehistoric🛩️Aviation / Flight🔢Number➗Math🙏Religious🌀Maze🔌Electronic🎩Mafia🩺Medical🐪Arabian🔞Mature / Adult🎵Music📚Book⚙️Game System➕Expansion for Base-game🪖World War I (+4)🎖️Napoleonic (+7)"
   ]
  },
@@ -482,8 +550,12 @@
    "labels": [
     "",
     "",
+    "",
+    "+++",
     "Ark Nova",
-    "Terraforming Mars"
+    "Terraforming Mars",
+    "−−",
+    "−−−"
    ]
   },
   "map": {
@@ -501,7 +573,7 @@
   "agree": "Métriques Cos IDFJaccardRecouv.SoupleCos IDF80808080Jaccard80808080Recouv.80808080Souple80808080 Attributs Méca.ThèmeFamillesDescr.Méca.80406020Thème40402020Familles6020600Descr.2020020 Case = % de voisins communs (top 5) pour Terraforming Mars. Consensus (≥ 4/8) Ark Nova (2021)7/8A Feast for Odin (2016)7/8Frosthaven (2022)6/8Too Many Bones (2017)6/8",
   "legend": [
    "jeu choisiniveau 1niveau 2niveau 3niveau 4",
-   "revente dans l'intervalle convoitise dans l'intervalle",
+   "−−−revente : 3 en bas de l'intervalle, 1 en haut +++convoitise : 1 à 3 selon la position dans l'intervalle",
    "Familles de mécaniques🃏Cartes🎒Construction de deck / sac🎲Dés et hasard👷Placement d'ouvriers⚙️Sélection d'actions🔨Enchères💰Économie et marché🧩Placement et motifs🗺️Contrôle de territoire🚶Déplacement🛤️Réseaux et livraison🤝Coopération🎭Bluff et information cachée⚔️Conflit direct🗳️Négociation et vote📖Récit et campagne🦸Asymétrie🏆Score et fin de partie🔬Progression et simulation⏱️Temps réel, adresse, party🔄Ordre du tour👤SoloThèmes🃏Card Game🧙Fantasy💰Economic🥊Fighting🚀Science Fiction⚔️Wargame🎲Dice🎉Party Game🧭Adventure🐾Animals🏰Medieval🗺️Exploration🔍Deduction🎭Bluffing🗿Miniatures♟️Abstract Strategy🏙️City Building😂Humor🏛️Ancient👻Horror🧒Children's Game🧩Puzzle⏱️Real-time🚩Territory Building🎬Movies / TV / Radio theme⚓Nautical🤝Negotiation🤹Action / Dexterity🏺Civilization🗳️Political📖Novel-based🚚Transportation🏭Industry / Manufacturing🚂Trains🔱Mythology🎨Renaissance🌾Farming🪐Space Exploration🕵️Murder/Mystery🏁Racing🎮Video Game Theme🦜Pirates🖨️Print & Play🔤Word Game🎓Educational💎Collectible Components🌱Environmental⚽Sports💥Comic Book / Strip🕶️Spies/Secret Agents🧟Zombies🤠American West🧠Memory❓Trivia🧳Travel🦖Prehistoric🛩️Aviation / Flight🔢Number➗Math🙏Religious🌀Maze🔌Electronic🎩Mafia🩺Medical🐪Arabian🔞Mature / Adult🎵Music📚Book⚙️Game System➕Expansion for Base-game🪖World War I (+4)🎖️Napoleonic (+7)"
   ]
  },
@@ -520,8 +592,12 @@
    "labels": [
     "",
     "",
+    "",
+    "+++",
     "Ark Nova",
-    "Terraforming Mars"
+    "Terraforming Mars",
+    "−−",
+    "−−−"
    ]
   },
   "map": {
@@ -539,7 +615,7 @@
   "agree": "Métriques Cos IDFJaccardRecouv.SoupleCos IDF80808080Jaccard80808080Recouv.80808080Souple80808080 Attributs Méca.ThèmeFamillesDescr.Méca.80406020Thème40402020Familles6020600Descr.2020020 Case = % de voisins communs (top 5) pour Terraforming Mars. Consensus (≥ 4/8) Ark Nova (2021)7/8A Feast for Odin (2016)7/8Frosthaven (2022)6/8Too Many Bones (2017)6/8",
   "legend": [
    "jeu choisiniveau 1niveau 2niveau 3niveau 4",
-   "revente dans l'intervalle convoitise dans l'intervalle",
+   "−−−revente : 3 en bas de l'intervalle, 1 en haut +++convoitise : 1 à 3 selon la position dans l'intervalle",
    "Familles de mécaniques🃏Cartes🎒Construction de deck / sac🎲Dés et hasard👷Placement d'ouvriers⚙️Sélection d'actions🔨Enchères💰Économie et marché🧩Placement et motifs🗺️Contrôle de territoire🚶Déplacement🛤️Réseaux et livraison🤝Coopération🎭Bluff et information cachée⚔️Conflit direct🗳️Négociation et vote📖Récit et campagne🦸Asymétrie🏆Score et fin de partie🔬Progression et simulation⏱️Temps réel, adresse, party🔄Ordre du tour👤SoloThèmes🃏Card Game🧙Fantasy💰Economic🥊Fighting🚀Science Fiction⚔️Wargame🎲Dice🎉Party Game🧭Adventure🐾Animals🏰Medieval🗺️Exploration🔍Deduction🎭Bluffing🗿Miniatures♟️Abstract Strategy🏙️City Building😂Humor🏛️Ancient👻Horror🧒Children's Game🧩Puzzle⏱️Real-time🚩Territory Building🎬Movies / TV / Radio theme⚓Nautical🤝Negotiation🤹Action / Dexterity🏺Civilization🗳️Political📖Novel-based🚚Transportation🏭Industry / Manufacturing🚂Trains🔱Mythology🎨Renaissance🌾Farming🪐Space Exploration🕵️Murder/Mystery🏁Racing🎮Video Game Theme🦜Pirates🖨️Print & Play🔤Word Game🎓Educational💎Collectible Components🌱Environmental⚽Sports💥Comic Book / Strip🕶️Spies/Secret Agents🧟Zombies🤠American West🧠Memory❓Trivia🧳Travel🦖Prehistoric🛩️Aviation / Flight🔢Number➗Math🙏Religious🌀Maze🔌Electronic🎩Mafia🩺Medical🐪Arabian🔞Mature / Adult🎵Music📚Book⚙️Game System➕Expansion for Base-game🪖World War I (+4)🎖️Napoleonic (+7)"
   ]
  },
@@ -560,10 +636,18 @@
     "",
     "",
     "",
+    "",
+    "",
+    "++",
+    "+++",
+    "+++",
     "Ark Nova",
     "Frosthaven",
     "Pandemic",
-    "Too Many Bones"
+    "Too Many Bones",
+    "−−",
+    "−−−",
+    "−−−"
    ]
   },
   "map": {
@@ -581,7 +665,7 @@
   "agree": "Métriques Cos IDFJaccardRecouv.SoupleCos IDF60606060Jaccard60606060Recouv.60606060Souple60606080 Attributs Méca.ThèmeFamillesDescr.Méca.6002020Thème0–00Familles200200Descr.200020 Case = % de voisins communs (top 5) pour Pandemic. Consensus (≥ 4/8) Ark Nova (2021)6/8Frosthaven (2022)6/8Too Many Bones (2017)5/8",
   "legend": [
    "jeu choisiniveau 1niveau 2niveau 3niveau 4",
-   "revente dans l'intervalle convoitise dans l'intervalle",
+   "−−−revente : 3 en bas de l'intervalle, 1 en haut +++convoitise : 1 à 3 selon la position dans l'intervalle",
    "Familles de mécaniques🃏Cartes🎒Construction de deck / sac🎲Dés et hasard👷Placement d'ouvriers⚙️Sélection d'actions🔨Enchères💰Économie et marché🧩Placement et motifs🗺️Contrôle de territoire🚶Déplacement🛤️Réseaux et livraison🤝Coopération🎭Bluff et information cachée⚔️Conflit direct🗳️Négociation et vote📖Récit et campagne🦸Asymétrie🏆Score et fin de partie🔬Progression et simulation⏱️Temps réel, adresse, party🔄Ordre du tour👤SoloThèmes🃏Card Game🧙Fantasy💰Economic🥊Fighting🚀Science Fiction⚔️Wargame🎲Dice🎉Party Game🧭Adventure🐾Animals🏰Medieval🗺️Exploration🔍Deduction🎭Bluffing🗿Miniatures♟️Abstract Strategy🏙️City Building😂Humor🏛️Ancient👻Horror🧒Children's Game🧩Puzzle⏱️Real-time🚩Territory Building🎬Movies / TV / Radio theme⚓Nautical🤝Negotiation🤹Action / Dexterity🏺Civilization🗳️Political📖Novel-based🚚Transportation🏭Industry / Manufacturing🚂Trains🔱Mythology🎨Renaissance🌾Farming🪐Space Exploration🕵️Murder/Mystery🏁Racing🎮Video Game Theme🦜Pirates🖨️Print & Play🔤Word Game🎓Educational💎Collectible Components🌱Environmental⚽Sports💥Comic Book / Strip🕶️Spies/Secret Agents🧟Zombies🤠American West🧠Memory❓Trivia🧳Travel🦖Prehistoric🛩️Aviation / Flight🔢Number➗Math🙏Religious🌀Maze🔌Electronic🎩Mafia🩺Medical🐪Arabian🔞Mature / Adult🎵Music📚Book⚙️Game System➕Expansion for Base-game🪖World War I (+4)🎖️Napoleonic (+7)"
   ]
  },
@@ -602,10 +686,18 @@
     "",
     "",
     "",
+    "",
+    "",
+    "++",
+    "+++",
+    "+++",
     "Ark Nova",
     "Frosthaven",
     "Pandemic",
-    "Too Many Bones"
+    "Too Many Bones",
+    "−−",
+    "−−−",
+    "−−−"
    ]
   },
   "map": {
@@ -623,7 +715,7 @@
   "agree": "Métriques Cos IDFJaccardRecouv.SoupleCos IDF60606060Jaccard60606060Recouv.60606060Souple60606080 Attributs Méca.ThèmeFamillesDescr.Méca.6002020Thème0–00Familles200200Descr.200020 Case = % de voisins communs (top 5) pour Pandemic. Consensus (≥ 4/8) Ark Nova (2021)6/8Frosthaven (2022)6/8Too Many Bones (2017)5/8",
   "legend": [
    "jeu choisiniveau 1niveau 2niveau 3niveau 4",
-   "revente dans l'intervalle convoitise dans l'intervalle",
+   "−−−revente : 3 en bas de l'intervalle, 1 en haut +++convoitise : 1 à 3 selon la position dans l'intervalle",
    "Familles de mécaniques🃏Cartes🎒Construction de deck / sac🎲Dés et hasard👷Placement d'ouvriers⚙️Sélection d'actions🔨Enchères💰Économie et marché🧩Placement et motifs🗺️Contrôle de territoire🚶Déplacement🛤️Réseaux et livraison🤝Coopération🎭Bluff et information cachée⚔️Conflit direct🗳️Négociation et vote📖Récit et campagne🦸Asymétrie🏆Score et fin de partie🔬Progression et simulation⏱️Temps réel, adresse, party🔄Ordre du tour👤SoloThèmes🃏Card Game🧙Fantasy💰Economic🥊Fighting🚀Science Fiction⚔️Wargame🎲Dice🎉Party Game🧭Adventure🐾Animals🏰Medieval🗺️Exploration🔍Deduction🎭Bluffing🗿Miniatures♟️Abstract Strategy🏙️City Building😂Humor🏛️Ancient👻Horror🧒Children's Game🧩Puzzle⏱️Real-time🚩Territory Building🎬Movies / TV / Radio theme⚓Nautical🤝Negotiation🤹Action / Dexterity🏺Civilization🗳️Political📖Novel-based🚚Transportation🏭Industry / Manufacturing🚂Trains🔱Mythology🎨Renaissance🌾Farming🪐Space Exploration🕵️Murder/Mystery🏁Racing🎮Video Game Theme🦜Pirates🖨️Print & Play🔤Word Game🎓Educational💎Collectible Components🌱Environmental⚽Sports💥Comic Book / Strip🕶️Spies/Secret Agents🧟Zombies🤠American West🧠Memory❓Trivia🧳Travel🦖Prehistoric🛩️Aviation / Flight🔢Number➗Math🙏Religious🌀Maze🔌Electronic🎩Mafia🩺Medical🐪Arabian🔞Mature / Adult🎵Music📚Book⚙️Game System➕Expansion for Base-game🪖World War I (+4)🎖️Napoleonic (+7)"
   ]
  },
