@@ -32,6 +32,9 @@ web/
 | `collection-store`           | store « Mes collections » (stockage, collections par défaut, horloge injectés)                                                                                     |
 | `ui-persistence`             | état mémorisé de la page collections (clé `bga.collections.ui.v1`)                                                                                                 |
 | `store`                      | mini-store observable                                                                                                                                              |
+| `suggest`                    | « 💡 Suggestions » : profil (centroïde) d'une collection, jeux hors collection classés par cosinus pondéré                                                         |
+| `share-link`                 | lien de partage d'une vue de l'explorateur (`#<id>~<état base64url>`), encodage / décodage validé                                                                  |
+| `cooccurrence`               | page Mécaniques : comptes, lift, NPMI, classification hiérarchique (ordre des feuilles, groupes)                                                                   |
 
 | `ui/`                 | rôle                                                                                                                                    |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
@@ -43,8 +46,9 @@ web/
 | `tab-links`           | liens d'en-tête : remet au premier plan l'onglet déjà ouvert                                                                            |
 
 `pages/explorer/` : `core` (données, état, voisins), `filters`, `graph-view`, `map-view`, `details`, `export-collections`,
-`toolbar`, `signals-ui`, `weights-ui`, `active-filters-pop`, `agreement-view`, `start`, assemblés par `app.js`.
-`pages/collections/` : `core`, `filters`, `cards`, `detail`, `card-actions`, `collection-popover`, `sections`, `dnd`,
+`toolbar`, `signals-ui`, `weights-ui`, `active-filters-pop`, `agreement-view`, `share-link`, `start`, assemblés par `app.js`.
+`pages/mechanics/` : `main`, `heatmap` (page `mechanics.html`, carte de chaleur des co-occurrences de mécaniques).
+`pages/collections/` : `core`, `filters`, `cards`, `detail`, `suggestions`, `card-actions`, `collection-popover`, `sections`, `dnd`,
 `collection-from-filters`, `actions`, `start`, assemblés par `app.js`.
 
 ## Flux
@@ -72,7 +76,7 @@ module précédent qu'au moment d'un événement, jamais pendant l'installation.
 ## Contrats à ne pas casser
 
 - localStorage : `bga.collections.v2` (migration depuis `bga.collection.v1`), `bga.collections.ui.v1`, `bga.reqsec.<sec>`.
-- URL : `#<id BGG>` recentre l'explorateur. `window.name` : `bga-explorer`, `bga-collection`.
+- URL : `#<id BGG>` recentre l'explorateur ; `#<id>~<état>` (bouton « Lien 🔗 ») applique en plus les réglages et filtres (`lib/share-link.js`, tolérant : champs invalides ignorés). `window.name` : `bga-explorer`, `bga-collection`.
 - Export JSON v2 : `{version: 2, games: [{id, added}], collections: [{cid, name, color, created, games}]}`.
 - Collections par défaut : semées au tout premier chargement seulement.
 
@@ -84,6 +88,13 @@ module précédent qu'au moment d'un événement, jamais pendant l'installation.
 - **Ajouter un bouton de barre (explorateur)** : id dans `index.html`, écouteur dans `pages/explorer/toolbar.js` (ou le module de la zone), `app.render()` ou `app.invalidate()` pour recalculer.
 - **Ajouter une métrique** : `lib/metrics.js` (`METRICS`, `attrPair`) + test ; le sélecteur et le comparateur la prennent seuls.
 - **Changer le CSS** : fichier de `styles/` concerné ; vérifier `tests/e2e/visual.spec.js`.
+
+## Cartes 2D (t-SNE / UMAP)
+
+`src/build_map.py --method umap --out-dir DIR` produit une carte UMAP (paquet `umap-learn`, absent par défaut) sans écraser
+celle utilisée ; `src/compare_maps.py DIR_A DIR_B` compare deux cartes (trustworthiness, recall@15 des voisins, corrélation
+de rang des distances). Mesuré sur ces données (4 attributs) : **t-SNE ≥ UMAP sur les trois critères**, y compris la structure
+globale (n_neighbors 15 ou 50) : la carte reste en t-SNE.
 
 ## Vérifier
 

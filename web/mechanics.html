@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mécaniques · Boardgame Affinity</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="mech-page">
+  <header class="top">
+    <div>
+      <h1>Carte des mécaniques</h1>
+      <p class="sub">Quelles mécaniques vont ensemble ? Co-occurrences, lift et information mutuelle · données BoardGameGeek</p>
+    </div>
+    <nav class="tabs" aria-label="Pages">
+      <a href="index.html" class="tab" target="bga-explorer" data-help="Ouvre l'explorateur (le même onglet à chaque clic).">Explorateur</a>
+      <a href="collections.html" class="tab" target="bga-collection" data-help="Ouvre tes collections (le même onglet à chaque clic).">Mes collections</a>
+      <a href="mechanics.html" class="tab on" aria-current="page">Mécaniques</a>
+    </nav>
+  </header>
+
+  <main class="mech-main">
+    <aside class="panel mech-ctl">
+      <label for="mh-metric">Valeur affichée</label>
+      <select id="mh-metric">
+        <option value="npmi">NPMI (association, −1 à 1)</option>
+        <option value="lift">Lift (log₂, ×1 = indépendantes)</option>
+        <option value="count">Nombre de jeux en commun</option>
+      </select>
+      <p class="hint" id="mh-metric-help"></p>
+      <label for="mh-n">Mécaniques affichées : <output id="mh-n-out"></output></label>
+      <input id="mh-n" type="range" min="10" max="120" step="1" value="40" aria-label="Nombre de mécaniques affichées">
+      <label for="mh-min">Co-occurrence minimale : <output id="mh-min-out"></output> jeux</label>
+      <input id="mh-min" type="range" min="1" max="50" step="1" value="5" aria-label="Nombre minimal de jeux en commun">
+      <label for="mh-k">Groupes : <output id="mh-k-out"></output></label>
+      <input id="mh-k" type="range" min="1" max="15" step="1" value="6" aria-label="Nombre de groupes de mécaniques">
+      <p id="mh-stats" class="msg"></p>
+      <h2>Groupes</h2>
+      <div id="mh-groups"></div>
+    </aside>
+    <section class="mech-map" aria-label="Carte de chaleur">
+      <div id="mh-scroll"><svg id="mh-svg" role="img" aria-label="Carte de chaleur des co-occurrences de mécaniques"></svg></div>
+      <div id="mh-tip" role="tooltip" hidden></div>
+    </section>
+    <section id="mh-detail" class="details" aria-live="polite">
+      <p class="hint">Clique sur une case pour voir les jeux qui combinent les deux mécaniques.</p>
+    </section>
+  </main>
+  <p id="mh-msg" class="msg" aria-live="polite"></p>
+  <div id="help" role="tooltip" hidden></div>
+  <script src="data/games.js"></script>
+  <script type="module" src="pages/mechanics/main.js"></script>
+</body>
+</html>

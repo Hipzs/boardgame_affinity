@@ -13,7 +13,9 @@ la transition animée entre deux cartes tournoierait).
 
 Sortie : data/processed/map_xy.csv (id, x0, y0, x1, y1, …) dans [-1, 1] environ, et map_xy.method
 (ligne 1 : méthode, ligne 2 : clés des attributs dans l'ordre des colonnes, ex. m,c,f,d).
-Usage : python3 src/build_map.py [--attrs m,c,f,d] [--min-ratings 500] [--method auto|umap|tsne]
+Usage : python3 src/build_map.py [--attrs m,c,f,d] [--min-ratings 500] [--method auto|umap|tsne] [--out-dir DIR]
+(--out-dir : écrit ailleurs que dans data/processed, pour comparer les méthodes sans écraser la carte utilisée ;
+ comparaison chiffrée : src/compare_maps.py)
 """
 import argparse
 import ast
@@ -22,6 +24,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import sklearn
 from scipy import sparse
 from scipy.linalg import orthogonal_procrustes
 from sklearn.preprocessing import normalize
@@ -78,21 +81,15 @@ def description_matrix(keep):
     return normalize(X, norm="l2", axis=1)
 
 
-def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--attrs", default="m,c,f,d", help="attributs (m, c, f, d) ; une carte par attribut")
-    ap.add_argument("--min-ratings", type=int, default=500)
-    ap.add_argument("--method", default="auto", choices=["auto", "umap", "tsne"])
-    a = ap.parse_args()
-    attrs = a.attrs.split(",")
-
+def load_games(min_ratings):
+    """Jeux retenus (DataFrame) et constructeurs de matrices {attribut: () -> matrice creuse normalisée L2}."""
     d = pd.read_csv(RAW / "details.csv")
     r = pd.read_csv(RAW / "ratings.csv")[["id", "users_rated"]]
     d = d.merge(r, on="id", how="left")
     d["m"] = d["boardgamemechanic"].map(parse_list)
     d["c"] = d["boardgamecategory"].map(parse_list)
     d["f"] = d["boardgamefamily"].map(parse_list)
-    keep = d[(d["users_rated"].fillna(0) >= a.min_ratings) & ((d["m"].map(len) > 0) | (d["c"].map(len) > 0))]
+    keep = d[(d["users_rated"].fillna(0) >= min_ratings) & ((d["m"].map(len) > 0) | (d["c"].map(len) > 0))]
     keep = keep.reset_index(drop=True)
     build = {
         "m": lambda: weighted_matrix(keep["m"], idf_dump(d["m"])),
@@ -100,7 +97,28 @@ def main():
         "f": lambda: weighted_matrix(keep["f"], idf_families(keep["f"])),
         "d": lambda: description_matrix(keep),
     }
+    return keep, build
 
+
+def cosine_distance(X):
+    """Distance cosinus précalculée (dense n×n) entre lignes normalisées L2 ; jeu sans étiquette : distance 1 à tous."""
+    Dm = np.clip(1.0 - (X @ X.T).toarray(), 0.0, 1.0)
+    np.fill_diagonal(Dm, 0.0)
+    return Dm
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--attrs", default="m,c,f,d", help="attributs (m, c, f, d) ; une carte par attribut")
+    ap.add_argument("--min-ratings", type=int, default=500)
+    ap.add_argument("--method", default="auto", choices=["auto", "umap", "tsne"])
+    ap.add_argument("--umap-neighbors", type=int, default=15, help="UMAP : n_neighbors (grand = structure globale)")
+    ap.add_argument("--umap-min-dist", type=float, default=0.1, help="UMAP : min_dist (grand = points moins serrés)")
+    ap.add_argument("--out-dir", type=Path, default=OUT, help="dossier de sortie (défaut : data/processed)")
+    a = ap.parse_args()
+    attrs = a.attrs.split(",")
+
+    keep, build = load_games(a.min_ratings)
     method = a.method
     if method == "auto":
         try:
@@ -113,15 +131,17 @@ def main():
     for k in attrs:
         X = build[k]()
         # Distance cosinus précalculée (dense 4672² ≈ 175 Mo) : évite de densifier X (vocabulaire des descriptions).
-        Dm = np.clip(1.0 - (X @ X.T).toarray(), 0.0, 1.0)
-        np.fill_diagonal(Dm, 0.0)
+        Dm = cosine_distance(X)
         if method == "umap":
             import umap
-            Y = umap.UMAP(n_neighbors=15, min_dist=0.1, metric="precomputed", random_state=0).fit_transform(Dm)
+            Y = umap.UMAP(n_neighbors=a.umap_neighbors, min_dist=a.umap_min_dist, metric="precomputed", random_state=0).fit_transform(Dm)
         else:
             from sklearn.manifold import TSNE
+            kw = {}
+            if sklearn.__version__ < "1.2":  # option retirée ensuite (le comportement « carré » est devenu le seul)
+                kw["square_distances"] = True
             Y = TSNE(n_components=2, metric="precomputed", perplexity=30, init="random", learning_rate="auto",
-                     square_distances=True, random_state=0).fit_transform(Dm)
+                     random_state=0, **kw).fit_transform(Dm)
         Y = Y - np.median(Y, axis=0)
         maps[k] = Y / np.percentile(np.abs(Y), 99.5)  # robuste aux points isolés
         empty = int((X.getnnz(axis=1) == 0).sum())
@@ -134,10 +154,10 @@ def main():
         Y = maps[k] @ R
         cols[f"x{j}"], cols[f"y{j}"] = Y[:, 0].round(4), Y[:, 1].round(4)
     out = pd.DataFrame(cols)
-    OUT.mkdir(parents=True, exist_ok=True)
-    out.to_csv(OUT / "map_xy.csv", index=False)
-    (OUT / "map_xy.method").write_text(f"{method}\n{','.join(attrs)}\n")
-    print(f"{len(out)} jeux, méthode {method}, attributs {attrs} -> {OUT / 'map_xy.csv'}")
+    a.out_dir.mkdir(parents=True, exist_ok=True)
+    out.to_csv(a.out_dir / "map_xy.csv", index=False)
+    (a.out_dir / "map_xy.method").write_text(f"{method}\n{','.join(attrs)}\n")
+    print(f"{len(out)} jeux, méthode {method}, attributs {attrs} -> {a.out_dir / 'map_xy.csv'}")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,109 @@
+/* --- Page « Mécaniques » : carte de chaleur des co-occurrences --- */
+:root {
+  --hm-pos: #d6336c;
+  --hm-neg: #1c7ed6;
+  --hm-cnt: #2f9e44;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --hm-pos: #f06595;
+    --hm-neg: #4dabf7;
+    --hm-cnt: #69db7c;
+  }
+}
+main.mech-main {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr) 300px;
+  gap: 12px;
+  padding: 12px 20px;
+  align-items: start;
+}
+.mech-ctl {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.mech-ctl label {
+  font-weight: 600;
+  font-size: 0.85rem;
+  margin-top: 6px;
+}
+.mech-map {
+  position: relative;
+  min-width: 0;
+}
+#mh-scroll {
+  overflow: auto;
+  max-height: calc(100vh - 150px);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+#mh-svg {
+  display: block;
+}
+#mh-svg rect[data-i] {
+  cursor: pointer;
+}
+#mh-svg rect[data-i]:hover {
+  stroke: var(--text);
+  stroke-width: 1px;
+}
+.mh-pos {
+  fill: var(--hm-pos);
+}
+.mh-neg {
+  fill: var(--hm-neg);
+}
+.mh-cnt {
+  fill: var(--hm-cnt);
+}
+.mh-low {
+  fill: var(--border);
+  fill-opacity: 0.35;
+}
+.mh-diag {
+  fill: var(--muted);
+  fill-opacity: 0.45;
+}
+.mh-lab {
+  font-size: 10.5px;
+  fill: var(--text);
+}
+#mh-tip {
+  position: absolute;
+  z-index: 5;
+  max-width: 250px;
+  padding: 6px 9px;
+  font-size: 0.8rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.2);
+  pointer-events: none;
+}
+.mh-gbox {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 3px;
+  margin-bottom: 8px;
+}
+.mh-gdot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 3px;
+}
+.mh-game {
+  grid-template-columns: 1fr;
+  grid-template-areas: "name" "meta";
+}
+@media (max-width: 1100px) {
+  main.mech-main {
+    grid-template-columns: 1fr;
+  }
+  #mh-scroll {
+    max-height: 70vh;
+  }
+}

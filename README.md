@@ -24,7 +24,7 @@ python3 src/export_web.py          # attributs, NPMI, descriptions -> web/data/g
 python3 web/serve.py 8765        # ou : npm run serve (sans cache navigateur)
 ```
 
-Puis ouvrir http://localhost:8765. La bibliothèque d3 est chargée depuis cdnjs (connexion internet nécessaire).
+Puis ouvrir http://localhost:8765 (pages : explorateur `index.html`, `collections.html`, carte des mécaniques `mechanics.html`). La bibliothèque d3 est chargée depuis cdnjs (connexion internet nécessaire).
 
 ## Développement
 
@@ -45,9 +45,10 @@ src/
   build_matrix.py    matrice binaire jeux x mécaniques, fréquences, IDF
   similarity.py      prototypes de similarité en Python (Jaccard, cosinus IDF, SVD)
   build_map.py       cartes 2D (t-SNE, ou UMAP si installé), alignées par Procrustes
+  compare_maps.py    compare deux cartes (trustworthiness, recall@k, corrélation des distances)
   export_web.py      export des données pour l'interface
 web/
-  index.html, collections.html    pages (balisage)
+  index.html, collections.html, mechanics.html    pages (balisage)
   lib/ ui/ pages/ styles/           code : voir web/ARCHITECTURE.md
   serve.py                          serveur de dev sans cache
 tests/

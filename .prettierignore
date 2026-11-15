@@ -12,6 +12,7 @@ web/emoji.js
 web/default-collections.js
 web/index.html
 web/collections.html
+web/mechanics.html
 tests/fixtures/games.small.js
 tests/fixtures/games.small.json
 tests/e2e/__screenshots__/
