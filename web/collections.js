@@ -9,11 +9,16 @@
 import { TAG_KEYS, TAG_NAMES } from "./lib/dataset.js";
 import { createKeywordText } from "./lib/keywords.js";
 import { createFilterState, passes as passesL, filterCount as filterCountL, reqBanCount, rateActive as rateActiveL, setKeywords, includeTag, excludeTag, isIncluded as isIncludedL, isExcluded as isExcludedL } from "./lib/filters.js";
+import { escapeHtml as esc } from "./ui/html.js";
+import { installHelp } from "./ui/help-tooltip.js";
+import { createBandDrag } from "./ui/dual-range.js";
 import { serializeUI, deserializeUI, UI_KEY } from "./lib/ui-persistence.js";
 
 (() => {
   "use strict";
   const $ = (s) => document.querySelector(s);
+  // Aide au survol (data-help, après 400 ms ; masquée pendant un glisser) : web/ui/help-tooltip.js.
+  const { hide: hideHelp } = installHelp({ el: $("#help"), delay: 400, isSuppressed: () => dragging });
   const D = window.BGG_DATA, COLL = window.BGG_COLLECTION, EMO = window.BGG_EMOJI || { themes: {}, families: {} };
   if (!D || !COLL) {
     $("#coll-msg").textContent = !D ? "Données absentes : lancer python3 src/export_web.py." : "collection-store.js manquant.";
@@ -21,7 +26,6 @@ import { serializeUI, deserializeUI, UI_KEY } from "./lib/ui-persistence.js";
     return;
   }
   const byId = new Map(D.nodes.map((g) => [g.id, g]));
-  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const nonThematic = new Set(EMO.nonThematic || []);
   // Émoji du thème dominant : catégorie thématique la plus spécifique (IDF maximal), comme dans l'explorateur.
   const domEmo = (g) => {
@@ -221,28 +225,8 @@ import { serializeUI, deserializeUI, UI_KEY } from "./lib/ui-persistence.js";
       });
     }
     // Glisser la bande entre les poignées : déplace tout l'intervalle (largeur conservée, butée aux bords).
-    const box = $(`#${k}-int`);
-    const frac = (e) => { const r = box.getBoundingClientRect(); return (e.clientX - r.left) / r.width; };
-    const inBand = (e) => { const x = R.min + frac(e) * (R.max - R.min); return R.hi > R.lo && x > R.lo && x < R.hi; };
-    let drag = null;
-    box.addEventListener("pointermove", (e) => {
-      if (!drag) { box.style.cursor = e.target === box && inBand(e) ? "grab" : ""; return; }
-      const w = drag.hi - drag.lo;
-      let d = Math.round(((frac(e) - drag.f0) * (R.max - R.min)) * 10) / 10;
-      d = Math.max(R.min - drag.lo, Math.min(R.max - drag.hi, d));
-      R.lo = +(drag.lo + d).toFixed(1); R.hi = +(R.lo + w).toFixed(1);
-      rateChanged(k);
-    });
-    box.addEventListener("pointerdown", (e) => {
-      if (e.target !== box || !inBand(e)) return;
-      e.preventDefault(); hideHelp();
-      drag = { f0: frac(e), lo: R.lo, hi: R.hi };
-      try { box.setPointerCapture(e.pointerId); } catch (_) { /* sans capture */ }
-      box.classList.add("dragging"); box.style.cursor = "grabbing";
-    });
-    const end = () => { drag = null; box.classList.remove("dragging"); box.style.cursor = ""; };
-    box.addEventListener("pointerup", end);
-    box.addEventListener("pointercancel", end);
+    createBandDrag($(`#${k}-int`), { min: R.min, max: R.max, step: 0.1, onStart: hideHelp, get: () => [R.lo, R.hi],
+      set: (lo, hi) => { R.lo = lo; R.hi = hi; rateChanged(k); } });
     drawRate(k);
   }
   $("#reset").addEventListener("click", () => {
@@ -712,26 +696,7 @@ import { serializeUI, deserializeUI, UI_KEY } from "./lib/ui-persistence.js";
   $("#inbox-sort").addEventListener("change", draw);
   $("#show-all").addEventListener("change", draw);
 
-  // --- Aide au survol (attribut data-help, après 400 ms ; masquée pendant un glisser) ---------------------
-  const help = $("#help");
-  let ht = null, hf = null;
-  function hideHelp() { clearTimeout(ht); help.hidden = true; hf = null; }
-  document.addEventListener("mouseover", (e) => {
-    const el = e.target.closest("[data-help]");
-    if (el === hf) return;
-    hideHelp();
-    if (!el || dragging) return;
-    ht = setTimeout(() => {
-      hf = el;
-      help.textContent = el.dataset.help;
-      help.hidden = false;
-      const r = el.getBoundingClientRect();
-      help.style.left = `${Math.min(Math.max(8, r.left), window.innerWidth - help.offsetWidth - 8)}px`;
-      const y = r.bottom + 6;
-      help.style.top = `${y + help.offsetHeight > window.innerHeight - 8 ? r.top - help.offsetHeight - 6 : y}px`;
-    }, 400);
-  });
-  document.addEventListener("mousedown", hideHelp);
+  // --- Aide au survol (attribut data-help, après 400 ms ; masquée pendant un glisser) : web/ui/help-tooltip.js ---
 
   // --- État de la page mémorisé (jeu affiché, filtres, surbrillance, tri) -----------------------------------
   // Retrouvé en revenant sur l'onglet, même si la page a été rechargée. localStorage de ce navigateur ; illisible

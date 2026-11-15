@@ -16,11 +16,15 @@ import { createKeywordText } from "./lib/keywords.js";
 import { createFilterState, computePass, filterCount, reqBanCount, rateActive as rateActiveL, setKeywords, clearReqBan as clearReqBanL } from "./lib/filters.js";
 import { createCenters } from "./lib/map-centers.js";
 import { agreementConfigs, consensus } from "./lib/agreement.js";
+import { escapeHtml, fr } from "./ui/html.js";
+import { installHelp } from "./ui/help-tooltip.js";
+import { createBandDrag } from "./ui/dual-range.js";
 
 (() => {
   "use strict";
   const D = window.BGG_DATA;
   const $ = (s) => document.querySelector(s);
+  const { hide: hideHelp } = installHelp({ el: $("#help"), delay: 300, followFocus: true });
   if (!D || !window.d3) {
     $("#search-msg").textContent = !D
       ? "Données absentes : lancer python3 src/export_web.py."
@@ -1075,41 +1079,13 @@ import { agreementConfigs, consensus } from "./lib/agreement.js";
   }
   // --- Curseurs doubles : glisser la bande entre les deux poignées déplace tout l'intervalle ---------------
   // Largeur (haut − bas) conservée ; l'intervalle bute sur les bords. Les poignées gardent leur rôle habituel
-  // (les <input> ne captent que leurs poignées : un appui ailleurs dans la boîte arrive ici).
-  function bandDrag(box, { min, max, step, get, set }) {
-    const frac = (e) => { const r = box.getBoundingClientRect(); return (e.clientX - r.left) / r.width; };
-    const inBand = (e) => { const [lo, hi] = get(), x = min + frac(e) * (max - min); return hi > lo && x > lo && x < hi; };
-    let drag = null;
-    box.addEventListener("pointermove", (e) => {
-      if (drag) {
-        const [lo0, hi0] = drag.iv, w = hi0 - lo0;
-        let d = Math.round(((frac(e) - drag.f0) * (max - min)) / step) * step;
-        d = Math.max(min - lo0, Math.min(max - hi0, d));
-        const lo = +(lo0 + d).toFixed(6);
-        set(lo, +(lo + w).toFixed(6));
-        return;
-      }
-      box.style.cursor = e.target === box && inBand(e) ? "grab" : "";
-    });
-    box.addEventListener("pointerdown", (e) => {
-      if (e.target !== box || !inBand(e)) return;
-      e.preventDefault();
-      hideHelp();
-      drag = { f0: frac(e), iv: get() };
-      try { box.setPointerCapture(e.pointerId); } catch (_) { /* pointeur sans capture possible */ }
-      box.classList.add("dragging");
-      box.style.cursor = "grabbing";
-    });
-    const end = () => { drag = null; box.classList.remove("dragging"); box.style.cursor = ""; };
-    box.addEventListener("pointerup", end);
-    box.addEventListener("pointercancel", end);
-  }
+  // (web/ui/dual-range.js)
   for (const k of ["wish", "trade"]) {
-    bandDrag($(`#${k}-int`), { min: 0, max: 100, step: 1, get: () => [...sigInt[k]],
+    createBandDrag($(`#${k}-int`), { onStart: hideHelp, min: 0, max: 100, step: 1, get: () => [...sigInt[k]],
       set: (lo, hi) => { sigInt[k] = [lo, hi]; sigChanged(); } });
   }
   for (const k of ["av", "b"]) {
-    bandDrag($(`#${k}-int`), { min: FS.rate[k].min, max: FS.rate[k].max, step: 0.1, get: () => [FS.rate[k].lo, FS.rate[k].hi],
+    createBandDrag($(`#${k}-int`), { onStart: hideHelp, min: FS.rate[k].min, max: FS.rate[k].max, step: 0.1, get: () => [FS.rate[k].lo, FS.rate[k].hi],
       set: (lo, hi) => { FS.rate[k].lo = lo; FS.rate[k].hi = hi; drawRate(k); clearTimeout(rtm); rtm = setTimeout(applyFilters, 150); } });
   }
 
@@ -1226,7 +1202,6 @@ import { agreementConfigs, consensus } from "./lib/agreement.js";
 
   // --- Overlay des filtres actifs (survol du mot « Filtres ») ------------------------------------------
   // Liste chaque filtre en place (y compris « Garder / exclure »), avec ✕ pour le retirer.
-  const fr = (x) => String(x).replace(".", ",");
   function activeFilters() {
     const out = [];
     const add = (group, text, clear, cls = "") => out.push({ group, text, clear, cls });
@@ -1364,41 +1339,6 @@ import { agreementConfigs, consensus } from "./lib/agreement.js";
     box.querySelectorAll("li[data-i]").forEach((li) => li.addEventListener("click", () => { hideHelp(); setCenter(+li.dataset.i); }));
   }
   $("#agree-box").addEventListener("toggle", drawAgreement);
-
-  // --- Aide au survol : tout élément [data-help] affiche son texte après 300 ms (souris ou focus clavier) ---
-  const help = $("#help");
-  let helpTimer = null, helpFor = null;
-  function showHelp(el) {
-    helpFor = el;
-    help.textContent = el.dataset.help;
-    help.hidden = false;
-    const r = el.getBoundingClientRect();
-    const w = help.offsetWidth, h = help.offsetHeight;
-    let x = Math.min(Math.max(8, r.left), window.innerWidth - w - 8);
-    let y = r.bottom + 6;
-    if (y + h > window.innerHeight - 8) y = r.top - h - 6; // au-dessus si pas la place en dessous
-    help.style.left = `${x}px`;
-    help.style.top = `${Math.max(8, y)}px`;
-  }
-  function hideHelp() { clearTimeout(helpTimer); help.hidden = true; helpFor = null; }
-  document.addEventListener("mouseover", (e) => {
-    const el = e.target.closest("[data-help]");
-    if (el === helpFor) return;
-    hideHelp();
-    if (el) helpTimer = setTimeout(() => showHelp(el), 300);
-  });
-  document.addEventListener("focusin", (e) => {
-    const el = e.target.closest("[data-help]");
-    hideHelp();
-    if (el) showHelp(el);
-  });
-  document.addEventListener("focusout", hideHelp);
-  document.addEventListener("mousedown", hideHelp);
-  window.addEventListener("scroll", hideHelp, true);
-
-  function escapeHtml(s) {
-    return String(s).replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
-  }
 
   // Jeu initial : id BGG dans l'URL (#30549), sinon Terraforming Mars, sinon le plus noté.
   const fromHash = N.findIndex((g) => String(g.id) === location.hash.slice(1));

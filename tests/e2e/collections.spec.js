@@ -78,3 +78,32 @@ test("l'état des filtres et le jeu affiché survivent à un rechargement", asyn
   await expect(page.locator("#gdetail h2")).toContainText("Catan");
   await expect(page.locator("#f-kw")).toHaveValue("a");
 });
+
+test("curseur de note : glisser la bande déplace l'intervalle en gardant sa largeur", async ({ page }) => {
+  await useData(page);
+  await page.goto("/collections.html");
+  await expect(page.locator("#av-lo")).toHaveAttribute("min", "20"); // le script de la page a câblé les curseurs
+  await page.evaluate(() => {
+    const set = (id, v) => {
+      const el = /** @type {HTMLInputElement} */ (document.getElementById(id));
+      el.value = String(v);
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+    };
+    set("av-lo", 40);
+    set("av-hi", 60);
+  });
+  const box = page.locator("#av-int");
+  await expect(page.locator("#av-out")).toHaveText("4.0 → 6.0");
+  await box.scrollIntoViewIfNeeded();
+  const r = await box.boundingBox();
+  const x = r.x + r.width * ((5 - 2) / (9 - 2)); // milieu de la bande (note 5 sur 2–9)
+  const y = r.y + r.height / 2;
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await page.mouse.move(x + r.width * 0.2, y, { steps: 5 });
+  await page.mouse.up();
+  const out = await page.locator("#av-out").textContent();
+  const [lo, hi] = out.split("→").map((t) => parseFloat(t));
+  expect(+(hi - lo).toFixed(1)).toBe(2);
+  expect(lo).toBeGreaterThan(4.5);
+});
