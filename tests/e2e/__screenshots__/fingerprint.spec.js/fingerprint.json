@@ -1,0 +1,632 @@
+{
+ "defaults": {
+  "kd": "2 / 30 jeux affichés (max 300), 2 liens d'arbre · 4 / 27 jeux passent les filtres",
+  "search": "",
+  "filters": [
+   "1",
+   "",
+   "4 jeux dans les intervalles actifs"
+  ],
+  "weights": "Mécaniques 100 %Thème 0 %Familles fines 0 %Description 0 %",
+  "graph": {
+   "nodes": 3,
+   "links": 4,
+   "labels": [
+    "",
+    "",
+    "",
+    "A Feast for Odin",
+    "Ark Nova",
+    "Terraforming Mars"
+   ]
+  },
+  "map": {
+   "points": 0,
+   "msg": "",
+   "buttons": []
+  },
+  "details": "Terraforming Mars ★ Dans mes collectionsBest_template Année2016 Note BGG8.42 (moyenne) · 8.27 (bayésienne) · 74 216 avis Collections101 872 possèdent · 19 227 souhaitent · 538 échangent Convoitise×0.78 la médiane · centile 27 Revente×0.36 la médiane · centile 15 dans l'intervalle Joueurs1–5 Durée120 min Âge minimal12 ans Poidsnon disponible FicheBoardGameGeek Ce jeu ne passe pas les filtres (affiché car choisi). Mécaniques🃏Drafting🏆End Game Bonuses🃏Hand Management🚶Hexagon Grid💰Income🏆Set Collection👤Solo / Solitaire Game⚔️Take That🧩Tile Placement🔄Turn Order: Progressive🦸Variable Player Powers Catégories💰Economic🌱Environmental🏭Industry / Manufacturing🚀Science Fiction🪐Space Exploration🚩Territory Building AuteursJacob Fryxelius IllustrateursIsaac Fryxelius ÉditeursFryxGamesArclightBrädspel.seFantasmagoriaGhenos GamesGreen Elephant Games +19 FamillesComponents: Map (Global Scale)Components: Multi-Use CardsGame: Terraforming MarsMechanism: Tableau BuildingPlayers: Games with Solitaire RulesSetting: Future Timeline (Fryxgames)Space: Earth's Solar SystemSpace: Mars Extensions BGG (22)Afficher la listeMeeple BR Jogos Promo Pack #1Terraforming Mars: Asteroid Rights Promo CardTerraforming Mars: Atmo Collectors Promo CardTerraforming Mars: Bactoviral Research Promo CardTerraforming Mars: BGG User-Created Corporation PackTerraforming Mars: Big BoxTerraforming Mars: Big Box Promo PackTerraforming Mars: Bio Printing Facility Promo CardTerraforming Mars: ColoniesTerraforming Mars: Harvest Promo CardTerraforming Mars: Hellas & ElysiumTerraforming Mars: Jovian Lanterns Promo CardTerraforming Mars: Lunar Exports Promo CardTerraforming Mars: Outdoor Sports Promo CardTerraforming Mars: Penguins Promo CardTerraforming Mars: PreludeTerraforming Mars: Self Replicating Robots Promo CardTerraforming Mars: Small Asteroid Promo CardTerraforming Mars: Snow Algae Promo CardTerraforming Mars: TurmoilTerraforming Mars: Turmoil PromosTerraforming Mars: Venus Next 5 plus proches voisins Ark Nova (2021)0.680",
+  "agree": "Métriques Cos IDFJaccardRecouv.SoupleCos IDF80808080Jaccard80808080Recouv.80808080Souple80808080 Attributs Méca.ThèmeFamillesDescr.Méca.80406020Thème40402020Familles6020600Descr.2020020 Case = % de voisins communs (top 5) pour Terraforming Mars. Consensus (≥ 4/8) Ark Nova (2021)7/8A Feast for Odin (2016)7/8Frosthaven (2022)6/8Too Many Bones (2017)6/8",
+  "legend": [
+   "jeu choisiniveau 1niveau 2niveau 3niveau 4",
+   "revente dans l'intervalle convoitise dans l'intervalle",
+   "Familles de mécaniques🃏Cartes🎒Construction de deck / sac🎲Dés et hasard👷Placement d'ouvriers⚙️Sélection d'actions🔨Enchères💰Économie et marché🧩Placement et motifs🗺️Contrôle de territoire🚶Déplacement🛤️Réseaux et livraison🤝Coopération🎭Bluff et information cachée⚔️Conflit direct🗳️Négociation et vote📖Récit et campagne🦸Asymétrie🏆Score et fin de partie🔬Progression et simulation⏱️Temps réel, adresse, party🔄Ordre du tour👤SoloThèmes🃏Card Game🧙Fantasy💰Economic🥊Fighting🚀Science Fiction⚔️Wargame🎲Dice🎉Party Game🧭Adventure🐾Animals🏰Medieval🗺️Exploration🔍Deduction🎭Bluffing🗿Miniatures♟️Abstract Strategy🏙️City Building😂Humor🏛️Ancient👻Horror🧒Children's Game🧩Puzzle⏱️Real-time🚩Territory Building🎬Movies / TV / Radio theme⚓Nautical🤝Negotiation🤹Action / Dexterity🏺Civilization🗳️Political📖Novel-based🚚Transportation🏭Industry / Manufacturing🚂Trains🔱Mythology🎨Renaissance🌾Farming🪐Space Exploration🕵️Murder/Mystery🏁Racing🎮Video Game Theme🦜Pirates🖨️Print & Play🔤Word Game🎓Educational💎Collectible Components🌱Environmental⚽Sports💥Comic Book / Strip🕶️Spies/Secret Agents🧟Zombies🤠American West🧠Memory❓Trivia🧳Travel🦖Prehistoric🛩️Aviation / Flight🔢Number➗Math🙏Religious🌀Maze🔌Electronic🎩Mafia🩺Medical🐪Arabian🔞Mature / Adult🎵Music📚Book⚙️Game System➕Expansion for Base-game🪖World War I (+4)🎖️Napoleonic (+7)"
+  ]
+ },
+ "cross": {
+  "kd": "2 / 30 jeux affichés (max 300), 2 liens d'arbre, 0 liens croisés · 4 / 27 jeux passent les filtres",
+  "search": "",
+  "filters": [
+   "1",
+   "",
+   "4 jeux dans les intervalles actifs"
+  ],
+  "weights": "Mécaniques 100 %Thème 0 %Familles fines 0 %Description 0 %",
+  "graph": {
+   "nodes": 3,
+   "links": 4,
+   "labels": [
+    "",
+    "",
+    "",
+    "A Feast for Odin",
+    "Ark Nova",
+    "Terraforming Mars"
+   ]
+  },
+  "map": {
+   "points": 0,
+   "msg": "",
+   "buttons": []
+  },
+  "details": "Terraforming Mars ★ Dans mes collectionsBest_template Année2016 Note BGG8.42 (moyenne) · 8.27 (bayésienne) · 74 216 avis Collections101 872 possèdent · 19 227 souhaitent · 538 échangent Convoitise×0.78 la médiane · centile 27 Revente×0.36 la médiane · centile 15 dans l'intervalle Joueurs1–5 Durée120 min Âge minimal12 ans Poidsnon disponible FicheBoardGameGeek Ce jeu ne passe pas les filtres (affiché car choisi). Mécaniques🃏Drafting🏆End Game Bonuses🃏Hand Management🚶Hexagon Grid💰Income🏆Set Collection👤Solo / Solitaire Game⚔️Take That🧩Tile Placement🔄Turn Order: Progressive🦸Variable Player Powers Catégories💰Economic🌱Environmental🏭Industry / Manufacturing🚀Science Fiction🪐Space Exploration🚩Territory Building AuteursJacob Fryxelius IllustrateursIsaac Fryxelius ÉditeursFryxGamesArclightBrädspel.seFantasmagoriaGhenos GamesGreen Elephant Games +19 FamillesComponents: Map (Global Scale)Components: Multi-Use CardsGame: Terraforming MarsMechanism: Tableau BuildingPlayers: Games with Solitaire RulesSetting: Future Timeline (Fryxgames)Space: Earth's Solar SystemSpace: Mars Extensions BGG (22)Afficher la listeMeeple BR Jogos Promo Pack #1Terraforming Mars: Asteroid Rights Promo CardTerraforming Mars: Atmo Collectors Promo CardTerraforming Mars: Bactoviral Research Promo CardTerraforming Mars: BGG User-Created Corporation PackTerraforming Mars: Big BoxTerraforming Mars: Big Box Promo PackTerraforming Mars: Bio Printing Facility Promo CardTerraforming Mars: ColoniesTerraforming Mars: Harvest Promo CardTerraforming Mars: Hellas & ElysiumTerraforming Mars: Jovian Lanterns Promo CardTerraforming Mars: Lunar Exports Promo CardTerraforming Mars: Outdoor Sports Promo CardTerraforming Mars: Penguins Promo CardTerraforming Mars: PreludeTerraforming Mars: Self Replicating Robots Promo CardTerraforming Mars: Small Asteroid Promo CardTerraforming Mars: Snow Algae Promo CardTerraforming Mars: TurmoilTerraforming Mars: Turmoil PromosTerraforming Mars: Venus Next 5 plus proches voisins Ark Nova (2021)0.680",
+  "agree": "Métriques Cos IDFJaccardRecouv.SoupleCos IDF80808080Jaccard80808080Recouv.80808080Souple80808080 Attributs Méca.ThèmeFamillesDescr.Méca.80406020Thème40402020Familles6020600Descr.2020020 Case = % de voisins communs (top 5) pour Terraforming Mars. Consensus (≥ 4/8) Ark Nova (2021)7/8A Feast for Odin (2016)7/8Frosthaven (2022)6/8Too Many Bones (2017)6/8",
+  "legend": [
+   "jeu choisiniveau 1niveau 2niveau 3niveau 4",
+   "revente dans l'intervalle convoitise dans l'intervalle",
+   "Familles de mécaniques🃏Cartes🎒Construction de deck / sac🎲Dés et hasard👷Placement d'ouvriers⚙️Sélection d'actions🔨Enchères💰Économie et marché🧩Placement et motifs🗺️Contrôle de territoire🚶Déplacement🛤️Réseaux et livraison🤝Coopération🎭Bluff et information cachée⚔️Conflit direct🗳️Négociation et vote📖Récit et campagne🦸Asymétrie🏆Score et fin de partie🔬Progression et simulation⏱️Temps réel, adresse, party🔄Ordre du tour👤SoloThèmes🃏Card Game🧙Fantasy💰Economic🥊Fighting🚀Science Fiction⚔️Wargame🎲Dice🎉Party Game🧭Adventure🐾Animals🏰Medieval🗺️Exploration🔍Deduction🎭Bluffing🗿Miniatures♟️Abstract Strategy🏙️City Building😂Humor🏛️Ancient👻Horror🧒Children's Game🧩Puzzle⏱️Real-time🚩Territory Building🎬Movies / TV / Radio theme⚓Nautical🤝Negotiation🤹Action / Dexterity🏺Civilization🗳️Political📖Novel-based🚚Transportation🏭Industry / Manufacturing🚂Trains🔱Mythology🎨Renaissance🌾Farming🪐Space Exploration🕵️Murder/Mystery🏁Racing🎮Video Game Theme🦜Pirates🖨️Print & Play🔤Word Game🎓Educational💎Collectible Components🌱Environmental⚽Sports💥Comic Book / Strip🕶️Spies/Secret Agents🧟Zombies🤠American West🧠Memory❓Trivia🧳Travel🦖Prehistoric🛩️Aviation / Flight🔢Number➗Math🙏Religious🌀Maze🔌Electronic🎩Mafia🩺Medical🐪Arabian🔞Mature / Adult🎵Music📚Book⚙️Game System➕Expansion for Base-game🪖World War I (+4)🎖️Napoleonic (+7)"
+  ]
+ },
+ "emoji": {
+  "kd": "2 / 30 jeux affichés (max 300), 2 liens d'arbre · 4 / 27 jeux passent les filtres",
+  "search": "",
+  "filters": [
+   "1",
+   "",
+   "4 jeux dans les intervalles actifs"
+  ],
+  "weights": "Mécaniques 100 %Thème 0 %Familles fines 0 %Description 0 %",
+  "graph": {
+   "nodes": 3,
+   "links": 4,
+   "labels": [
+    "",
+    "",
+    "",
+    "🌱 Ark Nova",
+    "🌱 Terraforming Mars",
+    "🏭 A Feast for Odin"
+   ]
+  },
+  "map": {
+   "points": 0,
+   "msg": "",
+   "buttons": []
+  },
+  "details": "Terraforming Mars ★ Dans mes collectionsBest_template Année2016 Note BGG8.42 (moyenne) · 8.27 (bayésienne) · 74 216 avis Collections101 872 possèdent · 19 227 souhaitent · 538 échangent Convoitise×0.78 la médiane · centile 27 Revente×0.36 la médiane · centile 15 dans l'intervalle Joueurs1–5 Durée120 min Âge minimal12 ans Poidsnon disponible FicheBoardGameGeek Ce jeu ne passe pas les filtres (affiché car choisi). Mécaniques🃏Drafting🏆End Game Bonuses🃏Hand Management🚶Hexagon Grid💰Income🏆Set Collection👤Solo / Solitaire Game⚔️Take That🧩Tile Placement🔄Turn Order: Progressive🦸Variable Player Powers Catégories💰Economic🌱Environmental🏭Industry / Manufacturing🚀Science Fiction🪐Space Exploration🚩Territory Building AuteursJacob Fryxelius IllustrateursIsaac Fryxelius ÉditeursFryxGamesArclightBrädspel.seFantasmagoriaGhenos GamesGreen Elephant Games +19 FamillesComponents: Map (Global Scale)Components: Multi-Use CardsGame: Terraforming MarsMechanism: Tableau BuildingPlayers: Games with Solitaire RulesSetting: Future Timeline (Fryxgames)Space: Earth's Solar SystemSpace: Mars Extensions BGG (22)Afficher la listeMeeple BR Jogos Promo Pack #1Terraforming Mars: Asteroid Rights Promo CardTerraforming Mars: Atmo Collectors Promo CardTerraforming Mars: Bactoviral Research Promo CardTerraforming Mars: BGG User-Created Corporation PackTerraforming Mars: Big BoxTerraforming Mars: Big Box Promo PackTerraforming Mars: Bio Printing Facility Promo CardTerraforming Mars: ColoniesTerraforming Mars: Harvest Promo CardTerraforming Mars: Hellas & ElysiumTerraforming Mars: Jovian Lanterns Promo CardTerraforming Mars: Lunar Exports Promo CardTerraforming Mars: Outdoor Sports Promo CardTerraforming Mars: Penguins Promo CardTerraforming Mars: PreludeTerraforming Mars: Self Replicating Robots Promo CardTerraforming Mars: Small Asteroid Promo CardTerraforming Mars: Snow Algae Promo CardTerraforming Mars: TurmoilTerraforming Mars: Turmoil PromosTerraforming Mars: Venus Next 5 plus proches voisins Ark Nova (2021)0.680",
+  "agree": "Métriques Cos IDFJaccardRecouv.SoupleCos IDF80808080Jaccard80808080Recouv.80808080Souple80808080 Attributs Méca.ThèmeFamillesDescr.Méca.80406020Thème40402020Familles6020600Descr.2020020 Case = % de voisins communs (top 5) pour Terraforming Mars. Consensus (≥ 4/8) Ark Nova (2021)7/8A Feast for Odin (2016)7/8Frosthaven (2022)6/8Too Many Bones (2017)6/8",
+  "legend": [
+   "jeu choisiniveau 1niveau 2niveau 3niveau 4",
+   "revente dans l'intervalle convoitise dans l'intervalle",
+   "Familles de mécaniques🃏Cartes🎒Construction de deck / sac🎲Dés et hasard👷Placement d'ouvriers⚙️Sélection d'actions🔨Enchères💰Économie et marché🧩Placement et motifs🗺️Contrôle de territoire🚶Déplacement🛤️Réseaux et livraison🤝Coopération🎭Bluff et information cachée⚔️Conflit direct🗳️Négociation et vote📖Récit et campagne🦸Asymétrie🏆Score et fin de partie🔬Progression et simulation⏱️Temps réel, adresse, party🔄Ordre du tour👤SoloThèmes🃏Card Game🧙Fantasy💰Economic🥊Fighting🚀Science Fiction⚔️Wargame🎲Dice🎉Party Game🧭Adventure🐾Animals🏰Medieval🗺️Exploration🔍Deduction🎭Bluffing🗿Miniatures♟️Abstract Strategy🏙️City Building😂Humor🏛️Ancient👻Horror🧒Children's Game🧩Puzzle⏱️Real-time🚩Territory Building🎬Movies / TV / Radio theme⚓Nautical🤝Negotiation🤹Action / Dexterity🏺Civilization🗳️Political📖Novel-based🚚Transportation🏭Industry / Manufacturing🚂Trains🔱Mythology🎨Renaissance🌾Farming🪐Space Exploration🕵️Murder/Mystery🏁Racing🎮Video Game Theme🦜Pirates🖨️Print & Play🔤Word Game🎓Educational💎Collectible Components🌱Environmental⚽Sports💥Comic Book / Strip🕶️Spies/Secret Agents🧟Zombies🤠American West🧠Memory❓Trivia🧳Travel🦖Prehistoric🛩️Aviation / Flight🔢Number➗Math🙏Religious🌀Maze🔌Electronic🎩Mafia🩺Medical🐪Arabian🔞Mature / Adult🎵Music📚Book⚙️Game System➕Expansion for Base-game🪖World War I (+4)🎖️Napoleonic (+7)"
+  ]
+ },
+ "rating": {
+  "kd": "2 / 30 jeux affichés (max 300), 2 liens d'arbre · 4 / 27 jeux passent les filtres",
+  "search": "",
+  "filters": [
+   "1",
+   "",
+   "4 jeux dans les intervalles actifs"
+  ],
+  "weights": "Mécaniques 100 %Thème 0 %Familles fines 0 %Description 0 %",
+  "graph": {
+   "nodes": 3,
+   "links": 4,
+   "labels": [
+    "8.2",
+    "8.4",
+    "8.7",
+    "🌱 Ark Nova",
+    "🌱 Terraforming Mars",
+    "🏭 A Feast for Odin"
+   ]
+  },
+  "map": {
+   "points": 0,
+   "msg": "",
+   "buttons": []
+  },
+  "details": "Terraforming Mars ★ Dans mes collectionsBest_template Année2016 Note BGG8.42 (moyenne) · 8.27 (bayésienne) · 74 216 avis Collections101 872 possèdent · 19 227 souhaitent · 538 échangent Convoitise×0.78 la médiane · centile 27 Revente×0.36 la médiane · centile 15 dans l'intervalle Joueurs1–5 Durée120 min Âge minimal12 ans Poidsnon disponible FicheBoardGameGeek Ce jeu ne passe pas les filtres (affiché car choisi). Mécaniques🃏Drafting🏆End Game Bonuses🃏Hand Management🚶Hexagon Grid💰Income🏆Set Collection👤Solo / Solitaire Game⚔️Take That🧩Tile Placement🔄Turn Order: Progressive🦸Variable Player Powers Catégories💰Economic🌱Environmental🏭Industry / Manufacturing🚀Science Fiction🪐Space Exploration🚩Territory Building AuteursJacob Fryxelius IllustrateursIsaac Fryxelius ÉditeursFryxGamesArclightBrädspel.seFantasmagoriaGhenos GamesGreen Elephant Games +19 FamillesComponents: Map (Global Scale)Components: Multi-Use CardsGame: Terraforming MarsMechanism: Tableau BuildingPlayers: Games with Solitaire RulesSetting: Future Timeline (Fryxgames)Space: Earth's Solar SystemSpace: Mars Extensions BGG (22)Afficher la listeMeeple BR Jogos Promo Pack #1Terraforming Mars: Asteroid Rights Promo CardTerraforming Mars: Atmo Collectors Promo CardTerraforming Mars: Bactoviral Research Promo CardTerraforming Mars: BGG User-Created Corporation PackTerraforming Mars: Big BoxTerraforming Mars: Big Box Promo PackTerraforming Mars: Bio Printing Facility Promo CardTerraforming Mars: ColoniesTerraforming Mars: Harvest Promo CardTerraforming Mars: Hellas & ElysiumTerraforming Mars: Jovian Lanterns Promo CardTerraforming Mars: Lunar Exports Promo CardTerraforming Mars: Outdoor Sports Promo CardTerraforming Mars: Penguins Promo CardTerraforming Mars: PreludeTerraforming Mars: Self Replicating Robots Promo CardTerraforming Mars: Small Asteroid Promo CardTerraforming Mars: Snow Algae Promo CardTerraforming Mars: TurmoilTerraforming Mars: Turmoil PromosTerraforming Mars: Venus Next 5 plus proches voisins Ark Nova (2021)0.680",
+  "agree": "Métriques Cos IDFJaccardRecouv.SoupleCos IDF80808080Jaccard80808080Recouv.80808080Souple80808080 Attributs Méca.ThèmeFamillesDescr.Méca.80406020Thème40402020Familles6020600Descr.2020020 Case = % de voisins communs (top 5) pour Terraforming Mars. Consensus (≥ 4/8) Ark Nova (2021)7/8A Feast for Odin (2016)7/8Frosthaven (2022)6/8Too Many Bones (2017)6/8",
+  "legend": [
+   "jeu choisiniveau 1niveau 2niveau 3niveau 4",
+   "revente dans l'intervalle convoitise dans l'intervalle",
+   "Familles de mécaniques🃏Cartes🎒Construction de deck / sac🎲Dés et hasard👷Placement d'ouvriers⚙️Sélection d'actions🔨Enchères💰Économie et marché🧩Placement et motifs🗺️Contrôle de territoire🚶Déplacement🛤️Réseaux et livraison🤝Coopération🎭Bluff et information cachée⚔️Conflit direct🗳️Négociation et vote📖Récit et campagne🦸Asymétrie🏆Score et fin de partie🔬Progression et simulation⏱️Temps réel, adresse, party🔄Ordre du tour👤SoloThèmes🃏Card Game🧙Fantasy💰Economic🥊Fighting🚀Science Fiction⚔️Wargame🎲Dice🎉Party Game🧭Adventure🐾Animals🏰Medieval🗺️Exploration🔍Deduction🎭Bluffing🗿Miniatures♟️Abstract Strategy🏙️City Building😂Humor🏛️Ancient👻Horror🧒Children's Game🧩Puzzle⏱️Real-time🚩Territory Building🎬Movies / TV / Radio theme⚓Nautical🤝Negotiation🤹Action / Dexterity🏺Civilization🗳️Political📖Novel-based🚚Transportation🏭Industry / Manufacturing🚂Trains🔱Mythology🎨Renaissance🌾Farming🪐Space Exploration🕵️Murder/Mystery🏁Racing🎮Video Game Theme🦜Pirates🖨️Print & Play🔤Word Game🎓Educational💎Collectible Components🌱Environmental⚽Sports💥Comic Book / Strip🕶️Spies/Secret Agents🧟Zombies🤠American West🧠Memory❓Trivia🧳Travel🦖Prehistoric🛩️Aviation / Flight🔢Number➗Math🙏Religious🌀Maze🔌Electronic🎩Mafia🩺Medical🐪Arabian🔞Mature / Adult🎵Music📚Book⚙️Game System➕Expansion for Base-game🪖World War I (+4)🎖️Napoleonic (+7)"
+  ]
+ },
+ "jaccard": {
+  "kd": "4 / 30 jeux affichés (max 300), 4 liens d'arbre · 4 / 27 jeux passent les filtres",
+  "search": "",
+  "filters": [
+   "1",
+   "",
+   "4 jeux dans les intervalles actifs"
+  ],
+  "weights": "Mécaniques 100 %Thème 0 %Familles fines 0 %Description 0 %",
+  "graph": {
+   "nodes": 5,
+   "links": 8,
+   "labels": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "A Feast for Odin",
+    "Ark Nova",
+    "Frosthaven",
+    "Terraforming Mars",
+    "Too Many Bones"
+   ]
+  },
+  "map": {
+   "points": 0,
+   "msg": "",
+   "buttons": []
+  },
+  "details": "Terraforming Mars ★ Dans mes collectionsBest_template Année2016 Note BGG8.42 (moyenne) · 8.27 (bayésienne) · 74 216 avis Collections101 872 possèdent · 19 227 souhaitent · 538 échangent Convoitise×0.78 la médiane · centile 27 Revente×0.36 la médiane · centile 15 dans l'intervalle Joueurs1–5 Durée120 min Âge minimal12 ans Poidsnon disponible FicheBoardGameGeek Ce jeu ne passe pas les filtres (affiché car choisi). Mécaniques🃏Drafting🏆End Game Bonuses🃏Hand Management🚶Hexagon Grid💰Income🏆Set Collection👤Solo / Solitaire Game⚔️Take That🧩Tile Placement🔄Turn Order: Progressive🦸Variable Player Powers Catégories💰Economic🌱Environmental🏭Industry / Manufacturing🚀Science Fiction🪐Space Exploration🚩Territory Building AuteursJacob Fryxelius IllustrateursIsaac Fryxelius ÉditeursFryxGamesArclightBrädspel.seFantasmagoriaGhenos GamesGreen Elephant Games +19 FamillesComponents: Map (Global Scale)Components: Multi-Use CardsGame: Terraforming MarsMechanism: Tableau BuildingPlayers: Games with Solitaire RulesSetting: Future Timeline (Fryxgames)Space: Earth's Solar SystemSpace: Mars Extensions BGG (22)Afficher la listeMeeple BR Jogos Promo Pack #1Terraforming Mars: Asteroid Rights Promo CardTerraforming Mars: Atmo Collectors Promo CardTerraforming Mars: Bactoviral Research Promo CardTerraforming Mars: BGG User-Created Corporation PackTerraforming Mars: Big BoxTerraforming Mars: Big Box Promo PackTerraforming Mars: Bio Printing Facility Promo CardTerraforming Mars: ColoniesTerraforming Mars: Harvest Promo CardTerraforming Mars: Hellas & ElysiumTerraforming Mars: Jovian Lanterns Promo CardTerraforming Mars: Lunar Exports Promo CardTerraforming Mars: Outdoor Sports Promo CardTerraforming Mars: Penguins Promo CardTerraforming Mars: PreludeTerraforming Mars: Self Replicating Robots Promo CardTerraforming Mars: Small Asteroid Promo CardTerraforming Mars: Snow Algae Promo CardTerraforming Mars: TurmoilTerraforming Mars: Turmoil PromosTerraforming Mars: Venus Next 5 plus proches voisins Ark Nova (2021)0.615",
+  "agree": "Métriques Cos IDFJaccardRecouv.SoupleCos IDF80808080Jaccard80808080Recouv.80808080Souple80808080 Attributs Méca.ThèmeFamillesDescr.Méca.80406020Thème40402020Familles6020600Descr.2020020 Case = % de voisins communs (top 5) pour Terraforming Mars. Consensus (≥ 4/8) Ark Nova (2021)7/8A Feast for Odin (2016)7/8Frosthaven (2022)6/8Too Many Bones (2017)6/8",
+  "legend": [
+   "jeu choisiniveau 1niveau 2niveau 3niveau 4",
+   "revente dans l'intervalle convoitise dans l'intervalle",
+   "Familles de mécaniques🃏Cartes🎒Construction de deck / sac🎲Dés et hasard👷Placement d'ouvriers⚙️Sélection d'actions🔨Enchères💰Économie et marché🧩Placement et motifs🗺️Contrôle de territoire🚶Déplacement🛤️Réseaux et livraison🤝Coopération🎭Bluff et information cachée⚔️Conflit direct🗳️Négociation et vote📖Récit et campagne🦸Asymétrie🏆Score et fin de partie🔬Progression et simulation⏱️Temps réel, adresse, party🔄Ordre du tour👤SoloThèmes🃏Card Game🧙Fantasy💰Economic🥊Fighting🚀Science Fiction⚔️Wargame🎲Dice🎉Party Game🧭Adventure🐾Animals🏰Medieval🗺️Exploration🔍Deduction🎭Bluffing🗿Miniatures♟️Abstract Strategy🏙️City Building😂Humor🏛️Ancient👻Horror🧒Children's Game🧩Puzzle⏱️Real-time🚩Territory Building🎬Movies / TV / Radio theme⚓Nautical🤝Negotiation🤹Action / Dexterity🏺Civilization🗳️Political📖Novel-based🚚Transportation🏭Industry / Manufacturing🚂Trains🔱Mythology🎨Renaissance🌾Farming🪐Space Exploration🕵️Murder/Mystery🏁Racing🎮Video Game Theme🦜Pirates🖨️Print & Play🔤Word Game🎓Educational💎Collectible Components🌱Environmental⚽Sports💥Comic Book / Strip🕶️Spies/Secret Agents🧟Zombies🤠American West🧠Memory❓Trivia🧳Travel🦖Prehistoric🛩️Aviation / Flight🔢Number➗Math🙏Religious🌀Maze🔌Electronic🎩Mafia🩺Medical🐪Arabian🔞Mature / Adult🎵Music📚Book⚙️Game System➕Expansion for Base-game🪖World War I (+4)🎖️Napoleonic (+7)"
+  ]
+ },
+ "themeOnly": {
+  "kd": "2 / 30 jeux affichés (max 300), 2 liens d'arbre · 4 / 27 jeux passent les filtres",
+  "search": "",
+  "filters": [
+   "1",
+   "",
+   "4 jeux dans les intervalles actifs"
+  ],
+  "weights": "Mécaniques 0 %Thème 100 %Familles fines 0 %Description 0 %",
+  "graph": {
+   "nodes": 3,
+   "links": 4,
+   "labels": [
+    "",
+    "",
+    "",
+    "A Feast for Odin",
+    "Ark Nova",
+    "Terraforming Mars"
+   ]
+  },
+  "map": {
+   "points": 0,
+   "msg": "",
+   "buttons": []
+  },
+  "details": "Terraforming Mars ★ Dans mes collectionsBest_template Année2016 Note BGG8.42 (moyenne) · 8.27 (bayésienne) · 74 216 avis Collections101 872 possèdent · 19 227 souhaitent · 538 échangent Convoitise×0.78 la médiane · centile 27 Revente×0.36 la médiane · centile 15 dans l'intervalle Joueurs1–5 Durée120 min Âge minimal12 ans Poidsnon disponible FicheBoardGameGeek Ce jeu ne passe pas les filtres (affiché car choisi). Mécaniques🃏Drafting🏆End Game Bonuses🃏Hand Management🚶Hexagon Grid💰Income🏆Set Collection👤Solo / Solitaire Game⚔️Take That🧩Tile Placement🔄Turn Order: Progressive🦸Variable Player Powers Catégories💰Economic🌱Environmental🏭Industry / Manufacturing🚀Science Fiction🪐Space Exploration🚩Territory Building AuteursJacob Fryxelius IllustrateursIsaac Fryxelius ÉditeursFryxGamesArclightBrädspel.seFantasmagoriaGhenos GamesGreen Elephant Games +19 FamillesComponents: Map (Global Scale)Components: Multi-Use CardsGame: Terraforming MarsMechanism: Tableau BuildingPlayers: Games with Solitaire RulesSetting: Future Timeline (Fryxgames)Space: Earth's Solar SystemSpace: Mars Extensions BGG (22)Afficher la listeMeeple BR Jogos Promo Pack #1Terraforming Mars: Asteroid Rights Promo CardTerraforming Mars: Atmo Collectors Promo CardTerraforming Mars: Bactoviral Research Promo CardTerraforming Mars: BGG User-Created Corporation PackTerraforming Mars: Big BoxTerraforming Mars: Big Box Promo PackTerraforming Mars: Bio Printing Facility Promo CardTerraforming Mars: ColoniesTerraforming Mars: Harvest Promo CardTerraforming Mars: Hellas & ElysiumTerraforming Mars: Jovian Lanterns Promo CardTerraforming Mars: Lunar Exports Promo CardTerraforming Mars: Outdoor Sports Promo CardTerraforming Mars: Penguins Promo CardTerraforming Mars: PreludeTerraforming Mars: Self Replicating Robots Promo CardTerraforming Mars: Small Asteroid Promo CardTerraforming Mars: Snow Algae Promo CardTerraforming Mars: TurmoilTerraforming Mars: Turmoil PromosTerraforming Mars: Venus Next 5 plus proches voisins Ark Nova (2021)0.506A Feast for Odin (2016)0.401",
+  "agree": "Métriques Cos IDFJaccardRecouv.SoupleCos IDF40404040Jaccard40404040Recouv.40404040Souple40404080 Attributs Méca.ThèmeFamillesDescr.Méca.80406020Thème40402020Familles6020600Descr.2020020 Case = % de voisins communs (top 5) pour Terraforming Mars. Consensus (≥ 4/8) Ark Nova (2021)7/8A Feast for Odin (2016)7/8",
+  "legend": [
+   "jeu choisiniveau 1niveau 2niveau 3niveau 4",
+   "revente dans l'intervalle convoitise dans l'intervalle",
+   "Familles de mécaniques🃏Cartes🎒Construction de deck / sac🎲Dés et hasard👷Placement d'ouvriers⚙️Sélection d'actions🔨Enchères💰Économie et marché🧩Placement et motifs🗺️Contrôle de territoire🚶Déplacement🛤️Réseaux et livraison🤝Coopération🎭Bluff et information cachée⚔️Conflit direct🗳️Négociation et vote📖Récit et campagne🦸Asymétrie🏆Score et fin de partie🔬Progression et simulation⏱️Temps réel, adresse, party🔄Ordre du tour👤SoloThèmes🃏Card Game🧙Fantasy💰Economic🥊Fighting🚀Science Fiction⚔️Wargame🎲Dice🎉Party Game🧭Adventure🐾Animals🏰Medieval🗺️Exploration🔍Deduction🎭Bluffing🗿Miniatures♟️Abstract Strategy🏙️City Building😂Humor🏛️Ancient👻Horror🧒Children's Game🧩Puzzle⏱️Real-time🚩Territory Building🎬Movies / TV / Radio theme⚓Nautical🤝Negotiation🤹Action / Dexterity🏺Civilization🗳️Political📖Novel-based🚚Transportation🏭Industry / Manufacturing🚂Trains🔱Mythology🎨Renaissance🌾Farming🪐Space Exploration🕵️Murder/Mystery🏁Racing🎮Video Game Theme🦜Pirates🖨️Print & Play🔤Word Game🎓Educational💎Collectible Components🌱Environmental⚽Sports💥Comic Book / Strip🕶️Spies/Secret Agents🧟Zombies🤠American West🧠Memory❓Trivia🧳Travel🦖Prehistoric🛩️Aviation / Flight🔢Number➗Math🙏Religious🌀Maze🔌Electronic🎩Mafia🩺Medical🐪Arabian🔞Mature / Adult🎵Music📚Book⚙️Game System➕Expansion for Base-game🪖World War I (+4)🎖️Napoleonic (+7)"
+  ]
+ },
+ "depth1": {
+  "kd": "1 / 5 jeux affichés (max 300), 1 liens d'arbre · 4 / 27 jeux passent les filtres",
+  "search": "",
+  "filters": [
+   "1",
+   "",
+   "4 jeux dans les intervalles actifs"
+  ],
+  "weights": "Mécaniques 100 %Thème 0 %Familles fines 0 %Description 0 %",
+  "graph": {
+   "nodes": 2,
+   "links": 2,
+   "labels": [
+    "",
+    "",
+    "Ark Nova",
+    "Terraforming Mars"
+   ]
+  },
+  "map": {
+   "points": 0,
+   "msg": "",
+   "buttons": []
+  },
+  "details": "Terraforming Mars ★ Dans mes collectionsBest_template Année2016 Note BGG8.42 (moyenne) · 8.27 (bayésienne) · 74 216 avis Collections101 872 possèdent · 19 227 souhaitent · 538 échangent Convoitise×0.78 la médiane · centile 27 Revente×0.36 la médiane · centile 15 dans l'intervalle Joueurs1–5 Durée120 min Âge minimal12 ans Poidsnon disponible FicheBoardGameGeek Ce jeu ne passe pas les filtres (affiché car choisi). Mécaniques🃏Drafting🏆End Game Bonuses🃏Hand Management🚶Hexagon Grid💰Income🏆Set Collection👤Solo / Solitaire Game⚔️Take That🧩Tile Placement🔄Turn Order: Progressive🦸Variable Player Powers Catégories💰Economic🌱Environmental🏭Industry / Manufacturing🚀Science Fiction🪐Space Exploration🚩Territory Building AuteursJacob Fryxelius IllustrateursIsaac Fryxelius ÉditeursFryxGamesArclightBrädspel.seFantasmagoriaGhenos GamesGreen Elephant Games +19 FamillesComponents: Map (Global Scale)Components: Multi-Use CardsGame: Terraforming MarsMechanism: Tableau BuildingPlayers: Games with Solitaire RulesSetting: Future Timeline (Fryxgames)Space: Earth's Solar SystemSpace: Mars Extensions BGG (22)Afficher la listeMeeple BR Jogos Promo Pack #1Terraforming Mars: Asteroid Rights Promo CardTerraforming Mars: Atmo Collectors Promo CardTerraforming Mars: Bactoviral Research Promo CardTerraforming Mars: BGG User-Created Corporation PackTerraforming Mars: Big BoxTerraforming Mars: Big Box Promo PackTerraforming Mars: Bio Printing Facility Promo CardTerraforming Mars: ColoniesTerraforming Mars: Harvest Promo CardTerraforming Mars: Hellas & ElysiumTerraforming Mars: Jovian Lanterns Promo CardTerraforming Mars: Lunar Exports Promo CardTerraforming Mars: Outdoor Sports Promo CardTerraforming Mars: Penguins Promo CardTerraforming Mars: PreludeTerraforming Mars: Self Replicating Robots Promo CardTerraforming Mars: Small Asteroid Promo CardTerraforming Mars: Snow Algae Promo CardTerraforming Mars: TurmoilTerraforming Mars: Turmoil PromosTerraforming Mars: Venus Next 5 plus proches voisins Ark Nova (2021)0.680",
+  "agree": "Métriques Cos IDFJaccardRecouv.SoupleCos IDF80808080Jaccard80808080Recouv.80808080Souple80808080 Attributs Méca.ThèmeFamillesDescr.Méca.80406020Thème40402020Familles6020600Descr.2020020 Case = % de voisins communs (top 5) pour Terraforming Mars. Consensus (≥ 4/8) Ark Nova (2021)7/8A Feast for Odin (2016)7/8Frosthaven (2022)6/8Too Many Bones (2017)6/8",
+  "legend": [
+   "jeu choisiniveau 1niveau 2niveau 3niveau 4",
+   "revente dans l'intervalle convoitise dans l'intervalle",
+   "Familles de mécaniques🃏Cartes🎒Construction de deck / sac🎲Dés et hasard👷Placement d'ouvriers⚙️Sélection d'actions🔨Enchères💰Économie et marché🧩Placement et motifs🗺️Contrôle de territoire🚶Déplacement🛤️Réseaux et livraison🤝Coopération🎭Bluff et information cachée⚔️Conflit direct🗳️Négociation et vote📖Récit et campagne🦸Asymétrie🏆Score et fin de partie🔬Progression et simulation⏱️Temps réel, adresse, party🔄Ordre du tour👤SoloThèmes🃏Card Game🧙Fantasy💰Economic🥊Fighting🚀Science Fiction⚔️Wargame🎲Dice🎉Party Game🧭Adventure🐾Animals🏰Medieval🗺️Exploration🔍Deduction🎭Bluffing🗿Miniatures♟️Abstract Strategy🏙️City Building😂Humor🏛️Ancient👻Horror🧒Children's Game🧩Puzzle⏱️Real-time🚩Territory Building🎬Movies / TV / Radio theme⚓Nautical🤝Negotiation🤹Action / Dexterity🏺Civilization🗳️Political📖Novel-based🚚Transportation🏭Industry / Manufacturing🚂Trains🔱Mythology🎨Renaissance🌾Farming🪐Space Exploration🕵️Murder/Mystery🏁Racing🎮Video Game Theme🦜Pirates🖨️Print & Play🔤Word Game🎓Educational💎Collectible Components🌱Environmental⚽Sports💥Comic Book / Strip🕶️Spies/Secret Agents🧟Zombies🤠American West🧠Memory❓Trivia🧳Travel🦖Prehistoric🛩️Aviation / Flight🔢Number➗Math🙏Religious🌀Maze🔌Electronic🎩Mafia🩺Medical🐪Arabian🔞Mature / Adult🎵Music📚Book⚙️Game System➕Expansion for Base-game🪖World War I (+4)🎖️Napoleonic (+7)"
+  ]
+ },
+ "map": {
+  "kd": "1 / 5 jeux affichés (max 300), 1 liens d'arbre · 4 / 27 jeux passent les filtres",
+  "search": "",
+  "filters": [
+   "1",
+   "",
+   "4 jeux dans les intervalles actifs"
+  ],
+  "weights": "Mécaniques 100 %Thème 0 %Familles fines 0 %Description 0 %",
+  "graph": {
+   "nodes": 2,
+   "links": 2,
+   "labels": [
+    "",
+    "",
+    "Ark Nova",
+    "Terraforming Mars"
+   ]
+  },
+  "map": {
+   "points": 29,
+   "msg": "",
+   "buttons": [
+    "Auto",
+    "Méca.",
+    "Thème",
+    "Familles",
+    "Descr."
+   ]
+  },
+  "details": "Terraforming Mars ★ Dans mes collectionsBest_template Année2016 Note BGG8.42 (moyenne) · 8.27 (bayésienne) · 74 216 avis Collections101 872 possèdent · 19 227 souhaitent · 538 échangent Convoitise×0.78 la médiane · centile 27 Revente×0.36 la médiane · centile 15 dans l'intervalle Joueurs1–5 Durée120 min Âge minimal12 ans Poidsnon disponible FicheBoardGameGeek Ce jeu ne passe pas les filtres (affiché car choisi). Mécaniques🃏Drafting🏆End Game Bonuses🃏Hand Management🚶Hexagon Grid💰Income🏆Set Collection👤Solo / Solitaire Game⚔️Take That🧩Tile Placement🔄Turn Order: Progressive🦸Variable Player Powers Catégories💰Economic🌱Environmental🏭Industry / Manufacturing🚀Science Fiction🪐Space Exploration🚩Territory Building AuteursJacob Fryxelius IllustrateursIsaac Fryxelius ÉditeursFryxGamesArclightBrädspel.seFantasmagoriaGhenos GamesGreen Elephant Games +19 FamillesComponents: Map (Global Scale)Components: Multi-Use CardsGame: Terraforming MarsMechanism: Tableau BuildingPlayers: Games with Solitaire RulesSetting: Future Timeline (Fryxgames)Space: Earth's Solar SystemSpace: Mars Extensions BGG (22)Afficher la listeMeeple BR Jogos Promo Pack #1Terraforming Mars: Asteroid Rights Promo CardTerraforming Mars: Atmo Collectors Promo CardTerraforming Mars: Bactoviral Research Promo CardTerraforming Mars: BGG User-Created Corporation PackTerraforming Mars: Big BoxTerraforming Mars: Big Box Promo PackTerraforming Mars: Bio Printing Facility Promo CardTerraforming Mars: ColoniesTerraforming Mars: Harvest Promo CardTerraforming Mars: Hellas & ElysiumTerraforming Mars: Jovian Lanterns Promo CardTerraforming Mars: Lunar Exports Promo CardTerraforming Mars: Outdoor Sports Promo CardTerraforming Mars: Penguins Promo CardTerraforming Mars: PreludeTerraforming Mars: Self Replicating Robots Promo CardTerraforming Mars: Small Asteroid Promo CardTerraforming Mars: Snow Algae Promo CardTerraforming Mars: TurmoilTerraforming Mars: Turmoil PromosTerraforming Mars: Venus Next 5 plus proches voisins Ark Nova (2021)0.680",
+  "agree": "Métriques Cos IDFJaccardRecouv.SoupleCos IDF80808080Jaccard80808080Recouv.80808080Souple80808080 Attributs Méca.ThèmeFamillesDescr.Méca.80406020Thème40402020Familles6020600Descr.2020020 Case = % de voisins communs (top 5) pour Terraforming Mars. Consensus (≥ 4/8) Ark Nova (2021)7/8A Feast for Odin (2016)7/8Frosthaven (2022)6/8Too Many Bones (2017)6/8",
+  "legend": [
+   "jeu choisiniveau 1niveau 2niveau 3niveau 4",
+   "revente dans l'intervalle convoitise dans l'intervalle",
+   "Familles de mécaniques🃏Cartes🎒Construction de deck / sac🎲Dés et hasard👷Placement d'ouvriers⚙️Sélection d'actions🔨Enchères💰Économie et marché🧩Placement et motifs🗺️Contrôle de territoire🚶Déplacement🛤️Réseaux et livraison🤝Coopération🎭Bluff et information cachée⚔️Conflit direct🗳️Négociation et vote📖Récit et campagne🦸Asymétrie🏆Score et fin de partie🔬Progression et simulation⏱️Temps réel, adresse, party🔄Ordre du tour👤SoloThèmes🃏Card Game🧙Fantasy💰Economic🥊Fighting🚀Science Fiction⚔️Wargame🎲Dice🎉Party Game🧭Adventure🐾Animals🏰Medieval🗺️Exploration🔍Deduction🎭Bluffing🗿Miniatures♟️Abstract Strategy🏙️City Building😂Humor🏛️Ancient👻Horror🧒Children's Game🧩Puzzle⏱️Real-time🚩Territory Building🎬Movies / TV / Radio theme⚓Nautical🤝Negotiation🤹Action / Dexterity🏺Civilization🗳️Political📖Novel-based🚚Transportation🏭Industry / Manufacturing🚂Trains🔱Mythology🎨Renaissance🌾Farming🪐Space Exploration🕵️Murder/Mystery🏁Racing🎮Video Game Theme🦜Pirates🖨️Print & Play🔤Word Game🎓Educational💎Collectible Components🌱Environmental⚽Sports💥Comic Book / Strip🕶️Spies/Secret Agents🧟Zombies🤠American West🧠Memory❓Trivia🧳Travel🦖Prehistoric🛩️Aviation / Flight🔢Number➗Math🙏Religious🌀Maze🔌Electronic🎩Mafia🩺Medical🐪Arabian🔞Mature / Adult🎵Music📚Book⚙️Game System➕Expansion for Base-game🪖World War I (+4)🎖️Napoleonic (+7)"
+  ]
+ },
+ "mapSel0": {
+  "kd": "1 / 5 jeux affichés (max 300), 1 liens d'arbre · 4 / 27 jeux passent les filtres",
+  "search": "",
+  "filters": [
+   "1",
+   "",
+   "4 jeux dans les intervalles actifs"
+  ],
+  "weights": "Mécaniques 100 %Thème 0 %Familles fines 0 %Description 0 %",
+  "graph": {
+   "nodes": 2,
+   "links": 2,
+   "labels": [
+    "",
+    "",
+    "Ark Nova",
+    "Terraforming Mars"
+   ]
+  },
+  "map": {
+   "points": 29,
+   "msg": "",
+   "buttons": [
+    "Auto",
+    "Méca.",
+    "Thème",
+    "Familles",
+    "Descr."
+   ]
+  },
+  "details": "Terraforming Mars ★ Dans mes collectionsBest_template Année2016 Note BGG8.42 (moyenne) · 8.27 (bayésienne) · 74 216 avis Collections101 872 possèdent · 19 227 souhaitent · 538 échangent Convoitise×0.78 la médiane · centile 27 Revente×0.36 la médiane · centile 15 dans l'intervalle Joueurs1–5 Durée120 min Âge minimal12 ans Poidsnon disponible FicheBoardGameGeek Ce jeu ne passe pas les filtres (affiché car choisi). Mécaniques🃏Drafting🏆End Game Bonuses🃏Hand Management🚶Hexagon Grid💰Income🏆Set Collection👤Solo / Solitaire Game⚔️Take That🧩Tile Placement🔄Turn Order: Progressive🦸Variable Player Powers Catégories💰Economic🌱Environmental🏭Industry / Manufacturing🚀Science Fiction🪐Space Exploration🚩Territory Building AuteursJacob Fryxelius IllustrateursIsaac Fryxelius ÉditeursFryxGamesArclightBrädspel.seFantasmagoriaGhenos GamesGreen Elephant Games +19 FamillesComponents: Map (Global Scale)Components: Multi-Use CardsGame: Terraforming MarsMechanism: Tableau BuildingPlayers: Games with Solitaire RulesSetting: Future Timeline (Fryxgames)Space: Earth's Solar SystemSpace: Mars Extensions BGG (22)Afficher la listeMeeple BR Jogos Promo Pack #1Terraforming Mars: Asteroid Rights Promo CardTerraforming Mars: Atmo Collectors Promo CardTerraforming Mars: Bactoviral Research Promo CardTerraforming Mars: BGG User-Created Corporation PackTerraforming Mars: Big BoxTerraforming Mars: Big Box Promo PackTerraforming Mars: Bio Printing Facility Promo CardTerraforming Mars: ColoniesTerraforming Mars: Harvest Promo CardTerraforming Mars: Hellas & ElysiumTerraforming Mars: Jovian Lanterns Promo CardTerraforming Mars: Lunar Exports Promo CardTerraforming Mars: Outdoor Sports Promo CardTerraforming Mars: Penguins Promo CardTerraforming Mars: PreludeTerraforming Mars: Self Replicating Robots Promo CardTerraforming Mars: Small Asteroid Promo CardTerraforming Mars: Snow Algae Promo CardTerraforming Mars: TurmoilTerraforming Mars: Turmoil PromosTerraforming Mars: Venus Next 5 plus proches voisins Ark Nova (2021)0.680",
+  "agree": "Métriques Cos IDFJaccardRecouv.SoupleCos IDF80808080Jaccard80808080Recouv.80808080Souple80808080 Attributs Méca.ThèmeFamillesDescr.Méca.80406020Thème40402020Familles6020600Descr.2020020 Case = % de voisins communs (top 5) pour Terraforming Mars. Consensus (≥ 4/8) Ark Nova (2021)7/8A Feast for Odin (2016)7/8Frosthaven (2022)6/8Too Many Bones (2017)6/8",
+  "legend": [
+   "jeu choisiniveau 1niveau 2niveau 3niveau 4",
+   "revente dans l'intervalle convoitise dans l'intervalle",
+   "Familles de mécaniques🃏Cartes🎒Construction de deck / sac🎲Dés et hasard👷Placement d'ouvriers⚙️Sélection d'actions🔨Enchères💰Économie et marché🧩Placement et motifs🗺️Contrôle de territoire🚶Déplacement🛤️Réseaux et livraison🤝Coopération🎭Bluff et information cachée⚔️Conflit direct🗳️Négociation et vote📖Récit et campagne🦸Asymétrie🏆Score et fin de partie🔬Progression et simulation⏱️Temps réel, adresse, party🔄Ordre du tour👤SoloThèmes🃏Card Game🧙Fantasy💰Economic🥊Fighting🚀Science Fiction⚔️Wargame🎲Dice🎉Party Game🧭Adventure🐾Animals🏰Medieval🗺️Exploration🔍Deduction🎭Bluffing🗿Miniatures♟️Abstract Strategy🏙️City Building😂Humor🏛️Ancient👻Horror🧒Children's Game🧩Puzzle⏱️Real-time🚩Territory Building🎬Movies / TV / Radio theme⚓Nautical🤝Negotiation🤹Action / Dexterity🏺Civilization🗳️Political📖Novel-based🚚Transportation🏭Industry / Manufacturing🚂Trains🔱Mythology🎨Renaissance🌾Farming🪐Space Exploration🕵️Murder/Mystery🏁Racing🎮Video Game Theme🦜Pirates🖨️Print & Play🔤Word Game🎓Educational💎Collectible Components🌱Environmental⚽Sports💥Comic Book / Strip🕶️Spies/Secret Agents🧟Zombies🤠American West🧠Memory❓Trivia🧳Travel🦖Prehistoric🛩️Aviation / Flight🔢Number➗Math🙏Religious🌀Maze🔌Electronic🎩Mafia🩺Medical🐪Arabian🔞Mature / Adult🎵Music📚Book⚙️Game System➕Expansion for Base-game🪖World War I (+4)🎖️Napoleonic (+7)"
+  ]
+ },
+ "mapSel1": {
+  "kd": "1 / 5 jeux affichés (max 300), 1 liens d'arbre · 4 / 27 jeux passent les filtres",
+  "search": "",
+  "filters": [
+   "1",
+   "",
+   "4 jeux dans les intervalles actifs"
+  ],
+  "weights": "Mécaniques 100 %Thème 0 %Familles fines 0 %Description 0 %",
+  "graph": {
+   "nodes": 2,
+   "links": 2,
+   "labels": [
+    "",
+    "",
+    "Ark Nova",
+    "Terraforming Mars"
+   ]
+  },
+  "map": {
+   "points": 29,
+   "msg": "",
+   "buttons": [
+    "Auto",
+    "Méca.",
+    "Thème",
+    "Familles",
+    "Descr."
+   ]
+  },
+  "details": "Terraforming Mars ★ Dans mes collectionsBest_template Année2016 Note BGG8.42 (moyenne) · 8.27 (bayésienne) · 74 216 avis Collections101 872 possèdent · 19 227 souhaitent · 538 échangent Convoitise×0.78 la médiane · centile 27 Revente×0.36 la médiane · centile 15 dans l'intervalle Joueurs1–5 Durée120 min Âge minimal12 ans Poidsnon disponible FicheBoardGameGeek Ce jeu ne passe pas les filtres (affiché car choisi). Mécaniques🃏Drafting🏆End Game Bonuses🃏Hand Management🚶Hexagon Grid💰Income🏆Set Collection👤Solo / Solitaire Game⚔️Take That🧩Tile Placement🔄Turn Order: Progressive🦸Variable Player Powers Catégories💰Economic🌱Environmental🏭Industry / Manufacturing🚀Science Fiction🪐Space Exploration🚩Territory Building AuteursJacob Fryxelius IllustrateursIsaac Fryxelius ÉditeursFryxGamesArclightBrädspel.seFantasmagoriaGhenos GamesGreen Elephant Games +19 FamillesComponents: Map (Global Scale)Components: Multi-Use CardsGame: Terraforming MarsMechanism: Tableau BuildingPlayers: Games with Solitaire RulesSetting: Future Timeline (Fryxgames)Space: Earth's Solar SystemSpace: Mars Extensions BGG (22)Afficher la listeMeeple BR Jogos Promo Pack #1Terraforming Mars: Asteroid Rights Promo CardTerraforming Mars: Atmo Collectors Promo CardTerraforming Mars: Bactoviral Research Promo CardTerraforming Mars: BGG User-Created Corporation PackTerraforming Mars: Big BoxTerraforming Mars: Big Box Promo PackTerraforming Mars: Bio Printing Facility Promo CardTerraforming Mars: ColoniesTerraforming Mars: Harvest Promo CardTerraforming Mars: Hellas & ElysiumTerraforming Mars: Jovian Lanterns Promo CardTerraforming Mars: Lunar Exports Promo CardTerraforming Mars: Outdoor Sports Promo CardTerraforming Mars: Penguins Promo CardTerraforming Mars: PreludeTerraforming Mars: Self Replicating Robots Promo CardTerraforming Mars: Small Asteroid Promo CardTerraforming Mars: Snow Algae Promo CardTerraforming Mars: TurmoilTerraforming Mars: Turmoil PromosTerraforming Mars: Venus Next 5 plus proches voisins Ark Nova (2021)0.680",
+  "agree": "Métriques Cos IDFJaccardRecouv.SoupleCos IDF80808080Jaccard80808080Recouv.80808080Souple80808080 Attributs Méca.ThèmeFamillesDescr.Méca.80406020Thème40402020Familles6020600Descr.2020020 Case = % de voisins communs (top 5) pour Terraforming Mars. Consensus (≥ 4/8) Ark Nova (2021)7/8A Feast for Odin (2016)7/8Frosthaven (2022)6/8Too Many Bones (2017)6/8",
+  "legend": [
+   "jeu choisiniveau 1niveau 2niveau 3niveau 4",
+   "revente dans l'intervalle convoitise dans l'intervalle",
+   "Familles de mécaniques🃏Cartes🎒Construction de deck / sac🎲Dés et hasard👷Placement d'ouvriers⚙️Sélection d'actions🔨Enchères💰Économie et marché🧩Placement et motifs🗺️Contrôle de territoire🚶Déplacement🛤️Réseaux et livraison🤝Coopération🎭Bluff et information cachée⚔️Conflit direct🗳️Négociation et vote📖Récit et campagne🦸Asymétrie🏆Score et fin de partie🔬Progression et simulation⏱️Temps réel, adresse, party🔄Ordre du tour👤SoloThèmes🃏Card Game🧙Fantasy💰Economic🥊Fighting🚀Science Fiction⚔️Wargame🎲Dice🎉Party Game🧭Adventure🐾Animals🏰Medieval🗺️Exploration🔍Deduction🎭Bluffing🗿Miniatures♟️Abstract Strategy🏙️City Building😂Humor🏛️Ancient👻Horror🧒Children's Game🧩Puzzle⏱️Real-time🚩Territory Building🎬Movies / TV / Radio theme⚓Nautical🤝Negotiation🤹Action / Dexterity🏺Civilization🗳️Political📖Novel-based🚚Transportation🏭Industry / Manufacturing🚂Trains🔱Mythology🎨Renaissance🌾Farming🪐Space Exploration🕵️Murder/Mystery🏁Racing🎮Video Game Theme🦜Pirates🖨️Print & Play🔤Word Game🎓Educational💎Collectible Components🌱Environmental⚽Sports💥Comic Book / Strip🕶️Spies/Secret Agents🧟Zombies🤠American West🧠Memory❓Trivia🧳Travel🦖Prehistoric🛩️Aviation / Flight🔢Number➗Math🙏Religious🌀Maze🔌Electronic🎩Mafia🩺Medical🐪Arabian🔞Mature / Adult🎵Music📚Book⚙️Game System➕Expansion for Base-game🪖World War I (+4)🎖️Napoleonic (+7)"
+  ]
+ },
+ "mapSel2": {
+  "kd": "1 / 5 jeux affichés (max 300), 1 liens d'arbre · 4 / 27 jeux passent les filtres",
+  "search": "",
+  "filters": [
+   "1",
+   "",
+   "4 jeux dans les intervalles actifs"
+  ],
+  "weights": "Mécaniques 100 %Thème 0 %Familles fines 0 %Description 0 %",
+  "graph": {
+   "nodes": 2,
+   "links": 2,
+   "labels": [
+    "",
+    "",
+    "Ark Nova",
+    "Terraforming Mars"
+   ]
+  },
+  "map": {
+   "points": 29,
+   "msg": "",
+   "buttons": [
+    "Auto",
+    "Méca.",
+    "Thème",
+    "Familles",
+    "Descr."
+   ]
+  },
+  "details": "Terraforming Mars ★ Dans mes collectionsBest_template Année2016 Note BGG8.42 (moyenne) · 8.27 (bayésienne) · 74 216 avis Collections101 872 possèdent · 19 227 souhaitent · 538 échangent Convoitise×0.78 la médiane · centile 27 Revente×0.36 la médiane · centile 15 dans l'intervalle Joueurs1–5 Durée120 min Âge minimal12 ans Poidsnon disponible FicheBoardGameGeek Ce jeu ne passe pas les filtres (affiché car choisi). Mécaniques🃏Drafting🏆End Game Bonuses🃏Hand Management🚶Hexagon Grid💰Income🏆Set Collection👤Solo / Solitaire Game⚔️Take That🧩Tile Placement🔄Turn Order: Progressive🦸Variable Player Powers Catégories💰Economic🌱Environmental🏭Industry / Manufacturing🚀Science Fiction🪐Space Exploration🚩Territory Building AuteursJacob Fryxelius IllustrateursIsaac Fryxelius ÉditeursFryxGamesArclightBrädspel.seFantasmagoriaGhenos GamesGreen Elephant Games +19 FamillesComponents: Map (Global Scale)Components: Multi-Use CardsGame: Terraforming MarsMechanism: Tableau BuildingPlayers: Games with Solitaire RulesSetting: Future Timeline (Fryxgames)Space: Earth's Solar SystemSpace: Mars Extensions BGG (22)Afficher la listeMeeple BR Jogos Promo Pack #1Terraforming Mars: Asteroid Rights Promo CardTerraforming Mars: Atmo Collectors Promo CardTerraforming Mars: Bactoviral Research Promo CardTerraforming Mars: BGG User-Created Corporation PackTerraforming Mars: Big BoxTerraforming Mars: Big Box Promo PackTerraforming Mars: Bio Printing Facility Promo CardTerraforming Mars: ColoniesTerraforming Mars: Harvest Promo CardTerraforming Mars: Hellas & ElysiumTerraforming Mars: Jovian Lanterns Promo CardTerraforming Mars: Lunar Exports Promo CardTerraforming Mars: Outdoor Sports Promo CardTerraforming Mars: Penguins Promo CardTerraforming Mars: PreludeTerraforming Mars: Self Replicating Robots Promo CardTerraforming Mars: Small Asteroid Promo CardTerraforming Mars: Snow Algae Promo CardTerraforming Mars: TurmoilTerraforming Mars: Turmoil PromosTerraforming Mars: Venus Next 5 plus proches voisins Ark Nova (2021)0.680",
+  "agree": "Métriques Cos IDFJaccardRecouv.SoupleCos IDF80808080Jaccard80808080Recouv.80808080Souple80808080 Attributs Méca.ThèmeFamillesDescr.Méca.80406020Thème40402020Familles6020600Descr.2020020 Case = % de voisins communs (top 5) pour Terraforming Mars. Consensus (≥ 4/8) Ark Nova (2021)7/8A Feast for Odin (2016)7/8Frosthaven (2022)6/8Too Many Bones (2017)6/8",
+  "legend": [
+   "jeu choisiniveau 1niveau 2niveau 3niveau 4",
+   "revente dans l'intervalle convoitise dans l'intervalle",
+   "Familles de mécaniques🃏Cartes🎒Construction de deck / sac🎲Dés et hasard👷Placement d'ouvriers⚙️Sélection d'actions🔨Enchères💰Économie et marché🧩Placement et motifs🗺️Contrôle de territoire🚶Déplacement🛤️Réseaux et livraison🤝Coopération🎭Bluff et information cachée⚔️Conflit direct🗳️Négociation et vote📖Récit et campagne🦸Asymétrie🏆Score et fin de partie🔬Progression et simulation⏱️Temps réel, adresse, party🔄Ordre du tour👤SoloThèmes🃏Card Game🧙Fantasy💰Economic🥊Fighting🚀Science Fiction⚔️Wargame🎲Dice🎉Party Game🧭Adventure🐾Animals🏰Medieval🗺️Exploration🔍Deduction🎭Bluffing🗿Miniatures♟️Abstract Strategy🏙️City Building😂Humor🏛️Ancient👻Horror🧒Children's Game🧩Puzzle⏱️Real-time🚩Territory Building🎬Movies / TV / Radio theme⚓Nautical🤝Negotiation🤹Action / Dexterity🏺Civilization🗳️Political📖Novel-based🚚Transportation🏭Industry / Manufacturing🚂Trains🔱Mythology🎨Renaissance🌾Farming🪐Space Exploration🕵️Murder/Mystery🏁Racing🎮Video Game Theme🦜Pirates🖨️Print & Play🔤Word Game🎓Educational💎Collectible Components🌱Environmental⚽Sports💥Comic Book / Strip🕶️Spies/Secret Agents🧟Zombies🤠American West🧠Memory❓Trivia🧳Travel🦖Prehistoric🛩️Aviation / Flight🔢Number➗Math🙏Religious🌀Maze🔌Electronic🎩Mafia🩺Medical🐪Arabian🔞Mature / Adult🎵Music📚Book⚙️Game System➕Expansion for Base-game🪖World War I (+4)🎖️Napoleonic (+7)"
+  ]
+ },
+ "mapSel3": {
+  "kd": "1 / 5 jeux affichés (max 300), 1 liens d'arbre · 4 / 27 jeux passent les filtres",
+  "search": "",
+  "filters": [
+   "1",
+   "",
+   "4 jeux dans les intervalles actifs"
+  ],
+  "weights": "Mécaniques 100 %Thème 0 %Familles fines 0 %Description 0 %",
+  "graph": {
+   "nodes": 2,
+   "links": 2,
+   "labels": [
+    "",
+    "",
+    "Ark Nova",
+    "Terraforming Mars"
+   ]
+  },
+  "map": {
+   "points": 29,
+   "msg": "",
+   "buttons": [
+    "Auto",
+    "Méca.",
+    "Thème",
+    "Familles",
+    "Descr."
+   ]
+  },
+  "details": "Terraforming Mars ★ Dans mes collectionsBest_template Année2016 Note BGG8.42 (moyenne) · 8.27 (bayésienne) · 74 216 avis Collections101 872 possèdent · 19 227 souhaitent · 538 échangent Convoitise×0.78 la médiane · centile 27 Revente×0.36 la médiane · centile 15 dans l'intervalle Joueurs1–5 Durée120 min Âge minimal12 ans Poidsnon disponible FicheBoardGameGeek Ce jeu ne passe pas les filtres (affiché car choisi). Mécaniques🃏Drafting🏆End Game Bonuses🃏Hand Management🚶Hexagon Grid💰Income🏆Set Collection👤Solo / Solitaire Game⚔️Take That🧩Tile Placement🔄Turn Order: Progressive🦸Variable Player Powers Catégories💰Economic🌱Environmental🏭Industry / Manufacturing🚀Science Fiction🪐Space Exploration🚩Territory Building AuteursJacob Fryxelius IllustrateursIsaac Fryxelius ÉditeursFryxGamesArclightBrädspel.seFantasmagoriaGhenos GamesGreen Elephant Games +19 FamillesComponents: Map (Global Scale)Components: Multi-Use CardsGame: Terraforming MarsMechanism: Tableau BuildingPlayers: Games with Solitaire RulesSetting: Future Timeline (Fryxgames)Space: Earth's Solar SystemSpace: Mars Extensions BGG (22)Afficher la listeMeeple BR Jogos Promo Pack #1Terraforming Mars: Asteroid Rights Promo CardTerraforming Mars: Atmo Collectors Promo CardTerraforming Mars: Bactoviral Research Promo CardTerraforming Mars: BGG User-Created Corporation PackTerraforming Mars: Big BoxTerraforming Mars: Big Box Promo PackTerraforming Mars: Bio Printing Facility Promo CardTerraforming Mars: ColoniesTerraforming Mars: Harvest Promo CardTerraforming Mars: Hellas & ElysiumTerraforming Mars: Jovian Lanterns Promo CardTerraforming Mars: Lunar Exports Promo CardTerraforming Mars: Outdoor Sports Promo CardTerraforming Mars: Penguins Promo CardTerraforming Mars: PreludeTerraforming Mars: Self Replicating Robots Promo CardTerraforming Mars: Small Asteroid Promo CardTerraforming Mars: Snow Algae Promo CardTerraforming Mars: TurmoilTerraforming Mars: Turmoil PromosTerraforming Mars: Venus Next 5 plus proches voisins Ark Nova (2021)0.680",
+  "agree": "Métriques Cos IDFJaccardRecouv.SoupleCos IDF80808080Jaccard80808080Recouv.80808080Souple80808080 Attributs Méca.ThèmeFamillesDescr.Méca.80406020Thème40402020Familles6020600Descr.2020020 Case = % de voisins communs (top 5) pour Terraforming Mars. Consensus (≥ 4/8) Ark Nova (2021)7/8A Feast for Odin (2016)7/8Frosthaven (2022)6/8Too Many Bones (2017)6/8",
+  "legend": [
+   "jeu choisiniveau 1niveau 2niveau 3niveau 4",
+   "revente dans l'intervalle convoitise dans l'intervalle",
+   "Familles de mécaniques🃏Cartes🎒Construction de deck / sac🎲Dés et hasard👷Placement d'ouvriers⚙️Sélection d'actions🔨Enchères💰Économie et marché🧩Placement et motifs🗺️Contrôle de territoire🚶Déplacement🛤️Réseaux et livraison🤝Coopération🎭Bluff et information cachée⚔️Conflit direct🗳️Négociation et vote📖Récit et campagne🦸Asymétrie🏆Score et fin de partie🔬Progression et simulation⏱️Temps réel, adresse, party🔄Ordre du tour👤SoloThèmes🃏Card Game🧙Fantasy💰Economic🥊Fighting🚀Science Fiction⚔️Wargame🎲Dice🎉Party Game🧭Adventure🐾Animals🏰Medieval🗺️Exploration🔍Deduction🎭Bluffing🗿Miniatures♟️Abstract Strategy🏙️City Building😂Humor🏛️Ancient👻Horror🧒Children's Game🧩Puzzle⏱️Real-time🚩Territory Building🎬Movies / TV / Radio theme⚓Nautical🤝Negotiation🤹Action / Dexterity🏺Civilization🗳️Political📖Novel-based🚚Transportation🏭Industry / Manufacturing🚂Trains🔱Mythology🎨Renaissance🌾Farming🪐Space Exploration🕵️Murder/Mystery🏁Racing🎮Video Game Theme🦜Pirates🖨️Print & Play🔤Word Game🎓Educational💎Collectible Components🌱Environmental⚽Sports💥Comic Book / Strip🕶️Spies/Secret Agents🧟Zombies🤠American West🧠Memory❓Trivia🧳Travel🦖Prehistoric🛩️Aviation / Flight🔢Number➗Math🙏Religious🌀Maze🔌Electronic🎩Mafia🩺Medical🐪Arabian🔞Mature / Adult🎵Music📚Book⚙️Game System➕Expansion for Base-game🪖World War I (+4)🎖️Napoleonic (+7)"
+  ]
+ },
+ "mapSel4": {
+  "kd": "1 / 5 jeux affichés (max 300), 1 liens d'arbre · 4 / 27 jeux passent les filtres",
+  "search": "",
+  "filters": [
+   "1",
+   "",
+   "4 jeux dans les intervalles actifs"
+  ],
+  "weights": "Mécaniques 100 %Thème 0 %Familles fines 0 %Description 0 %",
+  "graph": {
+   "nodes": 2,
+   "links": 2,
+   "labels": [
+    "",
+    "",
+    "Ark Nova",
+    "Terraforming Mars"
+   ]
+  },
+  "map": {
+   "points": 29,
+   "msg": "",
+   "buttons": [
+    "Auto",
+    "Méca.",
+    "Thème",
+    "Familles",
+    "Descr."
+   ]
+  },
+  "details": "Terraforming Mars ★ Dans mes collectionsBest_template Année2016 Note BGG8.42 (moyenne) · 8.27 (bayésienne) · 74 216 avis Collections101 872 possèdent · 19 227 souhaitent · 538 échangent Convoitise×0.78 la médiane · centile 27 Revente×0.36 la médiane · centile 15 dans l'intervalle Joueurs1–5 Durée120 min Âge minimal12 ans Poidsnon disponible FicheBoardGameGeek Ce jeu ne passe pas les filtres (affiché car choisi). Mécaniques🃏Drafting🏆End Game Bonuses🃏Hand Management🚶Hexagon Grid💰Income🏆Set Collection👤Solo / Solitaire Game⚔️Take That🧩Tile Placement🔄Turn Order: Progressive🦸Variable Player Powers Catégories💰Economic🌱Environmental🏭Industry / Manufacturing🚀Science Fiction🪐Space Exploration🚩Territory Building AuteursJacob Fryxelius IllustrateursIsaac Fryxelius ÉditeursFryxGamesArclightBrädspel.seFantasmagoriaGhenos GamesGreen Elephant Games +19 FamillesComponents: Map (Global Scale)Components: Multi-Use CardsGame: Terraforming MarsMechanism: Tableau BuildingPlayers: Games with Solitaire RulesSetting: Future Timeline (Fryxgames)Space: Earth's Solar SystemSpace: Mars Extensions BGG (22)Afficher la listeMeeple BR Jogos Promo Pack #1Terraforming Mars: Asteroid Rights Promo CardTerraforming Mars: Atmo Collectors Promo CardTerraforming Mars: Bactoviral Research Promo CardTerraforming Mars: BGG User-Created Corporation PackTerraforming Mars: Big BoxTerraforming Mars: Big Box Promo PackTerraforming Mars: Bio Printing Facility Promo CardTerraforming Mars: ColoniesTerraforming Mars: Harvest Promo CardTerraforming Mars: Hellas & ElysiumTerraforming Mars: Jovian Lanterns Promo CardTerraforming Mars: Lunar Exports Promo CardTerraforming Mars: Outdoor Sports Promo CardTerraforming Mars: Penguins Promo CardTerraforming Mars: PreludeTerraforming Mars: Self Replicating Robots Promo CardTerraforming Mars: Small Asteroid Promo CardTerraforming Mars: Snow Algae Promo CardTerraforming Mars: TurmoilTerraforming Mars: Turmoil PromosTerraforming Mars: Venus Next 5 plus proches voisins Ark Nova (2021)0.680",
+  "agree": "Métriques Cos IDFJaccardRecouv.SoupleCos IDF80808080Jaccard80808080Recouv.80808080Souple80808080 Attributs Méca.ThèmeFamillesDescr.Méca.80406020Thème40402020Familles6020600Descr.2020020 Case = % de voisins communs (top 5) pour Terraforming Mars. Consensus (≥ 4/8) Ark Nova (2021)7/8A Feast for Odin (2016)7/8Frosthaven (2022)6/8Too Many Bones (2017)6/8",
+  "legend": [
+   "jeu choisiniveau 1niveau 2niveau 3niveau 4",
+   "revente dans l'intervalle convoitise dans l'intervalle",
+   "Familles de mécaniques🃏Cartes🎒Construction de deck / sac🎲Dés et hasard👷Placement d'ouvriers⚙️Sélection d'actions🔨Enchères💰Économie et marché🧩Placement et motifs🗺️Contrôle de territoire🚶Déplacement🛤️Réseaux et livraison🤝Coopération🎭Bluff et information cachée⚔️Conflit direct🗳️Négociation et vote📖Récit et campagne🦸Asymétrie🏆Score et fin de partie🔬Progression et simulation⏱️Temps réel, adresse, party🔄Ordre du tour👤SoloThèmes🃏Card Game🧙Fantasy💰Economic🥊Fighting🚀Science Fiction⚔️Wargame🎲Dice🎉Party Game🧭Adventure🐾Animals🏰Medieval🗺️Exploration🔍Deduction🎭Bluffing🗿Miniatures♟️Abstract Strategy🏙️City Building😂Humor🏛️Ancient👻Horror🧒Children's Game🧩Puzzle⏱️Real-time🚩Territory Building🎬Movies / TV / Radio theme⚓Nautical🤝Negotiation🤹Action / Dexterity🏺Civilization🗳️Political📖Novel-based🚚Transportation🏭Industry / Manufacturing🚂Trains🔱Mythology🎨Renaissance🌾Farming🪐Space Exploration🕵️Murder/Mystery🏁Racing🎮Video Game Theme🦜Pirates🖨️Print & Play🔤Word Game🎓Educational💎Collectible Components🌱Environmental⚽Sports💥Comic Book / Strip🕶️Spies/Secret Agents🧟Zombies🤠American West🧠Memory❓Trivia🧳Travel🦖Prehistoric🛩️Aviation / Flight🔢Number➗Math🙏Religious🌀Maze🔌Electronic🎩Mafia🩺Medical🐪Arabian🔞Mature / Adult🎵Music📚Book⚙️Game System➕Expansion for Base-game🪖World War I (+4)🎖️Napoleonic (+7)"
+  ]
+ },
+ "themes": {
+  "kd": "1 / 5 jeux affichés (max 300), 1 liens d'arbre · 4 / 27 jeux passent les filtres",
+  "search": "",
+  "filters": [
+   "1",
+   "",
+   "4 jeux dans les intervalles actifs"
+  ],
+  "weights": "Mécaniques 100 %Thème 0 %Familles fines 0 %Description 0 %",
+  "graph": {
+   "nodes": 2,
+   "links": 2,
+   "labels": [
+    "",
+    "",
+    "Ark Nova",
+    "Terraforming Mars"
+   ]
+  },
+  "map": {
+   "points": 60,
+   "msg": "",
+   "buttons": [
+    "Auto",
+    "Méca.",
+    "Thème",
+    "Familles",
+    "Descr."
+   ]
+  },
+  "details": "Terraforming Mars ★ Dans mes collectionsBest_template Année2016 Note BGG8.42 (moyenne) · 8.27 (bayésienne) · 74 216 avis Collections101 872 possèdent · 19 227 souhaitent · 538 échangent Convoitise×0.78 la médiane · centile 27 Revente×0.36 la médiane · centile 15 dans l'intervalle Joueurs1–5 Durée120 min Âge minimal12 ans Poidsnon disponible FicheBoardGameGeek Ce jeu ne passe pas les filtres (affiché car choisi). Mécaniques🃏Drafting🏆End Game Bonuses🃏Hand Management🚶Hexagon Grid💰Income🏆Set Collection👤Solo / Solitaire Game⚔️Take That🧩Tile Placement🔄Turn Order: Progressive🦸Variable Player Powers Catégories💰Economic🌱Environmental🏭Industry / Manufacturing🚀Science Fiction🪐Space Exploration🚩Territory Building AuteursJacob Fryxelius IllustrateursIsaac Fryxelius ÉditeursFryxGamesArclightBrädspel.seFantasmagoriaGhenos GamesGreen Elephant Games +19 FamillesComponents: Map (Global Scale)Components: Multi-Use CardsGame: Terraforming MarsMechanism: Tableau BuildingPlayers: Games with Solitaire RulesSetting: Future Timeline (Fryxgames)Space: Earth's Solar SystemSpace: Mars Extensions BGG (22)Afficher la listeMeeple BR Jogos Promo Pack #1Terraforming Mars: Asteroid Rights Promo CardTerraforming Mars: Atmo Collectors Promo CardTerraforming Mars: Bactoviral Research Promo CardTerraforming Mars: BGG User-Created Corporation PackTerraforming Mars: Big BoxTerraforming Mars: Big Box Promo PackTerraforming Mars: Bio Printing Facility Promo CardTerraforming Mars: ColoniesTerraforming Mars: Harvest Promo CardTerraforming Mars: Hellas & ElysiumTerraforming Mars: Jovian Lanterns Promo CardTerraforming Mars: Lunar Exports Promo CardTerraforming Mars: Outdoor Sports Promo CardTerraforming Mars: Penguins Promo CardTerraforming Mars: PreludeTerraforming Mars: Self Replicating Robots Promo CardTerraforming Mars: Small Asteroid Promo CardTerraforming Mars: Snow Algae Promo CardTerraforming Mars: TurmoilTerraforming Mars: Turmoil PromosTerraforming Mars: Venus Next 5 plus proches voisins Ark Nova (2021)0.680",
+  "agree": "Métriques Cos IDFJaccardRecouv.SoupleCos IDF80808080Jaccard80808080Recouv.80808080Souple80808080 Attributs Méca.ThèmeFamillesDescr.Méca.80406020Thème40402020Familles6020600Descr.2020020 Case = % de voisins communs (top 5) pour Terraforming Mars. Consensus (≥ 4/8) Ark Nova (2021)7/8A Feast for Odin (2016)7/8Frosthaven (2022)6/8Too Many Bones (2017)6/8",
+  "legend": [
+   "jeu choisiniveau 1niveau 2niveau 3niveau 4",
+   "revente dans l'intervalle convoitise dans l'intervalle",
+   "Familles de mécaniques🃏Cartes🎒Construction de deck / sac🎲Dés et hasard👷Placement d'ouvriers⚙️Sélection d'actions🔨Enchères💰Économie et marché🧩Placement et motifs🗺️Contrôle de territoire🚶Déplacement🛤️Réseaux et livraison🤝Coopération🎭Bluff et information cachée⚔️Conflit direct🗳️Négociation et vote📖Récit et campagne🦸Asymétrie🏆Score et fin de partie🔬Progression et simulation⏱️Temps réel, adresse, party🔄Ordre du tour👤SoloThèmes🃏Card Game🧙Fantasy💰Economic🥊Fighting🚀Science Fiction⚔️Wargame🎲Dice🎉Party Game🧭Adventure🐾Animals🏰Medieval🗺️Exploration🔍Deduction🎭Bluffing🗿Miniatures♟️Abstract Strategy🏙️City Building😂Humor🏛️Ancient👻Horror🧒Children's Game🧩Puzzle⏱️Real-time🚩Territory Building🎬Movies / TV / Radio theme⚓Nautical🤝Negotiation🤹Action / Dexterity🏺Civilization🗳️Political📖Novel-based🚚Transportation🏭Industry / Manufacturing🚂Trains🔱Mythology🎨Renaissance🌾Farming🪐Space Exploration🕵️Murder/Mystery🏁Racing🎮Video Game Theme🦜Pirates🖨️Print & Play🔤Word Game🎓Educational💎Collectible Components🌱Environmental⚽Sports💥Comic Book / Strip🕶️Spies/Secret Agents🧟Zombies🤠American West🧠Memory❓Trivia🧳Travel🦖Prehistoric🛩️Aviation / Flight🔢Number➗Math🙏Religious🌀Maze🔌Electronic🎩Mafia🩺Medical🐪Arabian🔞Mature / Adult🎵Music📚Book⚙️Game System➕Expansion for Base-game🪖World War I (+4)🎖️Napoleonic (+7)"
+  ]
+ },
+ "themesPeak": {
+  "kd": "1 / 5 jeux affichés (max 300), 1 liens d'arbre · 4 / 27 jeux passent les filtres",
+  "search": "",
+  "filters": [
+   "1",
+   "",
+   "4 jeux dans les intervalles actifs"
+  ],
+  "weights": "Mécaniques 100 %Thème 0 %Familles fines 0 %Description 0 %",
+  "graph": {
+   "nodes": 2,
+   "links": 2,
+   "labels": [
+    "",
+    "",
+    "Ark Nova",
+    "Terraforming Mars"
+   ]
+  },
+  "map": {
+   "points": 60,
+   "msg": "",
+   "buttons": [
+    "Auto",
+    "Méca.",
+    "Thème",
+    "Familles",
+    "Descr."
+   ]
+  },
+  "details": "Terraforming Mars ★ Dans mes collectionsBest_template Année2016 Note BGG8.42 (moyenne) · 8.27 (bayésienne) · 74 216 avis Collections101 872 possèdent · 19 227 souhaitent · 538 échangent Convoitise×0.78 la médiane · centile 27 Revente×0.36 la médiane · centile 15 dans l'intervalle Joueurs1–5 Durée120 min Âge minimal12 ans Poidsnon disponible FicheBoardGameGeek Ce jeu ne passe pas les filtres (affiché car choisi). Mécaniques🃏Drafting🏆End Game Bonuses🃏Hand Management🚶Hexagon Grid💰Income🏆Set Collection👤Solo / Solitaire Game⚔️Take That🧩Tile Placement🔄Turn Order: Progressive🦸Variable Player Powers Catégories💰Economic🌱Environmental🏭Industry / Manufacturing🚀Science Fiction🪐Space Exploration🚩Territory Building AuteursJacob Fryxelius IllustrateursIsaac Fryxelius ÉditeursFryxGamesArclightBrädspel.seFantasmagoriaGhenos GamesGreen Elephant Games +19 FamillesComponents: Map (Global Scale)Components: Multi-Use CardsGame: Terraforming MarsMechanism: Tableau BuildingPlayers: Games with Solitaire RulesSetting: Future Timeline (Fryxgames)Space: Earth's Solar SystemSpace: Mars Extensions BGG (22)Afficher la listeMeeple BR Jogos Promo Pack #1Terraforming Mars: Asteroid Rights Promo CardTerraforming Mars: Atmo Collectors Promo CardTerraforming Mars: Bactoviral Research Promo CardTerraforming Mars: BGG User-Created Corporation PackTerraforming Mars: Big BoxTerraforming Mars: Big Box Promo PackTerraforming Mars: Bio Printing Facility Promo CardTerraforming Mars: ColoniesTerraforming Mars: Harvest Promo CardTerraforming Mars: Hellas & ElysiumTerraforming Mars: Jovian Lanterns Promo CardTerraforming Mars: Lunar Exports Promo CardTerraforming Mars: Outdoor Sports Promo CardTerraforming Mars: Penguins Promo CardTerraforming Mars: PreludeTerraforming Mars: Self Replicating Robots Promo CardTerraforming Mars: Small Asteroid Promo CardTerraforming Mars: Snow Algae Promo CardTerraforming Mars: TurmoilTerraforming Mars: Turmoil PromosTerraforming Mars: Venus Next 5 plus proches voisins Ark Nova (2021)0.680",
+  "agree": "Métriques Cos IDFJaccardRecouv.SoupleCos IDF80808080Jaccard80808080Recouv.80808080Souple80808080 Attributs Méca.ThèmeFamillesDescr.Méca.80406020Thème40402020Familles6020600Descr.2020020 Case = % de voisins communs (top 5) pour Terraforming Mars. Consensus (≥ 4/8) Ark Nova (2021)7/8A Feast for Odin (2016)7/8Frosthaven (2022)6/8Too Many Bones (2017)6/8",
+  "legend": [
+   "jeu choisiniveau 1niveau 2niveau 3niveau 4",
+   "revente dans l'intervalle convoitise dans l'intervalle",
+   "Familles de mécaniques🃏Cartes🎒Construction de deck / sac🎲Dés et hasard👷Placement d'ouvriers⚙️Sélection d'actions🔨Enchères💰Économie et marché🧩Placement et motifs🗺️Contrôle de territoire🚶Déplacement🛤️Réseaux et livraison🤝Coopération🎭Bluff et information cachée⚔️Conflit direct🗳️Négociation et vote📖Récit et campagne🦸Asymétrie🏆Score et fin de partie🔬Progression et simulation⏱️Temps réel, adresse, party🔄Ordre du tour👤SoloThèmes🃏Card Game🧙Fantasy💰Economic🥊Fighting🚀Science Fiction⚔️Wargame🎲Dice🎉Party Game🧭Adventure🐾Animals🏰Medieval🗺️Exploration🔍Deduction🎭Bluffing🗿Miniatures♟️Abstract Strategy🏙️City Building😂Humor🏛️Ancient👻Horror🧒Children's Game🧩Puzzle⏱️Real-time🚩Territory Building🎬Movies / TV / Radio theme⚓Nautical🤝Negotiation🤹Action / Dexterity🏺Civilization🗳️Political📖Novel-based🚚Transportation🏭Industry / Manufacturing🚂Trains🔱Mythology🎨Renaissance🌾Farming🪐Space Exploration🕵️Murder/Mystery🏁Racing🎮Video Game Theme🦜Pirates🖨️Print & Play🔤Word Game🎓Educational💎Collectible Components🌱Environmental⚽Sports💥Comic Book / Strip🕶️Spies/Secret Agents🧟Zombies🤠American West🧠Memory❓Trivia🧳Travel🦖Prehistoric🛩️Aviation / Flight🔢Number➗Math🙏Religious🌀Maze🔌Electronic🎩Mafia🩺Medical🐪Arabian🔞Mature / Adult🎵Music📚Book⚙️Game System➕Expansion for Base-game🪖World War I (+4)🎖️Napoleonic (+7)"
+  ]
+ },
+ "pandemic": {
+  "kd": "3 / 5 jeux affichés (max 300), 3 liens d'arbre · 4 / 27 jeux passent les filtres",
+  "search": "",
+  "filters": [
+   "1",
+   "",
+   "4 jeux dans les intervalles actifs"
+  ],
+  "weights": "Mécaniques 100 %Thème 0 %Familles fines 0 %Description 0 %",
+  "graph": {
+   "nodes": 4,
+   "links": 6,
+   "labels": [
+    "",
+    "",
+    "",
+    "",
+    "Ark Nova",
+    "Frosthaven",
+    "Pandemic",
+    "Too Many Bones"
+   ]
+  },
+  "map": {
+   "points": 29,
+   "msg": "",
+   "buttons": [
+    "Auto",
+    "Méca.",
+    "Thème",
+    "Familles",
+    "Descr."
+   ]
+  },
+  "details": "Pandemic ☆ Ajouter à mes collections Année2008 Note BGG7.59 (moyenne) · 7.49 (bayésienne) · 108 975 avis Collections168 364 possèdent · 9 344 souhaitent · 2 508 échangent Convoitise×0.23 la médiane · centile 8 Revente×1.00 la médiane · centile 50 Joueurs2–4 Durée45 min Âge minimal8 ans Poidsnon disponible FicheBoardGameGeek Ce jeu ne passe pas les filtres (affiché car choisi). Mécaniques⚙️Action Points🤝Cooperative Game🃏Hand Management🚶Point to Point Movement🏆Set Collection💰Trading🦸Variable Player Powers Catégories🩺Medical AuteursMatt Leacock IllustrateursJosh CappelChristian HanischRégis MoulunChris QuilliamsTom Thiel ÉditeursZ-Man GamesAlbiAsmodeeAsmodee ItaliaAsterion PressBergsala Enigma (Enigma) +27 FamillesComponents: Map (Global Scale)Components: Multi-Use CardsDigital Implementations: Board Game ArenaGame: PandemicMedical: DiseasesOccupation: DispatcherOccupation: Medic / Doctor / NursesOccupation: Researcher / ScientistRegion: The World Extensions BGG (7)Afficher la listePandemic: Gen Con 2016 Promos – Z-Force Team Member/Game ConventionPandemic: In the LabPandemic: On the BrinkPandemic: Promo RolesPandemic: State of EmergencyPandemic: Survival Promos – Crisis Mitigator/Relocation SpecialistPandemie: Uitbreiding \"De Generalist\" 5 plus proches voisins Ark Nova (2021)0.195Too Many Bones (2017)0.157Frosthaven (2022)0.149",
+  "agree": "Métriques Cos IDFJaccardRecouv.SoupleCos IDF60606060Jaccard60606060Recouv.60606060Souple60606080 Attributs Méca.ThèmeFamillesDescr.Méca.6002020Thème0–00Familles200200Descr.200020 Case = % de voisins communs (top 5) pour Pandemic. Consensus (≥ 4/8) Ark Nova (2021)6/8Frosthaven (2022)6/8Too Many Bones (2017)5/8",
+  "legend": [
+   "jeu choisiniveau 1niveau 2niveau 3niveau 4",
+   "revente dans l'intervalle convoitise dans l'intervalle",
+   "Familles de mécaniques🃏Cartes🎒Construction de deck / sac🎲Dés et hasard👷Placement d'ouvriers⚙️Sélection d'actions🔨Enchères💰Économie et marché🧩Placement et motifs🗺️Contrôle de territoire🚶Déplacement🛤️Réseaux et livraison🤝Coopération🎭Bluff et information cachée⚔️Conflit direct🗳️Négociation et vote📖Récit et campagne🦸Asymétrie🏆Score et fin de partie🔬Progression et simulation⏱️Temps réel, adresse, party🔄Ordre du tour👤SoloThèmes🃏Card Game🧙Fantasy💰Economic🥊Fighting🚀Science Fiction⚔️Wargame🎲Dice🎉Party Game🧭Adventure🐾Animals🏰Medieval🗺️Exploration🔍Deduction🎭Bluffing🗿Miniatures♟️Abstract Strategy🏙️City Building😂Humor🏛️Ancient👻Horror🧒Children's Game🧩Puzzle⏱️Real-time🚩Territory Building🎬Movies / TV / Radio theme⚓Nautical🤝Negotiation🤹Action / Dexterity🏺Civilization🗳️Political📖Novel-based🚚Transportation🏭Industry / Manufacturing🚂Trains🔱Mythology🎨Renaissance🌾Farming🪐Space Exploration🕵️Murder/Mystery🏁Racing🎮Video Game Theme🦜Pirates🖨️Print & Play🔤Word Game🎓Educational💎Collectible Components🌱Environmental⚽Sports💥Comic Book / Strip🕶️Spies/Secret Agents🧟Zombies🤠American West🧠Memory❓Trivia🧳Travel🦖Prehistoric🛩️Aviation / Flight🔢Number➗Math🙏Religious🌀Maze🔌Electronic🎩Mafia🩺Medical🐪Arabian🔞Mature / Adult🎵Music📚Book⚙️Game System➕Expansion for Base-game🪖World War I (+4)🎖️Napoleonic (+7)"
+  ]
+ },
+ "neighbourDetails": {
+  "kd": "3 / 5 jeux affichés (max 300), 3 liens d'arbre · 4 / 27 jeux passent les filtres",
+  "search": "",
+  "filters": [
+   "1",
+   "",
+   "4 jeux dans les intervalles actifs"
+  ],
+  "weights": "Mécaniques 100 %Thème 0 %Familles fines 0 %Description 0 %",
+  "graph": {
+   "nodes": 4,
+   "links": 6,
+   "labels": [
+    "",
+    "",
+    "",
+    "",
+    "Ark Nova",
+    "Frosthaven",
+    "Pandemic",
+    "Too Many Bones"
+   ]
+  },
+  "map": {
+   "points": 29,
+   "msg": "",
+   "buttons": [
+    "Auto",
+    "Méca.",
+    "Thème",
+    "Familles",
+    "Descr."
+   ]
+  },
+  "details": "Ark Nova ☆ Ajouter à mes collections Année2021 Note BGG8.70 (moyenne) · 6.94 (bayésienne) · 1 495 avis Collections2 461 possèdent · 4 903 souhaitent · 8 échangent Convoitise×8.19 la médiane · centile 96 dans l'intervalle Revente×0.25 la médiane · centile 0 dans l'intervalle Joueurs1–4 Durée150 min Âge minimal14 ans Poidsnon disponible FicheBoardGameGeek Atteint via Pandemic : s = 0.195 (Cosinus IDF) · Méca. 0.20 (×1.00) Surlignées : communes avec Pandemic Mécaniques🃏Card Drafting🏆End Game Bonuses🃏Hand Management🚶Hexagon Grid💰Income🏆Set Collection👤Solo / Solitaire Game🧩Tile Placement🦸Variable Player Powers🔬Variable Set-up Catégories🐾Animals💰Economic🌱Environmental AuteursMathias Wigge IllustrateursLoïc BilliauDennis LohausenSteffen Bieker ÉditeursFeuerland SpieleCapstone GamesCranio CreationsGame HarborKorea Boardgames Co., Ltd.Super Meeple +1 Famillesaucun Extensions BGG (0)aucune 5 plus proches voisins A Feast for Odin (2016)0.309 Recentrer sur ce jeu",
+  "agree": "Métriques Cos IDFJaccardRecouv.SoupleCos IDF60606060Jaccard60606060Recouv.60606060Souple60606080 Attributs Méca.ThèmeFamillesDescr.Méca.6002020Thème0–00Familles200200Descr.200020 Case = % de voisins communs (top 5) pour Pandemic. Consensus (≥ 4/8) Ark Nova (2021)6/8Frosthaven (2022)6/8Too Many Bones (2017)5/8",
+  "legend": [
+   "jeu choisiniveau 1niveau 2niveau 3niveau 4",
+   "revente dans l'intervalle convoitise dans l'intervalle",
+   "Familles de mécaniques🃏Cartes🎒Construction de deck / sac🎲Dés et hasard👷Placement d'ouvriers⚙️Sélection d'actions🔨Enchères💰Économie et marché🧩Placement et motifs🗺️Contrôle de territoire🚶Déplacement🛤️Réseaux et livraison🤝Coopération🎭Bluff et information cachée⚔️Conflit direct🗳️Négociation et vote📖Récit et campagne🦸Asymétrie🏆Score et fin de partie🔬Progression et simulation⏱️Temps réel, adresse, party🔄Ordre du tour👤SoloThèmes🃏Card Game🧙Fantasy💰Economic🥊Fighting🚀Science Fiction⚔️Wargame🎲Dice🎉Party Game🧭Adventure🐾Animals🏰Medieval🗺️Exploration🔍Deduction🎭Bluffing🗿Miniatures♟️Abstract Strategy🏙️City Building😂Humor🏛️Ancient👻Horror🧒Children's Game🧩Puzzle⏱️Real-time🚩Territory Building🎬Movies / TV / Radio theme⚓Nautical🤝Negotiation🤹Action / Dexterity🏺Civilization🗳️Political📖Novel-based🚚Transportation🏭Industry / Manufacturing🚂Trains🔱Mythology🎨Renaissance🌾Farming🪐Space Exploration🕵️Murder/Mystery🏁Racing🎮Video Game Theme🦜Pirates🖨️Print & Play🔤Word Game🎓Educational💎Collectible Components🌱Environmental⚽Sports💥Comic Book / Strip🕶️Spies/Secret Agents🧟Zombies🤠American West🧠Memory❓Trivia🧳Travel🦖Prehistoric🛩️Aviation / Flight🔢Number➗Math🙏Religious🌀Maze🔌Electronic🎩Mafia🩺Medical🐪Arabian🔞Mature / Adult🎵Music📚Book⚙️Game System➕Expansion for Base-game🪖World War I (+4)🎖️Napoleonic (+7)"
+  ]
+ },
+ "filterPop": "FiltresSignaux : convoitise c80–c100, revente c0–c30✕4 / 27 jeux passent les filtres. Les voisins sont cherchés parmi eux ; le jeu choisi reste toujours affiché (contour pointillé s'il ne passe pas).",
+ "exportPop": "4 jeux dans le graphe (2 pas encore dans mes jeux) Choisir dans le graphe Nouveaux jeux (à ranger) Dans une collectionBest_template +42Test_template +2 Nouvelle collection Créer Jeu choisi et tous ses voisins affichés. Les jeux déjà présents ne sont pas dupliqués."
+}
