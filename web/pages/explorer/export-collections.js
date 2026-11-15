@@ -1,13 +1,13 @@
 /* Mes collections côté explorateur : bouton d'ajout, compteur, export du graphe, mode « Choisir dans le graphe ». */
+import { COLL } from "../../ui/collection-instance.js";
 import { $, escapeHtml } from "../../ui/html.js";
 
 export function install(app) {
   const { hideHelp, N, state } = app;
   Object.assign(app, { collBtn, endPick, togglePick, applyPick }); // fonctions : disponibles dès le début (hissées)
-  // --- Mes collections (web/collection-store.js, page collections.html) ---------------------------
+  // --- Mes collections (web/ui/collection-instance.js, page collections.html) ---------------------------
   // Bouton dans les détails du jeu cliqué ; le compteur de l'en-tête et le bouton suivent les changements,
   // y compris ceux faits dans l'onglet « Mes collections ».
-  const COLL = window.BGG_COLLECTION;
   function collBtn(g) {
     if (!COLL) return "";
     const on = COLL.has(g.id);
@@ -86,7 +86,7 @@ export function install(app) {
       b.addEventListener("click", () => {
         const cid = b.dataset.to || null;
         const r = COLL.addMany(ids, cid);
-        done(r, cid ? `« ${colls.find((c) => c.cid === cid).name} »` : "Nouveaux jeux");
+        done(r, cid ? `« ${colls.find((c) => c.cid === cid)?.name} »` : "Nouveaux jeux");
       }),
     );
     xpop.querySelector(".xp-new").addEventListener("submit", (e) => {

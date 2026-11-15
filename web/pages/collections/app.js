@@ -16,11 +16,9 @@ import { install as installStart } from "./start.js";
 
 export function startCollections() {
   const w = /** @type {any} */ (window);
-  if (!w.BGG_DATA || !w.BGG_COLLECTION) {
+  if (!w.BGG_DATA) {
     const msg = /** @type {HTMLElement} */ ($("#coll-msg"));
-    msg.textContent = !w.BGG_DATA
-      ? "Données absentes : lancer python3 src/export_web.py."
-      : "collection-store.js manquant.";
+    msg.textContent = "Données absentes : lancer python3 src/export_web.py.";
     msg.classList.add("err");
     return;
   }

@@ -26,6 +26,17 @@ python3 web/serve.py 8765        # ou : npm run serve (sans cache navigateur)
 
 Puis ouvrir http://localhost:8765. La bibliothèque d3 est chargée depuis cdnjs (connexion internet nécessaire).
 
+## Développement
+
+```bash
+npm install          # une fois (typescript, eslint, prettier, playwright)
+npm run check        # types, lint, format
+npm test             # tests unitaires (logique pure de web/lib)
+npm run test:e2e     # tests bout en bout sur la fixture (npx playwright install chromium la 1re fois)
+```
+
+Architecture et conventions : [web/ARCHITECTURE.md](web/ARCHITECTURE.md).
+
 ## Structure
 
 ```
@@ -36,7 +47,11 @@ src/
   build_map.py       cartes 2D (t-SNE, ou UMAP si installé), alignées par Procrustes
   export_web.py      export des données pour l'interface
 web/
-  index.html, style.css, app.js
+  index.html, collections.html    pages (balisage)
+  lib/ ui/ pages/ styles/           code : voir web/ARCHITECTURE.md
+  serve.py                          serveur de dev sans cache
+tests/
+  unit/ e2e/ fixtures/              node:test, Playwright, petite fixture de données
 ```
 
 ## Source et licence des données

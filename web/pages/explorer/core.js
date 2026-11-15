@@ -8,6 +8,7 @@ import { buildSignals, inInt as inIntL, SIG_DEFAULT, sigActive as sigActiveL } f
 import { buildGemQ } from "../../lib/gems.js";
 import { createNeighborIndex } from "../../lib/neighbors.js";
 import { createFilterState } from "../../lib/filters.js";
+import { EMOJI } from "../../emoji.js";
 import { $, escapeHtml } from "../../ui/html.js";
 import { installHelp } from "../../ui/help-tooltip.js";
 
@@ -24,7 +25,7 @@ export function createApp() {
   const { ATTRS, ATTR_KEYS, franchise } = buildAttrs(D);
 
   // --- Émojis (web/emoji.js) : un par thème, un par famille de mécaniques --------------------------
-  const EMO = window.BGG_EMOJI || { themes: {}, families: {} };
+  const EMO = EMOJI;
   const EI = buildEmojiIndex(D, EMO);
   const { emo, DOM_EMO, NON_THEMATIC } = EI;
   if (EI.missing.mecaniques.length || EI.missing.themes.length) console.warn("emoji.js : sans émoji", EI.missing);

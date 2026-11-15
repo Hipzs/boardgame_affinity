@@ -1,17 +1,7 @@
-/* Point d'entrée de l'explorateur (index.html). Étape de transition : app.js reste un script classique qui lit
- * encore des globales ; ce module les pose puis le charge. Les ponts disparaissent à l'étape 10. */
-import { EMOJI } from "../../emoji.js";
-import { DEFAULT_COLLECTIONS } from "../../default-collections.js";
-import { createCollectionStore } from "../../lib/collection-store.js";
+// @ts-check
+/* Point d'entrée de l'explorateur (index.html) : liens d'en-tête, puis démarrage de la page. */
 import { installTabLinks } from "../../ui/tab-links.js";
+import { startExplorer } from "./app.js";
 
-window.BGG_EMOJI = EMOJI;
-window.BGG_COLLECTION = createCollectionStore({
-  storage: localStorage,
-  defaults: DEFAULT_COLLECTIONS,
-  addStorageListener: (cb) => window.addEventListener("storage", (e) => cb(e.key ?? "")),
-});
 installTabLinks();
-
-const { startExplorer } = await import("./app.js");
 startExplorer();

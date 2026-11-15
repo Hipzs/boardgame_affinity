@@ -9,6 +9,8 @@ import {
 } from "../../lib/filters.js";
 import { installHelp } from "../../ui/help-tooltip.js";
 import { $ } from "../../ui/html.js";
+import { COLL } from "../../ui/collection-instance.js";
+import { EMOJI } from "../../emoji.js";
 
 export function createApp() {
   /** Contexte partagé : socle (données, état, calcul) + fonctions que les modules se prêtent. */
@@ -16,8 +18,7 @@ export function createApp() {
   // Aide au survol (data-help, après 400 ms ; masquée pendant un glisser) : web/ui/help-tooltip.js.
   const { hide: hideHelp } = installHelp({ el: $("#help"), delay: 400, isSuppressed: () => app.dragging });
   const D = window.BGG_DATA,
-    COLL = window.BGG_COLLECTION,
-    EMO = window.BGG_EMOJI || { themes: {}, families: {} };
+    EMO = EMOJI;
   const byId = new Map(D.nodes.map((g) => [g.id, g]));
   const nonThematic = new Set(EMO.nonThematic || []);
   // Émoji du thème dominant : catégorie thématique la plus spécifique (IDF maximal), comme dans l'explorateur.
