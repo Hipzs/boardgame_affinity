@@ -1,4 +1,5 @@
 // @ts-check
+/** @import { FilterState, Game } from "../types" */
 /* Filtres : état unique (FilterState) et prédicat unique `passes`, communs à l'explorateur et à « Mes collections ».
  *
  *   kw / kwText     recherche par mots-clés (kw = mots normalisés, kwText = saisie brute)
@@ -17,10 +18,12 @@ export const RATE_DEFAULTS = {
   b: { min: 3.5, max: 8.6 },
 };
 export const NUM_KEYS = ["plMin", "plMax", "tMin", "tMax", "ageMax", "wMin", "wMax"];
+/** @param {string[]} keys */
 const sets = (keys) => Object.fromEntries(keys.map((k) => [k, new Set()]));
 
 /**
  * @param {{reqKeys?: string[], notTagKeys?: string[], sigFilter?: boolean}} [opts]
+ * @returns {import("../types").FilterState}
  */
 export function createFilterState({
   reqKeys = ["m", "c", "f", "d"],
@@ -49,12 +52,14 @@ export function createFilterState({
   };
 }
 
-/** Met à jour la recherche par mots-clés (saisie brute + mots normalisés). */
+/** Met à jour la recherche par mots-clés (saisie brute + mots normalisés).  @param {FilterState} F @param {string} text */
 export function setKeywords(F, text) {
   F.kwText = text;
   F.kw = kwTerms(text);
 }
+/** @param {FilterState} F @param {string} k */
 export const rateActive = (F, k) => F.rate[k].lo > F.rate[k].min || F.rate[k].hi < F.rate[k].max;
+/** @param {FilterState} F @param {string} k */
 export const resetRate = (F, k) => {
   F.rate[k].lo = F.rate[k].min;
   F.rate[k].hi = F.rate[k].max;
@@ -64,7 +69,7 @@ export const resetRate = (F, k) => {
  * Le jeu g (indice i) passe-t-il les filtres ?
  * @param {any} g
  * @param {number} i
- * @param {any} F  FilterState
+ * @param {FilterState} F
  * @param {{kwText: (g: any, i: number) => string, terms: (g: any, i: number, key: string) => Set<number>,
  *          signals?: null | {active: (k: string) => boolean, inInt: (k: string, i: number) => boolean}}} ctx
  *   kwText : texte normalisé du jeu ; terms : étiquettes d'un attribut ; signals : null = signaux sans effet
@@ -91,7 +96,7 @@ export function passes(g, i, F, ctx) {
     if (F.modeTag[key] === "and" ? [...sel].some((t) => !has.has(t)) : ![...sel].some((t) => has.has(t))) return false;
   }
   for (const key of Object.keys(F.notTags))
-    if (F.notTags[key].size && g[key].some((t) => F.notTags[key].has(t))) return false;
+    if (F.notTags[key].size && /** @type {number[]} */ (g[key]).some((t) => F.notTags[key].has(t))) return false;
   const n = F.nums;
   if (n.plMin !== null || n.plMax !== null) {
     const [mn, mx] = g.p;
@@ -105,15 +110,15 @@ export function passes(g, i, F, ctx) {
   return true;
 }
 
-/** Table 0/1 des jeux qui passent (explorateur : base des voisins). */
+/** Table 0/1 des jeux qui passent (explorateur : base des voisins).  @param {Game[]} N @param {FilterState} F @param {Parameters<typeof passes>[3]} ctx */
 export const computePass = (N, F, ctx) => Uint8Array.from(N, (g, i) => (passes(g, i, F, ctx) ? 1 : 0));
 
-/** Nombre d'étiquettes « indispensables » + « interdites » (badge de la rubrique Garder / exclure). */
+/** Nombre d'étiquettes « indispensables » + « interdites » (badge de la rubrique Garder / exclure).  @param {FilterState} F */
 export const reqBanCount = (F) => F.reqKeys.reduce((n, k) => n + F.req[k].size + F.ban[k].size, 0);
 
 /**
  * Nombre de filtres actifs (badge de « Filtres »).
- * @param {any} F
+ * @param {FilterState} F
  * @param {{sigOn?: boolean, sigActive?: boolean, reqInCount?: boolean}} [o]
  *   sigOn+sigActive : les signaux filtrent et au moins un intervalle est actif ; reqInCount : Garder / exclure compté (+1)
  */
@@ -134,7 +139,7 @@ export function filterCount(F, { sigOn = false, sigActive = false, reqInCount = 
   );
 }
 
-/** « Réinitialiser » : tout sauf Garder / exclure (qui a son propre bouton « Effacer »). */
+/** « Réinitialiser » : tout sauf Garder / exclure (qui a son propre bouton « Effacer »).  @param {FilterState} F */
 export function resetFilters(F) {
   setKeywords(F, "");
   for (const k of NUM_KEYS) F.nums[k] = null;
@@ -145,7 +150,7 @@ export function resetFilters(F) {
   for (const k of ["av", "b"]) resetRate(F, k);
 }
 
-/** « Effacer » de Garder / exclure. */
+/** « Effacer » de Garder / exclure.  @param {FilterState} F */
 export function clearReqBan(F) {
   for (const k of F.reqKeys) {
     F.req[k].clear();
@@ -156,11 +161,14 @@ export function clearReqBan(F) {
 // --- Sélection / exclusion d'une étiquette (clic sur une étiquette du jeu affiché, saisie dans un champ) ------------
 // Une étiquette est soit sélectionnée (✓), soit barrée (✕), jamais les deux. Mécaniques, thème, familles fines :
 // « Garder / exclure » (req / ban) ; auteur, illustrateur, éditeur : champs (tags / notTags).
+/** @param {string} key */
 const viaReq = (key) => key === "m" || key === "c" || key === "f";
+/** @param {FilterState} F @param {string} key @param {number} t */
 export const isIncluded = (F, key, t) => !!((viaReq(key) && F.req[key]?.has(t)) || F.tags[key]?.has(t));
+/** @param {FilterState} F @param {string} key @param {number} t */
 export const isExcluded = (F, key, t) => (viaReq(key) ? F.ban[key]?.has(t) : F.notTags[key]?.has(t)) || false;
 
-/** Bascule le filtre positif ; déjà actif (y compris sous Famille) : retiré partout. */
+/** Bascule le filtre positif ; déjà actif (y compris sous Famille) : retiré partout.  @param {FilterState} F @param {string} key @param {number} t */
 export function includeTag(F, key, t) {
   if (isIncluded(F, key, t)) {
     if (viaReq(key)) F.req[key]?.delete(t);
@@ -175,7 +183,7 @@ export function includeTag(F, key, t) {
     }
   }
 }
-/** Bascule l'exclusion ; exclure retire toute sélection (y compris sous Famille / Auteur / Éditeur). */
+/** Bascule l'exclusion ; exclure retire toute sélection (y compris sous Famille / Auteur / Éditeur).  @param {FilterState} F @param {string} key @param {number} t */
 export function excludeTag(F, key, t) {
   if (isExcluded(F, key, t)) {
     if (viaReq(key)) F.ban[key]?.delete(t);
@@ -191,7 +199,7 @@ export function excludeTag(F, key, t) {
     }
   }
 }
-/** Ajout depuis un champ (Famille, Auteur…) : la même famille ne reste pas interdite. */
+/** Ajout depuis un champ (Famille, Auteur…) : la même famille ne reste pas interdite.  @param {FilterState} F @param {string} key @param {number} t */
 export function addTag(F, key, t) {
   if (key === "f") F.ban.f?.delete(t);
   F.notTags[key]?.delete(t);

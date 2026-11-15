@@ -42,7 +42,7 @@ export function install(app) {
       const r = COLL.importJSON(await f.text());
       flash(`Importé : ${r.games} jeu(x), ${r.collections} collection(s) nouvelles.`);
     } catch (err) {
-      flash(`Import impossible : ${err.message}`, true);
+      flash(`Import impossible : ${/** @type {Error} */ (err).message}`, true);
     }
     e.target.value = "";
   });

@@ -9,9 +9,9 @@
 export function installHelp({ el: help, delay = 300, followFocus = false, isSuppressed = () => false }) {
   /** @type {any} */ let timer = null;
   /** @type {Element | null} */ let helpFor = null;
-  function show(el) {
+  function show(/** @type {HTMLElement} */ el) {
     helpFor = el;
-    help.textContent = el.dataset.help;
+    help.textContent = el.dataset.help ?? "";
     help.hidden = false;
     const r = el.getBoundingClientRect();
     const w = help.offsetWidth,
@@ -32,14 +32,14 @@ export function installHelp({ el: help, delay = 300, followFocus = false, isSupp
     if (el === helpFor) return;
     hide();
     if (!el || isSuppressed()) return;
-    timer = setTimeout(() => show(el), delay);
+    timer = setTimeout(() => show(/** @type {HTMLElement} */ (el)), delay);
   });
   document.addEventListener("mousedown", hide);
   if (followFocus) {
     document.addEventListener("focusin", (e) => {
       const el = e.target instanceof Element ? e.target.closest("[data-help]") : null;
       hide();
-      if (el) show(el);
+      if (el) show(/** @type {HTMLElement} */ (el));
     });
     document.addEventListener("focusout", hide);
     window.addEventListener("scroll", hide, true);

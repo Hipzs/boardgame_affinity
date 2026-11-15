@@ -20,7 +20,10 @@ test("chargement par défaut : Terraforming Mars, signaux filtrés, pépites à 
 });
 
 test("recherche par mots-clés : « -dice » réduit le nombre de jeux qui passent", async ({ page }) => {
-  const count = async () => +(await page.locator("#kd-msg").textContent()).match(/(\d+) \/ \d+ jeux passent/)[1];
+  const count = async () => {
+    const txt = (await page.locator("#kd-msg").textContent()) ?? "";
+    return Number(/** @type {RegExpMatchArray} */ (txt.match(/(\d+) \/ \d+ jeux passent/))[1]);
+  };
   const before = await count();
   await page.fill("#f-kw", "-dice");
   await page.waitForFunction((b) => {
@@ -49,7 +52,7 @@ test("étiquette du jeu affiché ↔ filtre de gauche (mécanique, éditeur)", a
   await expect(page.locator(`#details .chip.fchip[data-fk="m"][data-ft="${t}"]`)).not.toHaveClass(/f-on/);
 
   const pub = page.locator('#details .chip.fchip[data-fk="pu"]').first();
-  const name = (await pub.textContent()).trim();
+  const name = (await pub.textContent())?.trim() ?? "";
   await pub.click();
   await expect(page.locator('.tagfilter[data-key="pu"] .chip.removable')).toHaveText(name);
   await expect(page.locator("#filter-count")).toHaveText("2");

@@ -102,7 +102,9 @@ export function install(app) {
           }
           done();
         };
-        ch.addEventListener("click", (e) => (e.target.closest(".ban-x") ? toggleBan() : toggleReq()));
+        ch.addEventListener("click", (e) =>
+          /** @type {Element} */ (e.target).closest(".ban-x") ? toggleBan() : toggleReq(),
+        );
         ch.addEventListener("keydown", (e) => {
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();

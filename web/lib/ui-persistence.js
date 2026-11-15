@@ -5,6 +5,7 @@ import { setKeywords, NUM_KEYS } from "./filters.js";
 
 export const UI_KEY = "bga.collections.ui.v1";
 /** Clé d'état -> identifiant du champ dans le format mémorisé. */
+/** @type {Record<string, string>} */
 export const NUM_IDS = {
   plMin: "pl-min",
   plMax: "pl-max",
@@ -14,6 +15,7 @@ export const NUM_IDS = {
   wMin: "w-min",
   wMax: "w-max",
 };
+/** @param {Record<string, Set<number>>} o */
 const arr = (o) => Object.fromEntries(Object.entries(o).map(([k, v]) => [k, [...v]]));
 
 /**
@@ -47,10 +49,10 @@ export function serializeUI(F, ui) {
  */
 export function deserializeUI(F, st, env) {
   if (!st || typeof st !== "object") return null;
-  const fill = (dst, src) => {
+  const fill = (/** @type {Record<string, Set<number>>} */ dst, /** @type {any} */ src) => {
     for (const k of Object.keys(dst)) {
       dst[k].clear();
-      (src?.[k] || []).forEach((t) => Number.isFinite(t) && dst[k].add(t));
+      (src?.[k] || []).forEach((/** @type {any} */ t) => Number.isFinite(t) && dst[k].add(t));
     }
   };
   fill(F.req, st.req);
@@ -77,6 +79,7 @@ export function deserializeUI(F, st, env) {
     [F.modeTag, st.modeTag],
   ])
     for (const k of Object.keys(dst)) if (src?.[k] === "and" || src?.[k] === "or") dst[k] = src[k];
+  /** @type {Record<string, boolean>} */
   const expanded = { m: false, c: false, f: false };
   for (const k of Object.keys(expanded)) expanded[k] = !!st.expanded?.[k];
   return {

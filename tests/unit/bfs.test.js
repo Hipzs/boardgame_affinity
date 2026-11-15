@@ -9,7 +9,7 @@ test("budget : worst, maxDepth, maxK", () => {
   assert.equal(maxDepth(15), 2);
   assert.equal(maxDepth(1), 6);
   assert.equal(maxK(3), 6);
-  assert.ok(worst(maxK(3), 3) <= BUDGET && worst(maxK(3) + 1, 3) > BUDGET);
+  assert.ok(worst(maxK(3) ?? 0, 3) <= BUDGET && worst((maxK(3) ?? 0) + 1, 3) > BUDGET);
 });
 
 // Graphe jouet : voisins de u = u+1, u+2, u+3 (similarité décroissante)

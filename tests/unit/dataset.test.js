@@ -7,7 +7,7 @@ import { loadFixture } from "./helpers.js";
 
 test("dataset : libellés, résolution de saisie, index des étiquettes triés par fréquence", () => {
   const ds = loadDataset(loadFixture());
-  const i = ds.byId.get(167791);
+  const i = /** @type {number} */ (ds.byId.get(167791));
   assert.match(ds.label(i), /^Terraforming Mars/);
   assert.equal(ds.resolve("terraforming mars"), i);
   assert.equal(ds.resolve("TERRAFORMING"), i);

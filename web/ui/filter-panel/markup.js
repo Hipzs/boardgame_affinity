@@ -19,7 +19,7 @@ const RATE_LINES = [
     "Note bayésienne",
   ],
 ];
-const rateLine = ([k, name, help, aria]) => `
+const rateLine = (/** @type {[string, string, string, string]} */ [k, name, help, aria]) => `
 <div class="sig-line rate-line" data-help="${help}">
   <span class="sig-name">${name}</span><output id="${k}-out"></output>
   <div class="dual range2 rate" id="${k}-int">
@@ -80,7 +80,7 @@ const tagField = (
 };
 
 const KW_HELP = {
-  explorer: (n) =>
+  explorer: (/** @type {number} */ n) =>
     `Recherche par mots-clés dans les ${n} jeux : nom, description (début et mots-clés), mécaniques, catégories, familles, auteurs, illustrateurs, éditeurs, extensions, année. Plusieurs mots : le jeu doit tous les contenir (accents et majuscules ignorés, données en anglais). Préfixe « - » pour exclure un mot (ex. -dice). Les voisins sont cherchés parmi les jeux qui correspondent ; le jeu choisi reste affiché.`,
   collections: () =>
     `Recherche par mots-clés dans tous tes jeux : nom, description (début et mots-clés), mécaniques, thèmes, familles, auteurs, illustrateurs, éditeurs, extensions, année. Plusieurs mots : le jeu doit tous les contenir (accents et majuscules ignorés). Préfixe « - » pour exclure un mot (ex. -dice).`,
@@ -132,7 +132,7 @@ const OPTIONS = `
 
 /** Contenu du panneau Filtres pour la page demandée (chaîne HTML statique : aucune donnée utilisateur). */
 export function filterPanelHtml(/** @type {PanelMarkupConfig} */ cfg) {
-  const body = (req) =>
+  const body = (/** @type {string} */ req) =>
     `${req}${RATE_LINES.map(rateLine).join("")}${RANGES}${TAG_FIELDS.map((t) => tagField(cfg.mode, t)).join("")}`;
   if (cfg.mode === "explorer")
     return `<details class="filters" open>

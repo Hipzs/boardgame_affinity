@@ -255,8 +255,8 @@ export function install(app) {
     if (v !== "graph" && app.pick) app.endPick(); // la sélection ne se fait que sur le graphe
     state.view = v;
     document.querySelectorAll(".view-btn").forEach((b) => {
-      b.classList.toggle("on", b.dataset.view === v);
-      b.setAttribute("aria-pressed", b.dataset.view === v);
+      b.classList.toggle("on", /** @type {HTMLElement} */ (b).dataset.view === v);
+      b.setAttribute("aria-pressed", String(/** @type {HTMLElement} */ (b).dataset.view === v));
     });
     // Sur un <app.svg>, la propriété .hidden n'existe pas (simple expando) : on manipule l'attribut.
     $("#graph").toggleAttribute("hidden", v !== "graph");

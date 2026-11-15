@@ -1,4 +1,5 @@
 // @ts-check
+/** @import { RawData, Attrs, Game } from "../types" */
 /* Attributs (blocs d'étiquettes) : quatre attributs, chacun un ensemble d'étiquettes par jeu, avec un poids IDF.
  *   m : mécaniques · c : thème (catégories BGG) · f : familles fines · d : description (40 mots-clés TF-IDF)
  * Toute métrique s'applique à chaque attribut ; la ressemblance est la somme pondérée par les curseurs. */
@@ -8,7 +9,7 @@ import { FAM_SKIP } from "./dataset.js";
 export const smoothIdf = (counts, nDocs, keep = () => true) =>
   Array.from(counts, (x, t) => (x >= 2 && keep(t) ? Math.log((nDocs + 1) / (x + 1)) + 1 : 0));
 
-/** @param {any} D  données brutes */
+/** @param {RawData} D  données brutes */
 export function buildAttrs(D) {
   const N = D.nodes;
   const famIdf = (() => {
@@ -16,34 +17,43 @@ export function buildAttrs(D) {
     N.forEach((g) => g.f.forEach((t) => n[t]++));
     return smoothIdf(n, N.length, (t) => !FAM_SKIP.test(D.dict.fam[t]));
   })();
-  const ATTRS = {
-    m: {
-      label: "Mécaniques",
-      short: "Méca.",
-      dict: D.dict.mech,
-      terms: (g) => g.m,
-      idf: D.idf.mech,
-      npmi: D.npmi.mech,
-    },
-    c: { label: "Thème", short: "Thème", dict: D.dict.cat, terms: (g) => g.c, idf: D.idf.cat, npmi: D.npmi.cat },
-    f: {
-      label: "Familles fines",
-      short: "Familles",
-      dict: D.dict.fam,
-      terms: (g) => g.f.filter((t) => famIdf[t] > 0),
-      idf: famIdf,
-      npmi: D.npmi.fam,
-    },
-    // Description : les poids TF-IDF sont déjà dans dv (pas d'IDF supplémentaire) ; pas de matrice S (cosinus souple → cosinus).
-    d: {
-      label: "Description",
-      short: "Descr.",
-      dict: D.words,
-      terms: (g) => g.dv.map((x) => x[0]),
-      weights: (g) => g.dv,
-      npmi: null,
-    },
-  };
+  const ATTRS = /** @type {Attrs} */ (
+    /** @type {unknown} */ ({
+      m: {
+        label: "Mécaniques",
+        short: "Méca.",
+        dict: D.dict.mech,
+        terms: (/** @type {Game} */ g) => g.m,
+        idf: D.idf.mech,
+        npmi: D.npmi.mech,
+      },
+      c: {
+        label: "Thème",
+        short: "Thème",
+        dict: D.dict.cat,
+        terms: (/** @type {Game} */ g) => g.c,
+        idf: D.idf.cat,
+        npmi: D.npmi.cat,
+      },
+      f: {
+        label: "Familles fines",
+        short: "Familles",
+        dict: D.dict.fam,
+        terms: (/** @type {Game} */ g) => g.f.filter((t) => famIdf[t] > 0),
+        idf: famIdf,
+        npmi: D.npmi.fam,
+      },
+      // Description : les poids TF-IDF sont déjà dans dv (pas d'IDF supplémentaire) ; pas de matrice S (cosinus souple → cosinus).
+      d: {
+        label: "Description",
+        short: "Descr.",
+        dict: D.words,
+        terms: (/** @type {Game} */ g) => g.dv.map((x) => x[0]),
+        weights: (/** @type {Game} */ g) => g.dv,
+        npmi: null,
+      },
+    })
+  );
   const ATTR_KEYS = Object.keys(ATTRS);
   for (const A of Object.values(ATTRS)) {
     const nT = A.dict.length;
@@ -61,7 +71,7 @@ export function buildAttrs(D) {
     // Cosinus souple : S = I + max(0, NPMI) ; ‖x‖_S = √(xᵀ S x) précalculée par jeu.
     if (A.npmi) {
       const npmi = A.npmi;
-      A.sTimes = (x) => {
+      const sTimes = (/** @type {Map<number, number>} */ x) => {
         const out = new Float64Array(nT);
         for (const [t, w] of x) {
           out[t] += w;
@@ -69,9 +79,10 @@ export function buildAttrs(D) {
         }
         return out;
       };
+      A.sTimes = sTimes;
       A.snorm = A.vec.map((x) => {
         if (!x.size) return 0;
-        const sx = A.sTimes(x);
+        const sx = sTimes(x);
         let q = 0;
         for (const [t, w] of x) q += w * sx[t];
         return Math.sqrt(q);

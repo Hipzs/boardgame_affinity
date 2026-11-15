@@ -31,7 +31,7 @@ export function install(app) {
         ? `${both} jeux dans les intervalles actifs`
         : "aucun intervalle actif : glisse une poignée";
     document.querySelectorAll(".sig-preset").forEach((b) => {
-      const P = SIG_PRESETS[b.dataset.p];
+      const P = SIG_PRESETS[/** @type {HTMLElement} */ (b).dataset.p];
       b.classList.toggle(
         "on",
         ["wish", "trade"].every((k) => P[k][0] === sigInt[k][0] && P[k][1] === sigInt[k][1]),
@@ -59,7 +59,7 @@ export function install(app) {
   }
   document.querySelectorAll(".sig-preset").forEach((b) =>
     b.addEventListener("click", () => {
-      const P = SIG_PRESETS[b.dataset.p];
+      const P = SIG_PRESETS[/** @type {HTMLElement} */ (b).dataset.p];
       for (const k of ["wish", "trade"]) sigInt[k] = [...P[k]];
       hideHelp();
       sigChanged();
@@ -77,7 +77,7 @@ export function install(app) {
       min: 0,
       max: 100,
       step: 1,
-      get: () => [...sigInt[k]],
+      get: () => /** @type {[number, number]} */ ([...sigInt[k]]),
       set: (lo, hi) => {
         sigInt[k] = [lo, hi];
         sigChanged();
@@ -86,7 +86,7 @@ export function install(app) {
   }
   document
     .querySelectorAll(".view-btn[data-view]")
-    .forEach((b) => b.addEventListener("click", () => app.setView(b.dataset.view)));
+    .forEach((b) => b.addEventListener("click", () => app.setView(/** @type {HTMLElement} */ (b).dataset.view)));
   $("#fam-center").addEventListener("click", () => {
     state.famCenter = state.famCenter === "peak" ? "mean" : "peak";
     hideHelp();

@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Temporaire (étapes 2-3 du refactoring) : le calcul des voisins de web/lib/ doit être identique à celui de app.js.
 import { test, expect } from "@playwright/test";
 import { useData, waitExplorer } from "./helpers.js";

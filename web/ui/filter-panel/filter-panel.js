@@ -9,6 +9,7 @@ import { createTagFields } from "./tag-fields.js";
 import { setKeywords, NUM_KEYS } from "../../lib/filters.js";
 
 /** Champ de saisie de chaque borne numérique. */
+/** @type {Record<string, string>} */
 const NUM_INPUT = {
   plMin: "pl-min",
   plMax: "pl-max",
@@ -32,9 +33,9 @@ export function createFilterPanel(mount, cfg) {
     filterPanelHtml({ mode, nGames: D.nodes.length, afterKeywords: cfg.afterKeywords }),
   );
   mount.remove();
-  const $ = (s) => /** @type {HTMLInputElement} */ (document.querySelector(s));
+  const $ = (/** @type {string} */ s) => /** @type {HTMLInputElement} */ (document.querySelector(s));
 
-  const num = (id) => {
+  const num = (/** @type {string} */ id) => {
     const v = parseFloat($(`#${id}`).value);
     return Number.isFinite(v) ? v : null;
   };

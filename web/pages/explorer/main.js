@@ -9,7 +9,7 @@ window.BGG_EMOJI = EMOJI;
 window.BGG_COLLECTION = createCollectionStore({
   storage: localStorage,
   defaults: DEFAULT_COLLECTIONS,
-  addStorageListener: (cb) => window.addEventListener("storage", (e) => cb(e.key)),
+  addStorageListener: (cb) => window.addEventListener("storage", (e) => cb(e.key ?? "")),
 });
 installTabLinks();
 

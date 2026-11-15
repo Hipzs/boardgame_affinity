@@ -4,7 +4,9 @@
 import { TAG_KEYS, TAG_NAMES } from "./dataset.js";
 import { rateActive, resetRate } from "./filters.js";
 
+/** @param {unknown} x */
 export const fr = (x) => String(x).replace(".", ",");
+/** @param {number | null} lo @param {number | null} hi @param {string} [unit] */
 const span = (lo, hi, unit = "") =>
   lo !== null && hi !== null
     ? `${fr(lo)} à ${fr(hi)}${unit}`
@@ -21,12 +23,18 @@ const span = (lo, hi, unit = "") =>
  * @returns {{group: string, text: string, clear: (F: any) => void, cls: string}[]}
  */
 export function activeFilters(F, ctx) {
+  /** @type {{group: string, text: string, clear: (F: any) => void, cls: string}[]} */
   const out = [];
-  const add = (group, text, clear, cls = "") => out.push({ group, text, clear, cls });
+  const add = (
+    /** @type {string} */ group,
+    /** @type {string} */ text,
+    /** @type {(F: any) => void} */ clear,
+    cls = "",
+  ) => out.push({ group, text, clear, cls });
   const explorer = ctx.mode === "explorer";
   const n = F.nums;
   const clearNums =
-    (...ks) =>
+    (/** @type {string[]} */ ...ks) =>
     () =>
       ks.forEach((k) => (F.nums[k] = null));
   if (explorer) {

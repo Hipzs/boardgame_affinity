@@ -41,6 +41,7 @@ export function createNeighborIndex({ N, ATTRS, ATTR_KEYS, franchise, gemQ }) {
         seen[v] = 0;
       });
     }
+    /** @type {Record<string, Float64Array>} */
     const ctx = {};
     if (cfg.metric === "soft")
       for (const key of active) if (ATTRS[key].npmi) ctx[key] = ATTRS[key].sTimes(ATTRS[key].vec[u]);

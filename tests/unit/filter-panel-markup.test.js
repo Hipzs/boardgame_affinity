@@ -19,7 +19,7 @@ const NUMS = ["pl-min", "pl-max", "t-min", "t-max", "age-max", "w-min", "w-max"]
 const TAGS = ["f", "d", "ar", "pu"].flatMap((k) => [`tf-${k}`, `dl-${k}`]);
 const ids = (h) => [...h.matchAll(/\bid="([^"]+)"/g)].map((m) => m[1]);
 
-for (const mode of ["explorer", "collections"]) {
+for (const mode of /** @type {const} */ (["explorer", "collections"])) {
   test(`panneau ${mode} : ids attendus présents, sans doublon`, () => {
     const h = filterPanelHtml({ mode, nGames: 4672, afterKeywords: '<div id="f-save"></div>' });
     const found = ids(h);

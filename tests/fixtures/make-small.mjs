@@ -85,7 +85,7 @@ const nodes = kept.map((g) => {
   n.dv = g.dv.map(([w, v]) => [wMap.get(w), v]);
   return n;
 });
-const sliceIdf = (dk) => R[dk].list.map((_, j) => D.idf[dk][[...R[dk].map.entries()].find(([, v]) => v === j)[0]]);
+const sliceIdf = (dk) => R[dk].list.map((_, j) => D.idf[dk][[...R[dk].map.entries()].find(([, v]) => v === j)?.[0]]);
 const sliceNpmi = (dk) => {
   const inv = [...R[dk].map.entries()];
   return inv.map(([old]) =>

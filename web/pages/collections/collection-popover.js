@@ -73,7 +73,8 @@ export function install(app) {
     name.select();
   }
   document.addEventListener("mousedown", (e) => {
-    if (!pop.hidden && !pop.contains(e.target) && !e.target.closest("[data-ren]")) closeCollPop();
+    if (!pop.hidden && !pop.contains(e.target) && !(/** @type {Element} */ (e.target).closest("[data-ren]")))
+      closeCollPop();
   });
   document.addEventListener(
     "keydown",

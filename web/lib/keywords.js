@@ -1,26 +1,34 @@
 // @ts-check
+/** @import { Game, RawData } from "../types" */
 /* Recherche par mots-clés : texte normalisé (minuscules, sans accents) de chaque jeu, construit à la demande et mis en
  * cache. Champs : nom, début de description, 40 mots-clés TF-IDF, mécaniques, thèmes, familles, auteurs, illustrateurs,
  * éditeurs, extensions, année. Tous les mots doivent y être (sous-chaînes) ; « -mot » exclut. */
 
+/** @param {unknown} x */
 export const kwNorm = (x) => String(x).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 
 /** Saisie -> mots normalisés (un « - » seul est ignoré). */
+/** @param {string} q */
 export const kwTerms = (q) =>
   kwNorm(q)
     .split(/\s+/)
     .filter((w) => w && w !== "-");
 
-/** Le texte contient-il tous les mots, et aucun mot précédé de « - » ? */
+/**
+ * Le texte contient-il tous les mots, et aucun mot précédé de « - » ?
+ * @param {string} txt
+ * @param {string[]} terms
+ */
 export function matchesKeywords(txt, terms) {
   for (const w of terms) if (w.startsWith("-") ? txt.includes(w.slice(1)) : !txt.includes(w)) return false;
   return true;
 }
 
-/** @param {any} D  données brutes ; renvoie g -> texte normalisé (cache par identifiant BGG) */
+/** @param {RawData} D  données brutes ; renvoie g -> texte normalisé (cache par identifiant BGG) */
 export function createKeywordText(D) {
+  /** @type {Map<number, string>} */
   const cache = new Map();
-  return (g) => {
+  return (/** @type {Game} */ g) => {
     let t = cache.get(g.id);
     if (t === undefined) {
       t = kwNorm(

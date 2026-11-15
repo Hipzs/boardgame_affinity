@@ -65,3 +65,45 @@ export interface CollectionsData {
   games: { id: number; added: string }[];
   collections: Collection[];
 }
+
+export type Mode = "and" | "or";
+/** État des filtres partagé par les deux pages (voir web/lib/filters.js). */
+export interface FilterState {
+  reqKeys: string[];
+  kw: string[];
+  kwText: string;
+  nums: Record<string, number | null>;
+  rate: Record<string, { min: number; max: number; lo: number; hi: number }>;
+  req: Record<string, Set<number>>;
+  ban: Record<string, Set<number>>;
+  modeReq: Record<string, Mode>;
+  tags: Record<string, Set<number>>;
+  notTags: Record<string, Set<number>>;
+  modeTag: Record<string, Mode>;
+  noFranchise: boolean;
+  noReimpl: boolean;
+  noExpLine: boolean;
+  sigFilter: boolean;
+}
+
+/** Un attribut (mécaniques, thème, familles, description) : étiquettes de chaque jeu, poids et index, construits par buildAttrs. */
+export interface Attr {
+  label: string;
+  short: string;
+  dict: string[];
+  terms: (g: Game) => number[];
+  idf: ArrayLike<number>;
+  npmi: [number, number][][] | null;
+  weights?: (g: Game) => [number, number][];
+  vec: Map<number, number>[];
+  set: Set<number>[];
+  post: number[][];
+  sTimes?: (x: Map<number, number>) => Float64Array;
+  snorm?: number[];
+}
+export type Attrs = Record<string, Attr>;
+export interface MetricInfo {
+  label: string;
+  short: string;
+  help: string;
+}

@@ -52,8 +52,8 @@ test("jeu retiré, tri inconnu, données invalides : valeurs par défaut", () =>
     { selected: 7, sort: "zzz", rate: { av: ["x", 1] }, req: { m: [1, "a"] }, modeReq: { m: "xor" } },
     { sorts: ["name"], has: () => false },
   );
-  assert.equal(r.selected, null);
-  assert.equal(r.sort, null);
+  assert.equal(r?.selected, null);
+  assert.equal(r?.sort, null);
   assert.deepEqual([...F.req.m], [1]);
   assert.equal(F.modeReq.m, "and");
   assert.ok(!(F.rate.av.lo > 2));

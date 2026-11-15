@@ -1,3 +1,4 @@
+/** @import { CollectionsData } from "../types" */
 // @ts-check
 /* « Mes collections » : jeux ajoutés depuis l'explorateur et collections nommées, partagés entre l'explorateur
  * (index.html) et la page collections.html.
@@ -18,11 +19,12 @@ export const KEY = "bga.collections.v2";
 export const OLD_KEY = "bga.collection.v1";
 
 /** Nettoie des données lues (stockage, import) : ne garde que ce qui a la forme attendue. */
+/** @param {any} d  @returns {CollectionsData} */
 export const clean = (d) => ({
-  games: (Array.isArray(d && d.games) ? d.games : []).filter((x) => x && Number.isFinite(x.id)),
+  games: (Array.isArray(d && d.games) ? d.games : []).filter((/** @type {any} */ x) => x && Number.isFinite(x.id)),
   collections: (Array.isArray(d && d.collections) ? d.collections : [])
-    .filter((c) => c && c.cid && typeof c.name === "string")
-    .map((c) => ({
+    .filter((/** @type {any} */ c) => c && c.cid && typeof c.name === "string")
+    .map((/** @type {any} */ c) => ({
       cid: c.cid,
       name: c.name,
       color: /^#[0-9a-f]{6}$/i.test(c.color || "") ? c.color : "",
@@ -46,9 +48,12 @@ export function createCollectionStore({
   newCid = () => `c${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`,
   addStorageListener = () => {},
 } = {}) {
+  /** @type {CollectionsData} */
   let mem = { games: [], collections: [] }; // repli si le stockage est indisponible
+  /** @type {(() => void)[]} */
   const listeners = [];
 
+  /** @returns {CollectionsData} */
   function read() {
     try {
       const raw = storage.getItem(KEY);
@@ -85,7 +90,7 @@ export function createCollectionStore({
       return clean(JSON.parse(JSON.stringify(mem)));
     }
   }
-  function write(d) {
+  function write(/** @type {CollectionsData} */ d) {
     mem = d;
     try {
       storage.setItem(KEY, JSON.stringify(d));
@@ -94,6 +99,7 @@ export function createCollectionStore({
     }
     listeners.forEach((f) => f());
   }
+  /** @template R @param {(d: CollectionsData) => R} f @returns {R} */
   const edit = (f) => {
     const d = read();
     const r = f(d);
@@ -103,27 +109,28 @@ export function createCollectionStore({
   addStorageListener((key) => {
     if (key === KEY) listeners.forEach((f) => f());
   });
-  const ensureGame = (d, id) => {
+  const ensureGame = (/** @type {CollectionsData} */ d, /** @type {number} */ id) => {
     if (!d.games.some((x) => x.id === id)) d.games.push({ id, added: now() });
   };
 
   const api = {
+    /** @param {() => void} f */
     onChange(f) {
       listeners.push(f);
     },
     // --- jeux ---
     list: () => read().games,
-    has: (id) => read().games.some((x) => x.id === id),
-    add: (id) => edit((d) => ensureGame(d, id)),
+    has: (/** @type {number} */ id) => read().games.some((x) => x.id === id),
+    add: (/** @type {number} */ id) => edit((d) => ensureGame(d, id)),
     // Retire le jeu partout (liste des jeux et toutes les collections).
-    remove: (id) =>
+    remove: (/** @type {number} */ id) =>
       edit((d) => {
         d.games = d.games.filter((x) => x.id !== id);
         d.collections.forEach((c) => {
           c.games = c.games.filter((g) => g !== id);
         });
       }),
-    toggle(id) {
+    toggle(/** @type {number} */ id) {
       if (api.has(id)) api.remove(id);
       else api.add(id);
     },
@@ -133,22 +140,22 @@ export function createCollectionStore({
         used = new Set(d.collections.flatMap((c) => c.games));
       return d.games.filter((x) => !used.has(x.id));
     },
-    collectionsOf: (id) => read().collections.filter((c) => c.games.includes(id)),
+    collectionsOf: (/** @type {number} */ id) => read().collections.filter((c) => c.games.includes(id)),
     // --- collections ---
     collections: () => read().collections,
-    createCollection: (name, color = "") =>
+    createCollection: (/** @type {string} */ name, color = "") =>
       edit((d) => {
         const cid = newCid();
         d.collections.push({ cid, name, color, created: now(), games: [] });
         return cid;
       }),
-    renameCollection: (cid, name) =>
+    renameCollection: (/** @type {string} */ cid, /** @type {string} */ name) =>
       edit((d) => {
         const c = d.collections.find((x) => x.cid === cid);
         if (c) c.name = name;
       }),
     // Modifie nom et / ou couleur ({name, color}) en une seule écriture.
-    updateCollection: (cid, patch) =>
+    updateCollection: (/** @type {string} */ cid, /** @type {{name?: string, color?: string}} */ patch) =>
       edit((d) => {
         const c = d.collections.find((x) => x.cid === cid);
         if (!c) return;
@@ -156,7 +163,7 @@ export function createCollectionStore({
         if (typeof patch.color === "string") c.color = patch.color;
       }),
     // Déplace la collection cid juste avant beforeCid (null = à la fin) : ordre d'affichage.
-    reorderCollection: (cid, beforeCid) =>
+    reorderCollection: (/** @type {string} */ cid, /** @type {string | null} */ beforeCid) =>
       edit((d) => {
         const i = d.collections.findIndex((x) => x.cid === cid);
         if (i < 0 || cid === beforeCid) return;
@@ -166,13 +173,18 @@ export function createCollectionStore({
         else d.collections.splice(j, 0, c);
       }),
     // Supprime la collection ; ses jeux restent dans « Nouveaux jeux » s'ils ne sont dans aucune autre.
-    deleteCollection: (cid) =>
+    deleteCollection: (/** @type {string} */ cid) =>
       edit((d) => {
         d.collections = d.collections.filter((x) => x.cid !== cid);
       }),
     // Place le jeu dans la collection `to` (null = retour aux nouveaux jeux) ; `from` = collection d'origine
     // (null = nouveaux jeux) ; copy = vrai pour le laisser aussi dans `from`.
-    move: (id, from, to, copy = false) =>
+    move: (
+      /** @type {number} */ id,
+      /** @type {string | null} */ from,
+      /** @type {string | null} */ to,
+      copy = false,
+    ) =>
       edit((d) => {
         ensureGame(d, id);
         const F = d.collections.find((x) => x.cid === from),
@@ -182,7 +194,7 @@ export function createCollectionStore({
       }),
     // Ajout groupé (une seule écriture) : ids ajoutés à mes jeux, et à la collection cid si elle est donnée.
     // Renvoie {added: nouveaux dans mes jeux, inColl: nouveaux dans la collection}.
-    addMany: (ids, cid = null) =>
+    addMany: (/** @type {number[]} */ ids, /** @type {string | null} */ cid = null) =>
       edit((d) => {
         const T = cid ? d.collections.find((x) => x.cid === cid) : null;
         let added = 0,
@@ -202,7 +214,7 @@ export function createCollectionStore({
     // --- sauvegarde ---
     exportJSON: () => JSON.stringify({ version: 2, ...read() }, null, 1),
     // Import par fusion : jeux et collections ajoutés (collection de même nom : jeux réunis). Accepte aussi la v1.
-    importJSON(text) {
+    importJSON(/** @type {string} */ text) {
       const raw = JSON.parse(text);
       const inc = clean(Array.isArray(raw) ? { games: raw } : raw);
       if (!inc.games.length && !inc.collections.length) throw new Error("aucun jeu ni collection trouvé");

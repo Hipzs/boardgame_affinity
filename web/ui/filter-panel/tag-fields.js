@@ -10,8 +10,8 @@ import { addTag } from "../../lib/filters.js";
  *   suggestions(key) : [indice d'étiquette, nombre de jeux] triés pour la liste déroulante
  */
 export function createTagFields({ D, F, suggestions, onChange, hideHelp }) {
-  const $ = (s) => /** @type {HTMLElement} */ (document.querySelector(s));
-  const name = (key, t) => D.dict[TAG_KEYS[key]][t];
+  const $ = (/** @type {string} */ s) => /** @type {HTMLElement} */ (document.querySelector(s));
+  const name = (/** @type {string} */ key, /** @type {number} */ t) => D.dict[TAG_KEYS[key]][t];
   function drawSuggestions() {
     for (const key of Object.keys(TAG_KEYS)) {
       $(`#dl-${key}`).innerHTML = suggestions(key)
@@ -19,7 +19,7 @@ export function createTagFields({ D, F, suggestions, onChange, hideHelp }) {
         .join("");
     }
   }
-  function drawChips(key) {
+  function drawChips(/** @type {string} */ key) {
     const box = $(`.tagfilter[data-key="${key}"] .chips`);
     box.innerHTML =
       [...F.tags[key]]
@@ -54,7 +54,9 @@ export function createTagFields({ D, F, suggestions, onChange, hideHelp }) {
   const drawAllChips = () => Object.keys(TAG_KEYS).forEach(drawChips);
   for (const key of Object.keys(TAG_KEYS)) {
     const input = /** @type {HTMLInputElement} */ ($(`#tf-${key}`));
-    const index = new Map(D.dict[TAG_KEYS[key]].map((x, i) => [x.toLowerCase(), i]));
+    const index = new Map(
+      D.dict[TAG_KEYS[key]].map((/** @type {string} */ x, /** @type {number} */ i) => [x.toLowerCase(), i]),
+    );
     const tryAdd = () => {
       const t = index.get(input.value.trim().toLowerCase());
       if (t === undefined) return;

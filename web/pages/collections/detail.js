@@ -33,7 +33,9 @@ export function install(app) {
     Object.entries(app.HL_NAMES).map(([k, [dn]]) => [k, new Map(D.dict[dn].map((x, i) => [x, i]))]),
   );
   function drawDetail() {
-    document.querySelectorAll(".gcard").forEach((c) => c.classList.toggle("sel", +c.dataset.id === app.selected));
+    document
+      .querySelectorAll(".gcard")
+      .forEach((c) => c.classList.toggle("sel", Number(/** @type {HTMLElement} */ (c).dataset.id) === app.selected));
     const box = $("#gdetail");
     const g = app.selected !== null ? byId.get(app.selected) : null;
     if (!g) {
@@ -118,9 +120,9 @@ export function install(app) {
     app.syncSide();
   }
   document.addEventListener("click", (e) => {
-    const card = e.target.closest(".gcard");
-    if (!card || e.target.closest("a, button")) return;
-    app.selected = +card.dataset.id;
+    const card = /** @type {Element} */ (e.target).closest(".gcard");
+    if (!card || /** @type {Element} */ (e.target).closest("a, button")) return;
+    app.selected = Number(/** @type {HTMLElement} */ (card).dataset.id);
     hideHelp();
     drawDetail();
   });

@@ -1,12 +1,21 @@
 // @ts-check
 /* Aides DOM communes : échappement, gabarit HTML auto-échappant, délégation d'événements. */
 
+/** @type {Record<string, string>} */
 const ESC = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
 /** Échappe le texte pour l'insérer dans du HTML (contenu ou attribut). */
+/** @param {unknown} s */
 export const escapeHtml = (s) => String(s).replace(/[&<>"']/g, (ch) => ESC[ch]);
 /** Nombre -> texte à la française (virgule décimale). */
+/** @param {unknown} x */
 export const fr = (x) => String(x).replace(".", ",");
-/** @param {string} s @param {ParentNode} [root] */
+/**
+ * Élément du DOM par sélecteur. Typé `any` : les ids viennent du balisage de la page (et des tests de markup), pas de la saisie ;
+ * un id manquant échoue tout de suite à l'usage plutôt que d'être masqué par un test de nullité partout.
+ * @param {string} s
+ * @param {ParentNode} [root]
+ * @returns {any}
+ */
 export const $ = (s, root = document) => root.querySelector(s);
 
 /** Fragment HTML déjà sûr, que `html` n'échappe pas. */
@@ -19,6 +28,7 @@ export class Raw {
     return this.s;
   }
 }
+/** @param {unknown} s */
 export const raw = (s) => new Raw(String(s));
 
 /**
@@ -27,6 +37,7 @@ export const raw = (s) => new Raw(String(s));
  * @param {...any} values
  */
 export function html(strings, ...values) {
+  /** @param {any} v @returns {string} */
   const part = (v) =>
     v instanceof Raw ? v.s : Array.isArray(v) ? v.map(part).join("") : v == null || v === false ? "" : escapeHtml(v);
   let out = strings[0];

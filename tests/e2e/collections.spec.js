@@ -95,14 +95,14 @@ test("curseur de note : glisser la bande déplace l'intervalle en gardant sa lar
   const box = page.locator("#av-int");
   await expect(page.locator("#av-out")).toHaveText("4.0 → 6.0");
   await box.scrollIntoViewIfNeeded();
-  const r = await box.boundingBox();
+  const r = /** @type {{x: number, y: number, width: number, height: number}} */ (await box.boundingBox());
   const x = r.x + r.width * ((5 - 2) / (9 - 2)); // milieu de la bande (note 5 sur 2–9)
   const y = r.y + r.height / 2;
   await page.mouse.move(x, y);
   await page.mouse.down();
   await page.mouse.move(x + r.width * 0.2, y, { steps: 5 });
   await page.mouse.up();
-  const out = await page.locator("#av-out").textContent();
+  const out = /** @type {string} */ (await page.locator("#av-out").textContent());
   const [lo, hi] = out.split("→").map((t) => parseFloat(t));
   expect(+(hi - lo).toFixed(1)).toBe(2);
   expect(lo).toBeGreaterThan(4.5);

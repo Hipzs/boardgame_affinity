@@ -8,8 +8,8 @@ export function install(app) {
     app.drawDetail();
     document.querySelectorAll(".gcard [data-rm]").forEach((b) =>
       b.addEventListener("click", () => {
-        const card = b.closest(".gcard"),
-          id = +card.dataset.id,
+        const card = /** @type {HTMLElement} */ (b.closest(".gcard")),
+          id = Number(card.dataset.id),
           from = card.dataset.from;
         hideHelp();
         if (from) COLL.move(id, from, null);
@@ -18,7 +18,7 @@ export function install(app) {
     );
     document.querySelectorAll("[data-del]").forEach((b) =>
       b.addEventListener("click", () => {
-        const c = COLL.collections().find((x) => x.cid === b.dataset.del);
+        const c = COLL.collections().find((x) => x.cid === /** @type {HTMLElement} */ (b).dataset.del);
         if (
           c &&
           (!c.games.length ||
@@ -30,11 +30,13 @@ export function install(app) {
     document.querySelectorAll("[data-ren]").forEach((b) =>
       b.addEventListener("click", (e) => {
         e.stopPropagation();
-        app.openCollPop(b.dataset.ren, b);
+        app.openCollPop(/** @type {HTMLElement} */ (b).dataset.ren, b);
       }),
     );
     document
       .querySelectorAll(".cname")
-      .forEach((h) => h.addEventListener("dblclick", () => app.openCollPop(h.dataset.cid, h)));
+      .forEach((h) =>
+        h.addEventListener("dblclick", () => app.openCollPop(/** @type {HTMLElement} */ (h).dataset.cid, h)),
+      );
   }
 }

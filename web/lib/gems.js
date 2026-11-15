@@ -4,6 +4,7 @@
  *   O_v = 1 − rang centile du nombre d'avis  (peu connu → 1, très connu → 0) */
 export const GEM_RHO = 0.6;
 
+/** @param {import("../types").Game[]} N */
 export function buildGemQ(N) {
   const byR = N.map((_, i) => i).sort((a, b) => N[a].r - N[b].r);
   const pct = new Float64Array(N.length);

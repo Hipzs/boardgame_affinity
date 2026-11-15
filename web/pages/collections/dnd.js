@@ -13,35 +13,41 @@ export function install(app) {
       .querySelectorAll(".coll-box.drop-before, .coll-box.drop-after")
       .forEach((b) => b.classList.remove("drop-before", "drop-after"));
   function collDropAt(e) {
-    const box = e.target.closest && e.target.closest(".coll-box");
+    const box = /** @type {Element} */ (e.target).closest && /** @type {Element} */ (e.target).closest(".coll-box");
     if (!box) return null;
     const r = box.getBoundingClientRect();
     const cols = getComputedStyle($("#colls")).gridTemplateColumns.split(" ").length;
     const before = cols > 1 ? e.clientX < r.left + r.width / 2 : e.clientY < r.top + r.height / 2;
-    return { box, cid: box.dataset.drop, before, vert: cols === 1 };
+    return { box, cid: /** @type {HTMLElement} */ (box).dataset.drop, before, vert: cols === 1 };
   }
   document.addEventListener("dragstart", (e) => {
-    const head = e.target.closest && !e.target.closest(".gcard") && e.target.closest(".coll-head");
+    const head =
+      /** @type {Element} */ (e.target).closest &&
+      !(/** @type {Element} */ (e.target).closest(".gcard")) &&
+      /** @type {Element} */ (e.target).closest(".coll-head");
     if (head) {
       hideHelp();
-      app.dragging = { coll: head.dataset.cid };
-      e.dataTransfer.effectAllowed = "move";
-      e.dataTransfer.setData("text/plain", JSON.stringify(app.dragging));
-      head.closest(".coll-box").classList.add("dragging");
+      app.dragging = { coll: /** @type {HTMLElement} */ (head).dataset.cid };
+      /** @type {DataTransfer} */ (e.dataTransfer).effectAllowed = "move";
+      /** @type {DataTransfer} */ (e.dataTransfer).setData("text/plain", JSON.stringify(app.dragging));
+      /** @type {Element} */ (head.closest(".coll-box")).classList.add("dragging");
       document.body.classList.add("is-dragging-coll");
       return;
     }
-    const card = e.target.closest && e.target.closest(".gcard");
+    const card = /** @type {Element} */ (e.target).closest && /** @type {Element} */ (e.target).closest(".gcard");
     if (!card) return;
     hideHelp();
-    app.dragging = { id: +card.dataset.id, from: card.dataset.from };
-    e.dataTransfer.effectAllowed = "copyMove";
-    e.dataTransfer.setData("text/plain", JSON.stringify(app.dragging));
+    app.dragging = {
+      id: Number(/** @type {HTMLElement} */ (card).dataset.id),
+      from: /** @type {HTMLElement} */ (card).dataset.from,
+    };
+    /** @type {DataTransfer} */ (e.dataTransfer).effectAllowed = "copyMove";
+    /** @type {DataTransfer} */ (e.dataTransfer).setData("text/plain", JSON.stringify(app.dragging));
     card.classList.add("dragging");
     document.body.classList.add("is-dragging");
   });
   document.addEventListener("dragend", (e) => {
-    const card = e.target.closest && e.target.closest(".gcard");
+    const card = /** @type {Element} */ (e.target).closest && /** @type {Element} */ (e.target).closest(".gcard");
     if (card) card.classList.remove("dragging");
     document.querySelectorAll(".dropzone.over").forEach((z) => z.classList.remove("over"));
     document.querySelectorAll(".coll-box.dragging").forEach((b) => b.classList.remove("dragging"));
@@ -50,7 +56,8 @@ export function install(app) {
     app.dragging = null;
     collDrop = null;
   });
-  const zoneOf = (e) => e.target.closest && e.target.closest(".dropzone");
+  const zoneOf = (e) =>
+    /** @type {Element} */ (e.target).closest && /** @type {Element} */ (e.target).closest(".dropzone");
   const isCopy = (e) => e.ctrlKey || e.altKey || e.metaKey;
   document.addEventListener("dragover", (e) => {
     if (app.dragging && app.dragging.coll) {
@@ -61,7 +68,7 @@ export function install(app) {
         return;
       }
       e.preventDefault();
-      e.dataTransfer.dropEffect = "move";
+      /** @type {DataTransfer} */ (e.dataTransfer).dropEffect = "move";
       t.box.classList.add(t.before ? "drop-before" : "drop-after");
       t.box.classList.toggle("vert", t.vert);
       collDrop = t;
@@ -70,7 +77,8 @@ export function install(app) {
     const z = zoneOf(e);
     if (!z || !app.dragging) return;
     e.preventDefault();
-    e.dataTransfer.dropEffect = app.dragging.from && z.dataset.drop && isCopy(e) ? "copy" : "move";
+    /** @type {DataTransfer} */ (e.dataTransfer).dropEffect =
+      app.dragging.from && /** @type {HTMLElement} */ (z).dataset.drop && isCopy(e) ? "copy" : "move";
     document.querySelectorAll(".dropzone.over").forEach((x) => {
       if (x !== z) x.classList.remove("over");
     });
@@ -78,7 +86,7 @@ export function install(app) {
   });
   document.addEventListener("dragleave", (e) => {
     const z = zoneOf(e);
-    if (z && !z.contains(e.relatedTarget)) z.classList.remove("over");
+    if (z && !z.contains(/** @type {Node | null} */ (e.relatedTarget))) z.classList.remove("over");
   });
   document.addEventListener("drop", (e) => {
     if (app.dragging && app.dragging.coll) {
@@ -98,12 +106,12 @@ export function install(app) {
     z.classList.remove("over");
     let d = app.dragging;
     try {
-      d = d || JSON.parse(e.dataTransfer.getData("text/plain"));
+      d = d || JSON.parse(/** @type {DataTransfer} */ (e.dataTransfer).getData("text/plain"));
     } catch {
       return;
     }
     if (!d) return;
-    const to = z.dataset.drop || null,
+    const to = /** @type {HTMLElement} */ (z).dataset.drop || null,
       from = d.from || null;
     if (to === from) return;
     if (!to) {

@@ -9,6 +9,7 @@ export const K_MAX = KS[KS.length - 1];
 export const D_MAX = 6;
 
 // Budget W(k, d) = k + k² + … + k^d ≤ 300 (pire cas : chaque niveau entièrement nouveau).
+/** @param {number} k @param {number} d */
 export const worst = (k, d) => {
   let t = 0,
     p = 1;
@@ -18,13 +19,16 @@ export const worst = (k, d) => {
   }
   return t;
 };
+/** @param {number} k */
 export const maxDepth = (k) => {
   let d = 1;
   while (d < D_MAX && worst(k, d + 1) <= BUDGET) d++;
   return d;
 };
+/** @param {number} d */
 export const maxK = (d) => KS.filter((k) => worst(k, d) <= BUDGET).pop();
 
+/** @param {number} a @param {number} b */
 const pairKey = (a, b) => (a < b ? `${a}-${b}` : `${b}-${a}`);
 
 /**
@@ -39,7 +43,7 @@ export function expand({ center, k, depth, cross, tau }, neighborsOf) {
   let truncated = false;
   let pruned = 0;
   // k plus proches voisins de u, puis seuil τ sur la similarité.
-  const nbk = (u) => {
+  const nbk = (/** @type {number} */ u) => {
     const top = neighborsOf(u).slice(0, k);
     const kept = top.filter(([, s]) => s >= tau);
     return [kept, top.length - kept.length];

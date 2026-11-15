@@ -9,7 +9,7 @@
   },
   "scripts": {
     "serve": "python3 web/serve.py 8765",
-    "check": "tsc --noEmit && eslint . && prettier --check .",
+    "check": "tsc --noEmit && tsc --noEmit -p tsconfig.strict.json && eslint . && prettier --check .",
     "lint": "eslint .",
     "format": "prettier --write .",
     "test": "node --test 'tests/unit/**/*.test.js'",

@@ -1,0 +1,6 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": { "noImplicitAny": true },
+  "include": ["web/lib/**/*.js", "web/ui/**/*.js", "web/*.d.ts"],
+  "exclude": ["web/data", "node_modules"]
+}

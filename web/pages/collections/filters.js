@@ -122,7 +122,9 @@ export function install(app) {
           hideHelp();
           app.draw();
         };
-        ch.addEventListener("click", (e) => (e.target.closest(".ban-x") ? toggleBan() : toggleReq()));
+        ch.addEventListener("click", (e) =>
+          /** @type {Element} */ (e.target).closest(".ban-x") ? toggleBan() : toggleReq(),
+        );
         ch.addEventListener("keydown", (e) => {
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
@@ -154,7 +156,7 @@ export function install(app) {
     for (const k of Object.keys(REQ))
       if (req[k].size || ban[k].size) {
         const d = document.querySelector(`details.req-sec[data-sec="${k}"]`);
-        if (d && !d.open) d.open = true;
+        if (d && !(/** @type {HTMLDetailsElement} */ (d).open)) /** @type {HTMLDetailsElement} */ (d).open = true;
       }
     for (const k of Object.keys(REQ)) {
       const n = new Set(mine().flatMap((g) => reqTerms(g, k))).size,
@@ -191,7 +193,7 @@ export function install(app) {
       hideHelp();
       app.draw();
     });
-    b.redraw = draw1;
+    /** @type {any} */ (b).redraw = draw1;
     draw1();
     where.appendChild(b);
     return b;

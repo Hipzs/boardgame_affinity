@@ -9,21 +9,21 @@ import { rateActive } from "../../lib/filters.js";
  * @param {{onChange: () => void, hideHelp: () => void, debounce?: number}} o  onChange : appelé après `debounce` ms
  */
 export function createRateSliders(F, { onChange, hideHelp, debounce = 150 }) {
-  const $ = (s) => /** @type {HTMLInputElement} */ (document.querySelector(s));
-  function draw(k) {
+  const $ = (/** @type {string} */ s) => /** @type {HTMLInputElement} */ (document.querySelector(s));
+  function draw(/** @type {string} */ k) {
     const R = F.rate[k],
       box = $(`#${k}-int`);
     $(`#${k}-lo`).value = String(Math.round(R.lo * 10));
     $(`#${k}-hi`).value = String(Math.round(R.hi * 10));
     $(`#${k}-lo`).style.zIndex = R.lo > (R.min + R.max) / 2 ? "3" : "1";
-    const pos = (v) => `${(100 * (v - R.min)) / (R.max - R.min)}%`;
+    const pos = (/** @type {number} */ v) => `${(100 * (v - R.min)) / (R.max - R.min)}%`;
     box.style.setProperty("--lo", pos(R.lo));
     box.style.setProperty("--hi", pos(R.hi));
     box.classList.toggle("inactive", !rateActive(F, k));
     $(`#${k}-out`).textContent = rateActive(F, k) ? `${R.lo.toFixed(1)} → ${R.hi.toFixed(1)}` : "toutes";
   }
   /** @type {any} */ let timer;
-  const changed = (k) => {
+  const changed = (/** @type {string} */ k) => {
     draw(k);
     clearTimeout(timer);
     timer = setTimeout(onChange, debounce);

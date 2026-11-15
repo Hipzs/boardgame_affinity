@@ -23,7 +23,7 @@ test("collections : mots-clés, Garder / exclure (OU), joueurs, exclusions", () 
   assert.ok(texts.includes("✕ Cartes (Méca.)"));
   assert.ok(texts.includes("Joueurs : 2 à 4"));
   assert.ok(texts.includes("✕ Éditeur : P1"));
-  assert.equal(list.find((x) => x.text.startsWith("✕ Cartes")).cls, "ban");
+  assert.equal(list.find((x) => x.text.startsWith("✕ Cartes"))?.cls, "ban");
 });
 test("clear retire le filtre dans l'état", () => {
   const F = createFilterState();

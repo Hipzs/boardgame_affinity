@@ -174,7 +174,12 @@ export function install(app) {
     else closeExport();
   });
   document.addEventListener("mousedown", (e) => {
-    if (!xpop.hidden && !xpop.contains(e.target) && e.target.id !== "export-btn" && !e.target.closest("#pick-bar"))
+    if (
+      !xpop.hidden &&
+      !xpop.contains(e.target) &&
+      /** @type {Element} */ (e.target).id !== "export-btn" &&
+      !(/** @type {Element} */ (e.target).closest("#pick-bar"))
+    )
       closeExport();
   });
   document.addEventListener("keydown", (e) => {
