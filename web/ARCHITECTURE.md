@@ -36,14 +36,15 @@ web/
 | `share-link`                 | lien de partage d'une vue de l'explorateur (`#<id>~<état base64url>`), encodage / décodage validé                                                                  |
 | `cooccurrence`               | page Mécaniques : comptes, lift, NPMI, classification hiérarchique (ordre des feuilles, groupes)                                                                   |
 
-| `ui/`                 | rôle                                                                                                                                    |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `html`                | `escapeHtml`, `fr`, `$`, gabarit auto-échappant `` html`…` ``, délégation `on()`                                                        |
-| `help-tooltip`        | aide au survol (`data-help`)                                                                                                            |
-| `dual-range`          | curseur double : glisser la bande déplace l'intervalle                                                                                  |
-| `filter-panel/`       | **panneau Filtres généré** (balisage, curseurs de note, champs d'étiquettes, saisie anti-rebond) pour les deux pages (`mode: "explorer" | "collections"`) |
-| `collection-instance` | le store « Mes collections » du navigateur (localStorage + collections par défaut)                                                      |
-| `tab-links`           | liens d'en-tête : remet au premier plan l'onglet déjà ouvert                                                                            |
+| `ui/`                 | rôle                                                                                                                                                                    |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `html`                | `escapeHtml`, `fr`, `$`, gabarit auto-échappant `` html`…` ``, délégation `on()`                                                                                        |
+| `help-tooltip`        | aide au survol (`data-help`)                                                                                                                                            |
+| `dual-range`          | curseur double : glisser la bande déplace l'intervalle                                                                                                                  |
+| `filter-panel/`       | **panneau Filtres généré** (balisage, curseurs de note, champs d'étiquettes, saisie anti-rebond) pour les deux pages (`mode: "explorer"                                 | "collections"`) |
+| `collection-instance` | le store « Mes collections » du navigateur (localStorage + collections par défaut)                                                                                      |
+| `tab-links`           | liens d'en-tête : remet au premier plan l'onglet déjà ouvert                                                                                                            |
+| `swipe-panels`        | téléphone (≤ 820 px) : colonnes de `<main>` en pages plein écran, swipe gauche / droite (scroll-snap natif), onglets + point « changé » ; styles `styles/11-mobile.css` |
 
 `pages/explorer/` : `core` (données, état, voisins), `filters`, `graph-view`, `map-view`, `details`, `export-collections`,
 `toolbar`, `signals-ui`, `weights-ui`, `active-filters-pop`, `agreement-view`, `share-link`, `start`, assemblés par `app.js`.
@@ -88,6 +89,7 @@ module précédent qu'au moment d'un événement, jamais pendant l'installation.
 - **Ajouter un bouton de barre (explorateur)** : id dans `index.html`, écouteur dans `pages/explorer/toolbar.js` (ou le module de la zone), `app.render()` ou `app.invalidate()` pour recalculer.
 - **Ajouter une métrique** : `lib/metrics.js` (`METRICS`, `attrPair`) + test ; le sélecteur et le comparateur la prennent seuls.
 - **Changer le CSS** : fichier de `styles/` concerné ; vérifier `tests/e2e/visual.spec.js`.
+- **Mobile** : chaque `pages/*/main.js` appelle `installSwipePanels` (colonnes, libellés, page de départ). Bandes de bord : attribut `data-swipe-edges` sur un conteneur dont le SVG capte les gestes (d3.zoom). Les règles mobiles vont dans `styles/11-mobile.css` (dernier de la cascade).
 
 ## Cartes 2D (t-SNE / UMAP)
 
