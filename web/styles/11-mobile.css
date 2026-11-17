@@ -149,3 +149,9 @@
     right: 0;
   }
 }
+
+/* Téléphone : infobulle des nodes posée en bas de la scène du graphe (placée par placeTip, graph-view.js) */
+.tip.tip-docked {
+  max-width: none;
+  box-sizing: border-box;
+}

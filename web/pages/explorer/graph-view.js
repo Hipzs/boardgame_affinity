@@ -58,8 +58,20 @@ export function install(app) {
     tipMove(e);
   }
   // Place une infobulle près du pointeur, dans la zone du graphe (bascule à gauche / au-dessus près des bords).
+  // Téléphone (≤ 820 px) : posée en bas de la scène (graphe ou carte), sur toute sa largeur, sous le doigt jamais.
+  const phone = window.matchMedia("(max-width: 820px)");
   function placeTip(el, e) {
-    const r = $("#graph-wrap").getBoundingClientRect();
+    const wrap = $("#graph-wrap");
+    const r = wrap.getBoundingClientRect();
+    el.classList.toggle("tip-docked", phone.matches);
+    if (phone.matches) {
+      const s = $("#stage").getBoundingClientRect();
+      el.style.left = `${s.left - r.left + 6}px`;
+      el.style.width = `${s.width - 12}px`;
+      el.style.top = `${Math.max(4, s.bottom - r.top + wrap.scrollTop - el.offsetHeight - 6)}px`;
+      return;
+    }
+    el.style.width = "";
     const x = e.clientX - r.left + 12,
       y = e.clientY - r.top + 12;
     el.style.left = `${Math.max(4, x + el.offsetWidth > r.width ? x - el.offsetWidth - 24 : x)}px`;
