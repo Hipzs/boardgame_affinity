@@ -1,7 +1,7 @@
 /* Glisser-déposer au doigt (téléphone, tablette) : appui long sur une fiche -> elle se soulève et suit le doigt,
- * un tiroir monte du bas avec une pastille par collection ; lâcher sur une pastille range le jeu (déplacé s'il vient
- * d'une collection, comme à la souris sans Ctrl). Appui long sans glisser : le tiroir reste ouvert, un tap sur une
- * pastille suffit. Événements tactiles seulement : la souris garde le glisser-déposer HTML5 (dnd.js). */
+ * un tiroir monte du bas avec une pastille par collection ; lâcher sur une pastille range le jeu. S'il vient d'une
+ * collection, l'interrupteur Déplacer | Copier du tiroir choisit (Déplacer à chaque ouverture, comme sans Ctrl).
+ * Appui long sans glisser : le tiroir reste ouvert, un tap sur une pastille suffit. Événements tactiles seulement : la souris garde le glisser-déposer HTML5 (dnd.js). */
 import { escapeHtml as esc } from "../../ui/html.js";
 
 const HOLD_MS = 350; // durée de l'appui long
@@ -11,7 +11,7 @@ export function install(app) {
   const { byId, COLL, hideHelp } = app;
   /** @type {{id: number, from: string, card: HTMLElement, x: number, y: number, timer: any} | null} */
   let press = null; // appui en cours, pas encore long
-  /** @type {{id: number, from: string, card: HTMLElement, moved: boolean, held: boolean} | null} */
+  /** @type {{id: number, from: string, card: HTMLElement, moved: boolean, held: boolean, copy: boolean} | null} */
   let drag = null; // appui long déclenché : fiche soulevée, tiroir ouvert
   let ghost = /** @type {HTMLElement | null} */ (null);
   let closeT = /** @type {any} */ (null);
@@ -36,8 +36,17 @@ export function install(app) {
           `${c.color ? ` style="--cc:${c.color}"` : ""}>${esc(c.name)} <span class="n">${c.games.length}</span></button>`,
       );
     if (drag.from) chips.unshift(`<button type="button" class="tray-chip inbox" data-to="">↩ Nouveaux jeux</button>`);
+    const src = drag.from ? COLL.collections().find((c) => c.cid === drag?.from) : null;
+    // Jeu venant d'une collection : interrupteur Déplacer | Copier (Ctrl / Alt à la souris).
+    const mode = drag.from
+      ? `<div class="tray-mode" role="group" aria-label="Déplacer ou copier">` +
+        `<button type="button" data-mode="move" aria-pressed="true">Déplacer</button>` +
+        `<button type="button" data-mode="copy" aria-pressed="false">Copier</button></div>`
+      : "";
+    tray.classList.remove("copy-mode");
     tray.innerHTML =
-      `<p class="tray-title">Ranger <b>${esc(g ? g.n : `Jeu ${drag.id}`)}</b> dans :</p>` +
+      `<p class="tray-title">Ranger <b>${esc(g ? g.n : `Jeu ${drag.id}`)}</b>` +
+      `${src ? ` (depuis ${esc(src.name)})` : ""} :</p>${mode}` +
       `<div class="tray-chips">${chips.join("")}` +
       `<button type="button" class="tray-chip new" data-to="new">＋ Nouvelle</button></div>` +
       `<button type="button" class="tray-close" data-close aria-label="Annuler">✕</button>`;
@@ -47,7 +56,7 @@ export function install(app) {
     press = null;
     clearTimeout(closeT);
     hideHelp();
-    drag = { id: p.id, from: p.from, card: p.card, moved: false, held: false };
+    drag = { id: p.id, from: p.from, card: p.card, moved: false, held: false, copy: false }; // Déplacer à chaque ouverture
     app.dragging = drag; // coupe l'aide au survol
     p.card.classList.add("lifted");
     ghost = /** @type {HTMLElement} */ (p.card.cloneNode(true));
@@ -67,6 +76,18 @@ export function install(app) {
   function moveGhost(/** @type {number} */ x, /** @type {number} */ y) {
     if (!ghost) return;
     ghost.style.transform = `translate(${x - grab.dx}px, ${y - ghost.offsetHeight - 24}px)`; // au-dessus du doigt : la pastille visée reste visible
+  }
+
+  /** Bascule Déplacer / Copier (tap, ou doigt qui passe dessus pendant le glisser). */
+  function setMode(/** @type {boolean} */ copy) {
+    if (!drag || !drag.from || drag.copy === copy) return;
+    drag.copy = copy;
+    tray.classList.toggle("copy-mode", copy);
+    for (const b of tray.querySelectorAll("[data-mode]")) {
+      const isCopy = /** @type {HTMLElement} */ (b).dataset.mode === "copy";
+      b.setAttribute("aria-pressed", String(isCopy === copy));
+    }
+    navigator.vibrate?.(8);
   }
 
   const chipAt = (/** @type {number} */ x, /** @type {number} */ y) =>
@@ -94,7 +115,9 @@ export function install(app) {
   /** Applique le rangement vers la pastille ; affiche le résultat dans le tiroir puis le ferme. */
   function drop(/** @type {HTMLElement} */ chip) {
     if (!drag) return;
-    const { id, from } = drag;
+    const { id, from, copy } = drag;
+    const verb = (/** @type {string} */ name) =>
+      from ? (copy ? `copié dans ${name}` : `déplacé vers ${name}`) : `→ ${name}`;
     let to = chip.dataset.to ?? "";
     if (to === "new") {
       endDrag(); // la fenêtre de saisie interrompt le geste
@@ -103,14 +126,14 @@ export function install(app) {
       if (!name) return close();
       const same = COLL.collections().find((c) => c.name.toLowerCase() === name.toLowerCase());
       to = same ? same.cid : COLL.createCollection(name);
-      COLL.move(id, from || null, to);
-      return done(`${g ? g.n : `Jeu ${id}`} → ${name}`);
+      COLL.move(id, from || null, to, copy);
+      return done(`${g ? g.n : `Jeu ${id}`} ${verb(name)}`);
     }
     const c = COLL.collections().find((x) => x.cid === to);
     const g = byId.get(id);
     endDrag();
-    COLL.move(id, from || null, to || null);
-    done(`${g ? g.n : `Jeu ${id}`} → ${c ? c.name : "Nouveaux jeux"}`);
+    COLL.move(id, from || null, to || null, copy && !!to);
+    done(`${g ? g.n : `Jeu ${id}`} ${to ? verb(c ? c.name : "") : "→ Nouveaux jeux"}`);
   }
 
   function done(/** @type {string} */ text) {
@@ -155,6 +178,10 @@ export function install(app) {
       e.preventDefault(); // fiche soulevée : ni défilement ni swipe
       drag.moved = true;
       moveGhost(t.clientX, t.clientY);
+      const m = /** @type {HTMLElement | null} */ (
+        document.elementFromPoint(t.clientX, t.clientY)?.closest("[data-mode]") ?? null
+      );
+      if (m) setMode(m.dataset.mode === "copy");
       hover(chipAt(t.clientX, t.clientY));
     },
     { passive: false },
@@ -196,6 +223,8 @@ export function install(app) {
   tray.addEventListener("click", (e) => {
     const el = /** @type {Element} */ (e.target);
     if (el.closest("[data-close]")) return close();
+    const m = /** @type {HTMLElement | null} */ (el.closest("[data-mode]"));
+    if (m) return setMode(m.dataset.mode === "copy");
     const chip = /** @type {HTMLElement | null} */ (el.closest(".tray-chip"));
     if (chip && drag) drop(chip);
   });

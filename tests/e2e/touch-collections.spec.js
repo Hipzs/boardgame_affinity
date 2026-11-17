@@ -8,6 +8,7 @@ const seed = {
   games: [IDS.terraformingMars, IDS.pandemic, IDS.catan].map((id) => ({ id, added: "2026-11-14T10:00:00.000Z" })),
   collections: [
     { cid: "c1", name: "Coopératifs", color: "#37b24d", created: "2026-11-14T10:00:00.000Z", games: [IDS.pandemic] },
+    { cid: "c2", name: "Famille", color: "", created: "2026-11-14T10:00:00.000Z", games: [] },
   ],
 };
 
@@ -71,4 +72,68 @@ test("appui long sans glisser : le tiroir reste ouvert, un tap range le jeu", as
 test("appui court : pas de tiroir (le tap garde son rôle)", async ({ page }) => {
   await page.locator(`#inbox .gcard[data-id="${IDS.catan}"] .gname`).tap();
   await expect(page.locator("#touch-tray")).toBeHidden();
+});
+
+// --- Jeu venant d'une collection : interrupteur Déplacer | Copier ---------------------------------------------------
+async function liftPandemic(page) {
+  await page.locator(".swipe-tab", { hasText: "Collections" }).click();
+  const card = page.locator(`.coll-box .gcard[data-id="${IDS.pandemic}"]`);
+  await expect.poll(async () => (await card.boundingBox())?.x ?? -1).toBeGreaterThanOrEqual(0);
+  await page.waitForTimeout(300);
+  const cdp = await page.context().newCDPSession(page);
+  const box = await rect(card.locator(".gname"));
+  const x = box.x + 10,
+    y = box.y + box.height / 2;
+  await touch(page, cdp, "touchStart", x, y);
+  await page.waitForTimeout(500);
+  await expect(page.locator("#touch-tray")).toContainText("depuis Coopératifs");
+  await page.waitForTimeout(250); // fin de l'animation du tiroir
+  return { cdp, x, y };
+}
+
+test("collection → autre : Déplacer par défaut", async ({ page }) => {
+  const { cdp, x, y } = await liftPandemic(page);
+  await expect(page.locator('#touch-tray [data-mode="move"]')).toHaveAttribute("aria-pressed", "true");
+  await touch(page, cdp, "touchEnd", x, y);
+  await page.locator('#touch-tray .tray-chip[data-to="c2"]').tap();
+  await expect(page.locator("#touch-tray")).toContainText("Pandemic déplacé vers Famille");
+  const st = await readStore(page);
+  expect(st.collections[0].games).not.toContain(IDS.pandemic);
+  expect(st.collections[1].games).toContain(IDS.pandemic);
+});
+
+test("collection → autre : Copier au tap (« Nouveaux jeux » inactif)", async ({ page }) => {
+  const { cdp, x, y } = await liftPandemic(page);
+  await touch(page, cdp, "touchEnd", x, y);
+  await page.locator('#touch-tray [data-mode="copy"]').tap();
+  await expect(page.locator('#touch-tray [data-mode="copy"]')).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator("#touch-tray .tray-chip.inbox")).toHaveCSS("pointer-events", "none");
+  await page.locator('#touch-tray .tray-chip[data-to="c2"]').tap();
+  await expect(page.locator("#touch-tray")).toContainText("Pandemic copié dans Famille");
+  const st = await readStore(page);
+  expect(st.collections[0].games).toContain(IDS.pandemic);
+  expect(st.collections[1].games).toContain(IDS.pandemic);
+});
+
+test("collection → autre : Copier en glissant (passer sur « Copier » puis sur la pastille)", async ({ page }) => {
+  const { cdp, x, y } = await liftPandemic(page);
+  const m = await rect(page.locator('#touch-tray [data-mode="copy"]'));
+  const c = await rect(page.locator('#touch-tray .tray-chip[data-to="c2"]'));
+  const path = [
+    [x, y],
+    [m.x + m.width / 2, m.y + m.height / 2],
+    [c.x + c.width / 2, c.y + c.height / 2],
+  ];
+  for (let k = 1; k < path.length; k++)
+    for (let j = 1; j <= 4; j++) {
+      const [ax, ay] = path[k - 1],
+        [bx, by] = path[k];
+      await touch(page, cdp, "touchMove", ax + ((bx - ax) * j) / 4, ay + ((by - ay) * j) / 4);
+    }
+  await expect(page.locator('#touch-tray [data-mode="copy"]')).toHaveAttribute("aria-pressed", "true");
+  await touch(page, cdp, "touchEnd", c.x + c.width / 2, c.y + c.height / 2);
+  await expect(page.locator("#touch-tray")).toContainText("Pandemic copié dans Famille");
+  const st = await readStore(page);
+  expect(st.collections[0].games).toContain(IDS.pandemic);
+  expect(st.collections[1].games).toContain(IDS.pandemic);
 });

@@ -110,3 +110,35 @@ body.is-touch-dragging {
   font-size: 1.1rem;
   cursor: pointer;
 }
+
+/* Interrupteur Déplacer | Copier (jeu venant d'une collection) */
+.tray-mode {
+  display: inline-flex;
+  margin: 0 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.tray-mode button {
+  min-height: 40px;
+  padding: 6px 18px;
+  border: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.tray-mode button + button {
+  border-left: 1px solid var(--border);
+}
+.tray-mode button[aria-pressed="true"] {
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+/* Copier vers « Nouveaux jeux » n'a pas de sens : pastille grisée, inactive, mais à sa place (rien ne bouge sous le doigt) */
+.touch-tray.copy-mode .tray-chip.inbox {
+  opacity: 0.3;
+  pointer-events: none;
+}
