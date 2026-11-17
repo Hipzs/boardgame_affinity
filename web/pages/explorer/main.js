@@ -1,10 +1,8 @@
 // @ts-check
-/* Point d'entrée de l'explorateur (index.html) : liens d'en-tête, puis démarrage de la page. */
-import { installTabLinks } from "../../ui/tab-links.js";
+/* Point d'entrée de l'explorateur (index.html) : démarrage de la page. */
 import { installSwipePanels } from "../../ui/swipe-panels.js";
 import { startExplorer } from "./app.js";
 
-installTabLinks();
 startExplorer();
 // Téléphone : une colonne à la fois, swipe gauche / droite (ouvre sur le graphe).
 installSwipePanels({

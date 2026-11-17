@@ -79,7 +79,7 @@ export function install(app) {
     box.innerHTML = `
       <h2><span class="emo">${domEmo(g)}</span> ${esc(g.n)}</h2>
       <p class="det-act">
-        <a class="tab" href="index.html#${g.id}" target="bga-explorer">Explorer ↗</a>
+        <a class="tab" href="index.html#${g.id}">Explorer ↗</a>
         <a class="tab" href="https://boardgamegeek.com/boardgame/${g.id}" target="_blank" rel="noopener">Fiche BGG ↗</a>
       </p>
       <dl>

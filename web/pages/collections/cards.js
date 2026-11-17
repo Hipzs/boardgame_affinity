@@ -44,7 +44,7 @@ export function install(app) {
       `<span class="gname"><span class="emo">${domEmo(g)}</span> ${esc(g.n)}${g.y ? ` <span class="yr">${g.y}</span>` : ""}</span>` +
       `<span class="gmeta">★ ${g.av.toFixed(1)} · ${players(g.p)} · ${g.t ? `${g.t} min` : "?"}</span>${extra}` +
       `<span class="gact">` +
-      `<a href="index.html#${id}" target="bga-explorer" title="Ouvrir dans l'explorateur" draggable="false">↗</a>` +
+      `<a href="index.html#${id}" title="Ouvrir dans l'explorateur" draggable="false">↗</a>` +
       `<a href="https://boardgamegeek.com/boardgame/${id}" target="_blank" rel="noopener" title="Fiche BGG" draggable="false">BGG</a>` +
       `${rmBtn(from)}</span></div>`
     );

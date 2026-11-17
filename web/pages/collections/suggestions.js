@@ -57,7 +57,7 @@ export function install(app) {
                     `<a class="sugg-name" href="#" data-open="${g.id}"><span class="emo">${domEmo(g)}</span> ${esc(g.n)}${g.y ? ` <span class="yr">${g.y}</span>` : ""}</a>` +
                     `<span class="gmeta">★ ${g.av.toFixed(1)} · ${esc(top)}</span>` +
                     `<button type="button" class="secondary sugg-add" data-add="${g.id}" title="Ajouter à « ${esc(c.name)} »">＋</button>` +
-                    `<a href="index.html#${g.id}" target="bga-explorer" title="Ouvrir dans l'explorateur">↗</a></li>`
+                    `<a href="index.html#${g.id}" title="Ouvrir dans l'explorateur">↗</a></li>`
                   );
                 })
                 .join("") || '<li class="hint">Aucun jeu ne passe les filtres.</li>'

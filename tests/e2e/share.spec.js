@@ -53,3 +53,23 @@ test("#id seul : comportement inchangé (recentre sur le jeu, réglages par déf
   await expect(page.locator("#details h2")).toHaveText("Catan");
   await expect(page.locator("#k-out")).toHaveText("5");
 });
+
+test("un seul onglet : Explorateur → Mes collections → Explorateur retrouve la vue", async ({ page, context }) => {
+  await clearStorage(page);
+  await useData(page);
+  await page.goto("/index.html");
+  await waitExplorer(page);
+  await page.locator("#search").fill("Pandemic");
+  await page.click("#go");
+  await expect(page.locator("#details h2")).toHaveText("Pandemic");
+  await page.locator("#k").fill("7"); // k = 8
+  await page.locator("#metric").selectOption("soft");
+  await page.click("header a.tab[href='collections.html']");
+  await expect(page).toHaveURL(/collections\.html/);
+  await page.click("header a.tab[href='index.html']");
+  await waitExplorer(page);
+  expect(context.pages()).toHaveLength(1);
+  await expect(page.locator("#details h2")).toHaveText("Pandemic");
+  await expect(page.locator("#k-out")).toHaveText("8");
+  await expect(page.locator("#metric")).toHaveValue("soft");
+});

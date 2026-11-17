@@ -50,6 +50,5 @@ export function install(app) {
     if (document.hidden) saveUI();
   });
 
-  window.name = "bga-collection"; // les liens « Mes collections » de l'explorateur rouvrent cet onglet
   app.draw();
 }

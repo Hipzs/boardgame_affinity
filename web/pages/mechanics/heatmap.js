@@ -141,7 +141,7 @@ export function startMechanics() {
         .slice(0, 40)
         .map(
           (/** @type {any} */ g) =>
-            `<li class="sugg-row mh-game"><a class="sugg-name" href="index.html#${g.id}" target="bga-explorer">${esc(g.n)}${g.y ? ` <span class="yr">${g.y}</span>` : ""}</a>` +
+            `<li class="sugg-row mh-game"><a class="sugg-name" href="index.html#${g.id}">${esc(g.n)}${g.y ? ` <span class="yr">${g.y}</span>` : ""}</a>` +
             `<span class="gmeta">★ ${g.av.toFixed(1)} · ${g.r.toLocaleString("fr-FR")} avis</span></li>`,
         )
         .join("")}</ol>` +
@@ -164,6 +164,5 @@ export function startMechanics() {
     });
   $("#mh-min-out").textContent = String(ui.min);
   $("#mh-k").value = String(ui.k);
-  window.name = "bga-mechanics";
   draw();
 }

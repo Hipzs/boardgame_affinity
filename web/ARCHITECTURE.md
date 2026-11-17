@@ -43,7 +43,6 @@ web/
 | `dual-range`          | curseur double : glisser la bande déplace l'intervalle                                                                                                                  |
 | `filter-panel/`       | **panneau Filtres généré** (balisage, curseurs de note, champs d'étiquettes, saisie anti-rebond) pour les deux pages (`mode: "explorer"                                 | "collections"`) |
 | `collection-instance` | le store « Mes collections » du navigateur (localStorage + collections par défaut)                                                                                      |
-| `tab-links`           | liens d'en-tête : remet au premier plan l'onglet déjà ouvert                                                                                                            |
 | `swipe-panels`        | téléphone (≤ 820 px) : colonnes de `<main>` en pages plein écran, swipe gauche / droite (scroll-snap natif), onglets + point « changé » ; styles `styles/11-mobile.css` |
 
 `pages/explorer/` : `core` (données, état, voisins), `filters`, `graph-view`, `map-view`, `details`, `export-collections`,
@@ -77,7 +76,7 @@ module précédent qu'au moment d'un événement, jamais pendant l'installation.
 ## Contrats à ne pas casser
 
 - localStorage : `bga.collections.v2` (migration depuis `bga.collection.v1`), `bga.collections.ui.v1`, `bga.reqsec.<sec>`.
-- URL : `#<id BGG>` recentre l'explorateur ; `#<id>~<état>` (bouton « Lien 🔗 ») applique en plus les réglages et filtres (`lib/share-link.js`, tolérant : champs invalides ignorés). `window.name` : `bga-explorer`, `bga-collection`.
+- URL : `#<id BGG>` recentre l'explorateur ; `#<id>~<état>` (bouton « Lien 🔗 ») applique en plus les réglages et filtres (`lib/share-link.js`, tolérant : champs invalides ignorés). Une seule fenêtre : liens internes sans `target` ; vue de l'explorateur mémorisée pour l'onglet dans `sessionStorage` `bga.explorer.view.v1` (`<id>~<état>`, encodage de `lib/share-link.js`), restaurée au retour (un `#id` dans l'adresse garde la priorité pour le jeu, un `#id~état` pour tout).
 - Export JSON v2 : `{version: 2, games: [{id, added}], collections: [{cid, name, color, created, games}]}`.
 - Collections par défaut : semées au tout premier chargement seulement.
 
