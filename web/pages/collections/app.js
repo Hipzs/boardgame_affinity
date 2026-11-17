@@ -11,6 +11,7 @@ import { install as installCardActions } from "./card-actions.js";
 import { install as installPopover } from "./collection-popover.js";
 import { install as installSections } from "./sections.js";
 import { install as installDnd } from "./dnd.js";
+import { install as installTouchDnd } from "./touch-dnd.js";
 import { install as installFromFilters } from "./collection-from-filters.js";
 import { install as installActions } from "./actions.js";
 import { install as installStart } from "./start.js";
@@ -33,6 +34,7 @@ export function startCollections() {
     installPopover,
     installSections,
     installDnd,
+    installTouchDnd,
     installFromFilters,
     installActions,
     installStart,

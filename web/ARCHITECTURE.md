@@ -49,7 +49,7 @@ web/
 `toolbar`, `signals-ui`, `weights-ui`, `active-filters-pop`, `agreement-view`, `share-link`, `start`, assemblés par `app.js`.
 `pages/mechanics/` : `main`, `heatmap` (page `mechanics.html`, carte de chaleur des co-occurrences de mécaniques).
 `pages/collections/` : `core`, `filters`, `cards`, `detail`, `suggestions`, `card-actions`, `collection-popover`, `sections`, `dnd`,
-`collection-from-filters`, `actions`, `start`, assemblés par `app.js`.
+`touch-dnd`, `collection-from-filters`, `actions`, `start`, assemblés par `app.js`.
 
 ## Flux
 

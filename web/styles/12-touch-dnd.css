@@ -1,0 +1,112 @@
+/* Glisser-déposer au doigt dans « Mes collections » (pages/collections/touch-dnd.js) : fiche soulevée, fantôme qui
+ * suit le doigt, tiroir de collections en bas de l'écran. */
+
+/* Appui long sur une fiche : pas de sélection de texte ni de menu « copier / partager » */
+@media (pointer: coarse) {
+  .gcard {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+}
+.gcard.lifted {
+  opacity: 0.35;
+  outline: 2px dashed var(--accent);
+}
+.touch-ghost {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 60;
+  pointer-events: none;
+  margin: 0;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+  transform-origin: center;
+  opacity: 0.95;
+}
+.touch-ghost .gact {
+  display: none;
+}
+body.is-touch-dragging {
+  overscroll-behavior: none;
+}
+
+.touch-tray {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  background: var(--surface);
+  color: var(--text);
+  border-top: 1px solid var(--border);
+  border-radius: 14px 14px 0 0;
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.25);
+  padding: 10px 12px calc(12px + env(safe-area-inset-bottom));
+  max-height: 45dvh;
+  overflow-y: auto;
+  animation: tray-up 0.16s ease-out;
+}
+.touch-tray[hidden] {
+  display: none;
+}
+@keyframes tray-up {
+  from {
+    transform: translateY(100%);
+  }
+}
+.tray-title,
+.tray-done {
+  margin: 0 32px 8px 0;
+  font-size: 0.9rem;
+}
+.tray-done {
+  margin: 4px 0;
+  font-weight: 600;
+  color: var(--accent);
+}
+.tray-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.tray-chip {
+  min-height: 44px;
+  padding: 8px 14px;
+  border-radius: 22px;
+  border: 2px solid var(--cc, var(--border));
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.92rem;
+  cursor: pointer;
+}
+.tray-chip .n {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+.tray-chip.new,
+.tray-chip.inbox {
+  border-style: dashed;
+}
+.tray-chip.over {
+  background: var(--cc, var(--accent));
+  border-color: var(--cc, var(--accent));
+  color: #fff;
+  transform: scale(1.06);
+}
+.tray-chip.over .n {
+  color: inherit;
+}
+.tray-close {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-size: 1.1rem;
+  cursor: pointer;
+}
